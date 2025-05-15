@@ -16,25 +16,28 @@ import { useAuth } from "@/hooks/useAuth";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
+  // Instead of blocking the entire UI while loading, we'll handle loading states 
+  // within protected routes individually
   return (
     <Switch>
-      <Route path="/" component={isAuthenticated ? Dashboard : Home} />
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/my-stories" component={MyStories} />
+      <Route path="/" component={isLoading ? LoadingScreen : (isAuthenticated ? Dashboard : Home)} />
+      <Route path="/dashboard" component={isAuthenticated ? Dashboard : Login} />
+      <Route path="/my-stories" component={isAuthenticated ? MyStories : Login} />
       <Route path="/explore" component={Explore} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+// Simple loading component
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+    </div>
   );
 }
 

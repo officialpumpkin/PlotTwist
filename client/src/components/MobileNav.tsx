@@ -4,10 +4,14 @@ import {
   DashboardIcon, 
   BookOpenIcon, 
   CompassIcon, 
-  AddCircleIcon 
+  AddCircleIcon,
+  UserIcon
 } from "./assets/icons";
 import { useState } from "react";
 import NewStoryModal from "./NewStoryModal";
+import LoginOptions from "./LoginOptions";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function MobileNav() {
   const [location] = useLocation();

@@ -8,11 +8,15 @@ import {
   DropdownMenuTrigger, 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { NotificationIcon, ArrowDownIcon } from "./assets/icons";
+import { NotificationIcon, ArrowDownIcon, UserIcon } from "./assets/icons";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import LoginOptions from "./LoginOptions";
 
 export default function UserMenu() {
   const [open, setOpen] = useState(false);
-  const { user } = useAuth();
+  const [showLoginOptions, setShowLoginOptions] = useState(false);
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
@@ -27,6 +31,36 @@ export default function UserMenu() {
   const displayName = user?.firstName 
     ? `${user.firstName} ${user.lastName || ''}`
     : user?.username || 'User';
+    
+  if (isLoading) {
+    return (
+      <div className="flex items-center space-x-4">
+        <div className="h-8 w-8 rounded-full bg-neutral-200 animate-pulse"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center space-x-4">
+        <Button 
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          onClick={() => setShowLoginOptions(true)}
+        >
+          <UserIcon className="h-4 w-4" />
+          <span>Log in</span>
+        </Button>
+        
+        <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
+          <DialogContent className="sm:max-w-md">
+            <LoginOptions />
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center space-x-4">

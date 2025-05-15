@@ -39,6 +39,7 @@ export default function WritingModal({
   const { toast } = useToast();
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
+  const [characterCount, setCharacterCount] = useState(0);
 
   // Get story details
   const { data: story, isLoading: storyLoading } = useQuery({
@@ -75,6 +76,7 @@ export default function WritingModal({
       return await apiRequest("POST", `/api/stories/${storyId}/segments`, {
         content,
         wordCount,
+        characterCount,
       });
     },
     onSuccess: () => {
@@ -84,6 +86,7 @@ export default function WritingModal({
       });
       setContent("");
       setWordCount(0);
+      setCharacterCount(0);
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/turn`] });
       queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });

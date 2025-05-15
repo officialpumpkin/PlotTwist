@@ -45,6 +45,10 @@ const storyFormSchema = z.object({
     (val) => parseInt(String(val), 10),
     z.number().min(50).max(500)
   ),
+  characterLimit: z.preprocess(
+    (val) => parseInt(String(val), 10),
+    z.number().min(0).max(2000)
+  ),
   maxSegments: z.preprocess(
     (val) => parseInt(String(val), 10),
     z.number().min(5).max(100)
@@ -68,6 +72,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       description: "",
       genre: "",
       wordLimit: 100,
+      characterLimit: 0, // 0 means no character limit
       maxSegments: 30,
       isPublic: true,
     },
@@ -208,6 +213,65 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                         <SelectItem value="150">150 words</SelectItem>
                         <SelectItem value="200">200 words</SelectItem>
                         <SelectItem value="250">250 words</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="characterLimit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Character Limit per Turn</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select character limit" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="0">No limit</SelectItem>
+                        <SelectItem value="280">280 characters (Tweet length)</SelectItem>
+                        <SelectItem value="500">500 characters</SelectItem>
+                        <SelectItem value="1000">1000 characters</SelectItem>
+                        <SelectItem value="1500">1500 characters</SelectItem>
+                        <SelectItem value="2000">2000 characters</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="maxSegments"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Max Story Segments</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value.toString()}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select max segments" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="10">10 turns</SelectItem>
+                        <SelectItem value="20">20 turns</SelectItem>
+                        <SelectItem value="30">30 turns</SelectItem>
+                        <SelectItem value="50">50 turns</SelectItem>
+                        <SelectItem value="100">100 turns</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

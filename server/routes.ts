@@ -356,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const isInviterParticipant = await storage.isParticipant(storyId, inviterId);
-      if (!isInviterParticipant && story.createdBy !== inviterId) {
+      if (!isInviterParticipant && story.creatorId !== inviterId) {
         return res.status(403).json({ message: "Only story participants can invite others" });
       }
       

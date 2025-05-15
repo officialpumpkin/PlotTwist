@@ -8,6 +8,8 @@ import Home from "@/pages/home";
 import Dashboard from "@/pages/dashboard";
 import MyStories from "@/pages/my-stories";
 import Explore from "@/pages/explore";
+import Login from "@/pages/login";
+import Register from "@/pages/register";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -28,6 +30,8 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/my-stories" component={MyStories} />
       <Route path="/explore" component={Explore} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import { MailIcon } from 'lucide-react';
 
 export default function LoginOptions() {
-  const [_, setLocation] = useLocation();
+  const [_, navigate] = useLocation();
 
   // Handle Replit login
   const handleReplitLogin = () => {
@@ -13,6 +14,16 @@ export default function LoginOptions() {
   const handleGoogleLogin = () => {
     window.location.href = '/api/auth/google';
   };
+  
+  // Handle Email login
+  const handleEmailLogin = () => {
+    navigate('/login');
+  };
+  
+  // Handle Register
+  const handleRegister = () => {
+    navigate('/register');
+  };
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm border border-neutral-200 max-w-md mx-auto">
@@ -22,6 +33,24 @@ export default function LoginOptions() {
       </p>
       
       <div className="space-y-4">
+        <Button 
+          onClick={handleEmailLogin}
+          className="w-full flex items-center justify-center"
+          variant="default"
+        >
+          <MailIcon className="w-4 h-4 mr-2" />
+          Continue with Email
+        </Button>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-200"></div>
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-white px-2 text-gray-500">Or continue with</span>
+          </div>
+        </div>
+        
         <Button 
           onClick={handleReplitLogin}
           className="w-full flex items-center justify-center"

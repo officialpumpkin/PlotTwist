@@ -296,6 +296,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Check character count against story's character limit (if set)
+      if (story.characterLimit > 0 && validatedData.characterCount > story.characterLimit) {
+        return res.status(400).json({
+          message: `Exceeded character limit of ${story.characterLimit}`
+        });
+      }
+      
       // Add the segment
       const segment = await storage.addStorySegment({
         ...validatedData,

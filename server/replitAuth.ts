@@ -1,5 +1,6 @@
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import passport from "passport";
 import session from "express-session";
@@ -63,6 +64,19 @@ async function upsertUser(
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+  });
+}
+
+async function upsertGoogleUser(
+  profile: any,
+) {
+  await storage.upsertUser({
+    id: `google:${profile.id}`, // Prefix with "google:" to avoid ID conflicts
+    email: profile.emails?.[0]?.value,
+    firstName: profile.name?.givenName,
+    lastName: profile.name?.familyName,
+    profileImageUrl: profile.photos?.[0]?.value,
+    username: profile.displayName || profile.emails?.[0]?.value?.split("@")[0],
   });
 }
 

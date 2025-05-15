@@ -102,18 +102,25 @@ export default function WritingModal({
     },
   });
 
-  // Update word count when content changes
+  // Update word and character count when content changes
   useEffect(() => {
     if (content.trim() === '') {
       setWordCount(0);
+      setCharacterCount(0);
     } else {
       setWordCount(content.trim().split(/\s+/).length);
+      setCharacterCount(content.length);
     }
   }, [content]);
 
-  // Check if the word count is valid
+  // Check if the word and character counts are valid
   const isValidWordCount = wordCount > 0 && 
-    story && wordCount <= story.wordLimit;
+    story && wordCount <= (story.wordLimit || 100);
+    
+  const isValidCharacterCount = characterCount > 0 && 
+    (!story?.characterLimit || characterCount <= story.characterLimit);
+    
+  const isValidContribution = isValidWordCount && isValidCharacterCount;
 
   // Sort segments by turn number
   const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
@@ -217,6 +224,25 @@ export default function WritingModal({
                 </svg>
                 <span>{story?.wordLimit} word limit</span>
               </div>
+              {story?.characterLimit > 0 && (
+                <div className="flex items-center text-sm text-neutral-600">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 mr-1.5"
+                  >
+                    <path d="M18 6H6L2 12l4 6h12l4-6-4-6z" />
+                    <path d="M12 10v4" />
+                    <path d="M12 16h.01" />
+                  </svg>
+                  <span>{story?.characterLimit} character limit</span>
+                </div>
+              )}
               <div className="flex items-center text-sm text-neutral-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -306,11 +332,21 @@ export default function WritingModal({
                         className="w-full h-32 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none" 
                         placeholder="Continue the story..."
                       ></textarea>
-                      <div className="absolute bottom-3 right-3">
-                        <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
-                          {wordCount}
-                        </span>
-                        <span className="text-neutral-500">/{story?.wordLimit}</span>
+                      <div className="absolute bottom-3 right-3 space-y-1 text-right">
+                        <div>
+                          <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
+                            {wordCount}
+                          </span>
+                          <span className="text-neutral-500">/{story?.wordLimit} words</span>
+                        </div>
+                        {story?.characterLimit > 0 && (
+                          <div>
+                            <span className={characterCount > (story?.characterLimit || 0) ? "text-error font-medium" : "font-medium"}>
+                              {characterCount}
+                            </span>
+                            <span className="text-neutral-500">/{story?.characterLimit} chars</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
@@ -341,7 +377,7 @@ export default function WritingModal({
                         </Button>
                         <Button 
                           size="sm" 
-                          disabled={!isValidWordCount || addSegmentMutation.isPending}
+                          disabled={!isValidContribution || addSegmentMutation.isPending}
                           onClick={() => addSegmentMutation.mutate()}
                         >
                           {addSegmentMutation.isPending ? "Submitting..." : "Submit"}

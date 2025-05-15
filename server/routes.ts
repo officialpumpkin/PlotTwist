@@ -93,28 +93,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new story
   app.post('/api/stories', isAuthenticated, async (req: any, res) => {
     try {
+      // Make sure we have a userId
+      if (!req.user || !req.user.claims || !req.user.claims.sub) {
+        return res.status(401).json({ 
+          message: "Unauthorized - user not properly authenticated",
+          details: "User ID missing from authentication"
+        });
+      }
+      
       const userId = req.user.claims.sub;
-      const validatedData = storyFormSchema.parse(req.body);
+      console.log("Creating story with userID:", userId);
       
-      const newStory = await storage.createStory({
-        ...validatedData,
-        creatorId: userId
-      });
-      
-      // Add creator as a participant
-      await storage.addParticipant({
-        storyId: newStory.id,
-        userId: userId
-      });
-      
-      // Initialize turn to the creator
-      await storage.createStoryTurn({
-        storyId: newStory.id,
-        currentTurn: 1,
-        currentUserId: userId
-      });
-      
-      res.status(201).json(newStory);
+      try {
+        const validatedData = storyFormSchema.parse({
+          ...req.body,
+          creatorId: userId // Ensure creatorId is included in validation
+        });
+        
+        const newStory = await storage.createStory({
+          ...validatedData,
+          creatorId: userId
+        });
+        
+        // Add creator as a participant
+        await storage.addParticipant({
+          storyId: newStory.id,
+          userId: userId
+        });
+        
+        // Initialize turn to the creator
+        await storage.createStoryTurn({
+          storyId: newStory.id,
+          currentTurn: 1,
+          currentUserId: userId
+        });
+        
+        res.status(201).json(newStory);
+      } catch (validationError) {
+        console.error("Validation error:", validationError);
+        if (validationError instanceof z.ZodError) {
+          return res.status(400).json({ 
+            message: "Invalid story data", 
+            errors: validationError.errors 
+          });
+        }
+        throw validationError; // Re-throw if not a ZodError
+      }
     } catch (error) {
       console.error("Error creating story:", error);
       if (error instanceof z.ZodError) {

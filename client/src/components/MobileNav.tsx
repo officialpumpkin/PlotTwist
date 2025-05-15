@@ -16,6 +16,8 @@ import { useAuth } from "@/hooks/useAuth";
 export default function MobileNav() {
   const [location] = useLocation();
   const [newStoryModal, setNewStoryModal] = useState(false);
+  const [showLoginOptions, setShowLoginOptions] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon className="text-xl" /> },
@@ -42,20 +44,36 @@ export default function MobileNav() {
               </a>
             </Link>
           ))}
-          <button 
-            onClick={() => setNewStoryModal(true)} 
-            className={cn(
-              "flex flex-col items-center py-1",
-              newStoryModal ? "text-secondary" : "text-neutral-500"
-            )}
-          >
-            <AddCircleIcon className="text-xl" />
-            <span className="text-xs mt-1">New Story</span>
-          </button>
+          {isAuthenticated ? (
+            <button 
+              onClick={() => setNewStoryModal(true)} 
+              className={cn(
+                "flex flex-col items-center py-1",
+                newStoryModal ? "text-secondary" : "text-neutral-500"
+              )}
+            >
+              <AddCircleIcon className="text-xl" />
+              <span className="text-xs mt-1">New Story</span>
+            </button>
+          ) : (
+            <button 
+              onClick={() => setShowLoginOptions(true)} 
+              className="flex flex-col items-center py-1 text-neutral-500"
+            >
+              <UserIcon className="text-xl" />
+              <span className="text-xs mt-1">Log in</span>
+            </button>
+          )}
         </div>
       </div>
 
       <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
+      
+      <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
+        <DialogContent className="sm:max-w-md">
+          <LoginOptions />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

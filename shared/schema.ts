@@ -44,6 +44,7 @@ export const stories = pgTable("stories", {
   description: text("description").notNull(),
   genre: varchar("genre").notNull(),
   wordLimit: integer("word_limit").notNull(),
+  characterLimit: integer("character_limit").notNull().default(0), // 0 means no character limit
   maxSegments: integer("max_segments").notNull().default(30),
   isComplete: boolean("is_complete").notNull().default(false),
   isPublic: boolean("is_public").notNull().default(true),
@@ -59,7 +60,7 @@ export const storyParticipants = pgTable("story_participants", {
   userId: varchar("user_id").notNull().references(() => users.id),
   joinedAt: timestamp("joined_at").defaultNow(),
 }, (table) => ({
-  uniqParticipant: primaryKey(table.storyId, table.userId),
+  uniqParticipantIdx: index("uniq_participant_idx").on(table.storyId, table.userId),
 }));
 
 // Story segments (individual contributions)
@@ -70,6 +71,7 @@ export const storySegments = pgTable("story_segments", {
   content: text("content").notNull(),
   turn: integer("turn").notNull(),
   wordCount: integer("word_count").notNull(),
+  characterCount: integer("character_count").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -193,6 +195,10 @@ export const storyFormSchema = insertStorySchema.extend({
     (val) => parseInt(String(val), 10),
     z.number().min(50).max(500)
   ),
+  characterLimit: z.preprocess(
+    (val) => parseInt(String(val), 10),
+    z.number().min(0).max(2000)
+  ),
   maxSegments: z.preprocess(
     (val) => parseInt(String(val), 10),
     z.number().min(5).max(100)
@@ -200,8 +206,12 @@ export const storyFormSchema = insertStorySchema.extend({
 });
 
 export const storySegmentFormSchema = insertStorySegmentSchema.extend({
-  content: z.string().min(1).max(1000),
+  content: z.string().min(1).max(5000),
   wordCount: z.preprocess(
+    (val) => parseInt(String(val), 10),
+    z.number().min(1)
+  ),
+  characterCount: z.preprocess(
     (val) => parseInt(String(val), 10),
     z.number().min(1)
   ),

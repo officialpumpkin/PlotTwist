@@ -20,7 +20,10 @@ import {
   UnderlineIcon, 
   EmojiIcon,
   FlagIcon,
+  UserIcon
 } from "./assets/icons";
+
+import InviteCollaboratorModal from "./InviteCollaboratorModal";
 
 interface WritingModalProps {
   open: boolean;
@@ -40,6 +43,7 @@ export default function WritingModal({
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
+  const [showInviteModal, setShowInviteModal] = useState(false);
 
   // Get story details
   const { data: story, isLoading: storyLoading } = useQuery({
@@ -406,8 +410,20 @@ export default function WritingModal({
                 </span>
               </div>
               
-              {onComplete && (
-                <div>
+              <div className="flex space-x-2">
+                {/* Show invite button only for the creator of the story */}
+                {story?.creatorId === user?.id && !story?.isComplete && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-sm text-neutral-600 hover:text-neutral-800"
+                    onClick={() => setShowInviteModal(true)}
+                  >
+                    <UserIcon className="mr-1" /> Invite Collaborators
+                  </Button>
+                )}
+                
+                {onComplete && (
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -416,12 +432,19 @@ export default function WritingModal({
                   >
                     <FlagIcon className="mr-1" /> Mark as Complete
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
       </DialogContent>
+      
+      {/* Invite collaborator modal */}
+      <InviteCollaboratorModal 
+        open={showInviteModal} 
+        onOpenChange={setShowInviteModal} 
+        storyId={storyId} 
+      />
     </Dialog>
   );
 }

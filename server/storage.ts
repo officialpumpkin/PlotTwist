@@ -1,0 +1,286 @@
+import {
+  users,
+  stories,
+  storyParticipants,
+  storySegments,
+  storyTurns,
+  storyImages,
+  printOrders,
+  type User,
+  type UpsertUser,
+  type Story,
+  type InsertStory,
+  type StoryParticipant,
+  type InsertStoryParticipant,
+  type StorySegment,
+  type InsertStorySegment,
+  type StoryTurn,
+  type InsertStoryTurn,
+  type StoryImage,
+  type InsertStoryImage,
+  type PrintOrder,
+  type InsertPrintOrder
+} from "@shared/schema";
+import { db } from "./db";
+import { eq, and, desc, asc, sql, inArray, not, or, isNull } from "drizzle-orm";
+import { nanoid } from "nanoid";
+
+// Interface for storage operations
+export interface IStorage {
+  // User operations (required for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Story operations
+  createStory(story: InsertStory): Promise<Story>;
+  getStoryById(id: number): Promise<Story | undefined>;
+  getStories(): Promise<Story[]>;
+  updateStory(id: number, story: Partial<Story>): Promise<Story | undefined>;
+  getStoriesByUser(userId: string): Promise<Story[]>;
+  getPublicStories(): Promise<Story[]>;
+  
+  // Story participants
+  addParticipant(participant: InsertStoryParticipant): Promise<StoryParticipant>;
+  getStoryParticipants(storyId: number): Promise<StoryParticipant[]>;
+  isParticipant(storyId: number, userId: string): Promise<boolean>;
+  
+  // Story segments
+  addStorySegment(segment: InsertStorySegment): Promise<StorySegment>;
+  getStorySegments(storyId: number): Promise<StorySegment[]>;
+  getLatestSegments(storyId: number, limit: number): Promise<StorySegment[]>;
+  
+  // Story turns
+  getStoryTurn(storyId: number): Promise<StoryTurn | undefined>;
+  updateStoryTurn(storyId: number, turn: Partial<InsertStoryTurn>): Promise<StoryTurn | undefined>;
+  createStoryTurn(turn: InsertStoryTurn): Promise<StoryTurn>;
+  
+  // Story images
+  addStoryImage(image: InsertStoryImage): Promise<StoryImage>;
+  getStoryImages(storyId: number): Promise<StoryImage[]>;
+  
+  // Print orders
+  createPrintOrder(order: InsertPrintOrder): Promise<PrintOrder>;
+  getUserOrders(userId: string): Promise<PrintOrder[]>;
+}
+
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+  
+  // Story operations
+  async createStory(storyData: InsertStory): Promise<Story> {
+    const [story] = await db
+      .insert(stories)
+      .values(storyData)
+      .returning();
+    return story;
+  }
+  
+  async getStoryById(id: number): Promise<Story | undefined> {
+    const [story] = await db
+      .select()
+      .from(stories)
+      .where(eq(stories.id, id));
+    return story;
+  }
+  
+  async getStories(): Promise<Story[]> {
+    return await db
+      .select()
+      .from(stories)
+      .orderBy(desc(stories.createdAt));
+  }
+  
+  async updateStory(id: number, storyData: Partial<Story>): Promise<Story | undefined> {
+    const [story] = await db
+      .update(stories)
+      .set({
+        ...storyData,
+        updatedAt: new Date(),
+      })
+      .where(eq(stories.id, id))
+      .returning();
+    return story;
+  }
+  
+  async getStoriesByUser(userId: string): Promise<Story[]> {
+    // Get stories where user is a participant
+    const participantStories = await db
+      .select({
+        storyId: storyParticipants.storyId,
+      })
+      .from(storyParticipants)
+      .where(eq(storyParticipants.userId, userId));
+    
+    const storyIds = participantStories.map(s => s.storyId);
+    
+    if (storyIds.length === 0) {
+      return [];
+    }
+    
+    return await db
+      .select()
+      .from(stories)
+      .where(inArray(stories.id, storyIds))
+      .orderBy(desc(stories.updatedAt));
+  }
+  
+  async getPublicStories(): Promise<Story[]> {
+    return await db
+      .select()
+      .from(stories)
+      .where(eq(stories.isPublic, true))
+      .orderBy(desc(stories.createdAt));
+  }
+  
+  // Story participants
+  async addParticipant(participantData: InsertStoryParticipant): Promise<StoryParticipant> {
+    const [participant] = await db
+      .insert(storyParticipants)
+      .values(participantData)
+      .onConflictDoNothing()
+      .returning();
+    
+    return participant;
+  }
+  
+  async getStoryParticipants(storyId: number): Promise<StoryParticipant[]> {
+    return await db
+      .select()
+      .from(storyParticipants)
+      .where(eq(storyParticipants.storyId, storyId));
+  }
+  
+  async isParticipant(storyId: number, userId: string): Promise<boolean> {
+    const [participant] = await db
+      .select()
+      .from(storyParticipants)
+      .where(
+        and(
+          eq(storyParticipants.storyId, storyId),
+          eq(storyParticipants.userId, userId)
+        )
+      );
+    
+    return !!participant;
+  }
+  
+  // Story segments
+  async addStorySegment(segmentData: InsertStorySegment): Promise<StorySegment> {
+    const [segment] = await db
+      .insert(storySegments)
+      .values(segmentData)
+      .returning();
+    
+    return segment;
+  }
+  
+  async getStorySegments(storyId: number): Promise<StorySegment[]> {
+    return await db
+      .select()
+      .from(storySegments)
+      .where(eq(storySegments.storyId, storyId))
+      .orderBy(asc(storySegments.turn));
+  }
+  
+  async getLatestSegments(storyId: number, limit: number): Promise<StorySegment[]> {
+    return await db
+      .select()
+      .from(storySegments)
+      .where(eq(storySegments.storyId, storyId))
+      .orderBy(desc(storySegments.turn))
+      .limit(limit);
+  }
+  
+  // Story turns
+  async getStoryTurn(storyId: number): Promise<StoryTurn | undefined> {
+    const [turn] = await db
+      .select()
+      .from(storyTurns)
+      .where(eq(storyTurns.storyId, storyId));
+    
+    return turn;
+  }
+  
+  async updateStoryTurn(storyId: number, turnData: Partial<InsertStoryTurn>): Promise<StoryTurn | undefined> {
+    const [turn] = await db
+      .update(storyTurns)
+      .set({
+        ...turnData,
+        updatedAt: new Date(),
+      })
+      .where(eq(storyTurns.storyId, storyId))
+      .returning();
+    
+    return turn;
+  }
+  
+  async createStoryTurn(turnData: InsertStoryTurn): Promise<StoryTurn> {
+    const [turn] = await db
+      .insert(storyTurns)
+      .values(turnData)
+      .returning();
+    
+    return turn;
+  }
+  
+  // Story images
+  async addStoryImage(imageData: InsertStoryImage): Promise<StoryImage> {
+    const [image] = await db
+      .insert(storyImages)
+      .values(imageData)
+      .returning();
+    
+    return image;
+  }
+  
+  async getStoryImages(storyId: number): Promise<StoryImage[]> {
+    return await db
+      .select()
+      .from(storyImages)
+      .where(eq(storyImages.storyId, storyId));
+  }
+  
+  // Print orders
+  async createPrintOrder(orderData: InsertPrintOrder): Promise<PrintOrder> {
+    const orderId = `SW-${nanoid(6).toUpperCase()}`;
+    
+    const [order] = await db
+      .insert(printOrders)
+      .values({
+        ...orderData,
+        orderId,
+      })
+      .returning();
+    
+    return order;
+  }
+  
+  async getUserOrders(userId: string): Promise<PrintOrder[]> {
+    return await db
+      .select()
+      .from(printOrders)
+      .where(eq(printOrders.userId, userId))
+      .orderBy(desc(printOrders.createdAt));
+  }
+}
+
+export const storage = new DatabaseStorage();

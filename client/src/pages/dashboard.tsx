@@ -7,6 +7,7 @@ import WritingModal from "@/components/WritingModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import Layout from "@/components/Layout";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ export default function Dashboard() {
   };
 
   return (
-    <>
+    <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Dashboard Header */}
         <div className="flex items-center justify-between mb-6">
@@ -248,6 +249,6 @@ export default function Dashboard() {
           storyId={activeStory} 
         />
       )}
-    </>
+    </Layout>
   );
 }

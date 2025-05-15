@@ -5,6 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
 import {
   storyFormSchema,
+  serverStorySchema,
   storySegmentFormSchema,
   printOrderFormSchema,
   stories,
@@ -105,15 +106,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Creating story with userID:", userId);
       
       try {
-        const validatedData = storyFormSchema.parse({
-          ...req.body,
-          creatorId: userId // Ensure creatorId is included in validation
-        });
+        // First validate client-side data
+        const clientData = storyFormSchema.parse(req.body);
         
-        const newStory = await storage.createStory({
-          ...validatedData,
+        // Then add creatorId and validate with server schema
+        const validatedData = serverStorySchema.parse({
+          ...clientData,
           creatorId: userId
         });
+        
+        const newStory = await storage.createStory(validatedData);
         
         // Add creator as a participant
         await storage.addParticipant({
@@ -244,6 +246,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error joining story:", error);
       res.status(500).json({ message: "Failed to join story" });
+    }
+  });
+  
+  // Invite a user to a story
+  app.post('/api/stories/:id/invite', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const inviterId = req.user.claims.sub;
+      const { usernameOrEmail } = req.body;
+      
+      if (!usernameOrEmail) {
+        return res.status(400).json({ message: "Username or email is required" });
+      }
+      
+      // Check if the story exists and the inviter is a participant
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      const isInviterParticipant = await storage.isParticipant(storyId, inviterId);
+      if (!isInviterParticipant && story.creatorId !== inviterId) {
+        return res.status(403).json({ message: "Only story participants can invite others" });
+      }
+      
+      // Find the user to invite by username or email
+      let inviteeUser;
+      if (usernameOrEmail.includes('@')) {
+        // Search by email
+        inviteeUser = await storage.getUserByEmail(usernameOrEmail);
+      } else {
+        // Search by username
+        inviteeUser = await storage.getUserByUsername(usernameOrEmail);
+      }
+      
+      if (!inviteeUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if already a participant
+      const isAlreadyParticipant = await storage.isParticipant(storyId, inviteeUser.id);
+      if (isAlreadyParticipant) {
+        return res.status(400).json({ message: "User is already a participant in this story" });
+      }
+      
+      // Add the invitee as a participant
+      const participant = await storage.addParticipant({
+        storyId,
+        userId: inviteeUser.id
+      });
+      
+      res.status(201).json({
+        message: `${inviteeUser.username || inviteeUser.email} has been invited to the story`,
+        participant
+      });
+    } catch (error) {
+      console.error("Error inviting user:", error);
+      res.status(500).json({ message: "Failed to invite user" });
     }
   });
 

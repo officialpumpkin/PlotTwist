@@ -190,19 +190,26 @@ export type InsertPrintOrder = z.infer<typeof insertPrintOrderSchema>;
 export type PrintOrder = typeof printOrders.$inferSelect;
 
 // Extended schemas for validation
-export const storyFormSchema = insertStorySchema.extend({
-  wordLimit: z.preprocess(
-    (val) => parseInt(String(val), 10),
-    z.number().min(50).max(500)
-  ),
-  characterLimit: z.preprocess(
-    (val) => parseInt(String(val), 10),
-    z.number().min(0).max(2000)
-  ),
-  maxSegments: z.preprocess(
-    (val) => parseInt(String(val), 10),
-    z.number().min(5).max(100)
-  ),
+export const storyFormSchema = insertStorySchema
+  .omit({ creatorId: true }) // Remove creatorId from client validation
+  .extend({
+    wordLimit: z.preprocess(
+      (val) => parseInt(String(val), 10),
+      z.number().min(50).max(500)
+    ),
+    characterLimit: z.preprocess(
+      (val) => parseInt(String(val), 10),
+      z.number().min(0).max(2000)
+    ),
+    maxSegments: z.preprocess(
+      (val) => parseInt(String(val), 10),
+      z.number().min(5).max(100)
+    ),
+  });
+
+// Server-side only schema that includes creatorId
+export const serverStorySchema = storyFormSchema.extend({
+  creatorId: z.string().min(1),
 });
 
 export const storySegmentFormSchema = insertStorySegmentSchema.extend({

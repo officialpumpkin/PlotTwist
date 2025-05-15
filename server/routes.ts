@@ -3,11 +3,15 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
 import {
   storyFormSchema,
   serverStorySchema,
   storySegmentFormSchema,
   printOrderFormSchema,
+  registerSchema,
+  loginSchema,
   stories,
   storyParticipants,
   storyTurns,
@@ -59,6 +63,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Email-based registration
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      // Validate with schema
+      const result = registerSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "Invalid registration data", 
+          errors: result.error.format() 
+        });
+      }
+      
+      const { email, username, password } = result.data;
+      
+      // Check if user with this email or username exists
+      const existingUserByEmail = await storage.getUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+      
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+      
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      
+      // Create user
+      const newUser = await storage.upsertUser({
+        id: nanoid(),
+        email,
+        username,
+        password: hashedPassword,
+      });
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = newUser;
+      res.status(201).json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error registering user:", error);
+      res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+  
+  // Email-based login
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      // Validate with schema
+      const result = loginSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ 
+          message: "Invalid login data", 
+          errors: result.error.format() 
+        });
+      }
+      
+      const { email, password } = result.data;
+      
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      
+      // Verify password
+      const isMatch = await bcrypt.compare(password, user.password || "");
+      if (!isMatch) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+      
+      // Create session
+      req.login(user, (err) => {
+        if (err) {
+          console.error("Login error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        
+        // Return user without password
+        const { password: _, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+      });
+    } catch (error) {
+      console.error("Error logging in user:", error);
+      res.status(500).json({ message: "Failed to log in" });
     }
   });
 

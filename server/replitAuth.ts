@@ -86,6 +86,7 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Setup Replit Auth
   const config = await getOidcConfig();
 
   const verify: VerifyFunction = async (
@@ -112,9 +113,46 @@ export async function setupAuth(app: Express) {
     passport.use(strategy);
   }
 
+  // Setup Google Auth
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const googleCallbackURL = `https://${process.env.REPLIT_DOMAINS!.split(",")[0]}/api/auth/google/callback`;
+    
+    passport.use(new GoogleStrategy({
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: googleCallbackURL,
+        scope: ['profile', 'email']
+      },
+      async function(accessToken: string, refreshToken: string, profile: any, done: any) {
+        try {
+          await upsertGoogleUser(profile);
+          
+          // Create a user object similar to the Replit Auth user
+          const user = {
+            claims: {
+              sub: `google:${profile.id}`,
+              email: profile.emails?.[0]?.value,
+              first_name: profile.name?.givenName,
+              last_name: profile.name?.familyName,
+              profile_image_url: profile.photos?.[0]?.value,
+            },
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiry
+          };
+          
+          return done(null, user);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    ));
+  }
+
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
+  // Replit Auth routes
   app.get("/api/login", (req, res, next) => {
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
@@ -128,15 +166,37 @@ export async function setupAuth(app: Express) {
       failureRedirect: "/api/login",
     })(req, res, next);
   });
+  
+  // Google Auth routes
+  app.get("/api/auth/google", passport.authenticate("google", {
+    scope: ["profile", "email"]
+  }));
+  
+  app.get("/api/auth/google/callback", 
+    passport.authenticate("google", {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/api/login"
+    })
+  );
 
+  // Shared logout route
   app.get("/api/logout", (req, res) => {
+    const user = req.user as any;
+    const isGoogleUser = user?.claims?.sub?.startsWith("google:");
+    
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
-      );
+      if (isGoogleUser) {
+        // For Google users, just redirect to home
+        res.redirect(`${req.protocol}://${req.hostname}`);
+      } else {
+        // For Replit users, use Replit's logout endpoint
+        res.redirect(
+          client.buildEndSessionUrl(config, {
+            client_id: process.env.REPL_ID!,
+            post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          }).href
+        );
+      }
     });
   });
 }
@@ -144,7 +204,20 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  
+  // Check if it's a Google user
+  const isGoogleUser = user?.claims?.sub?.startsWith("google:");
+  
+  if (isGoogleUser) {
+    // Google auth doesn't need token refresh logic
+    return next();
+  }
+  
+  // Replit Auth token validation and refresh
+  if (!user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 

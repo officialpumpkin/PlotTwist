@@ -1,7 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useState } from "react";
+import LoginOptions from "@/components/LoginOptions";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function Home() {
+  const [showLoginOptions, setShowLoginOptions] = useState(false);
+  
+  const openLoginOptions = () => {
+    setShowLoginOptions(true);
+  };
+  
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
@@ -36,17 +45,21 @@ export default function Home() {
               Build creative narratives together where each person contributes within word limits
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
-              <a href="/api/login">
-                <Button size="lg" className="font-medium">
-                  Get Started
-                </Button>
-              </a>
+              <Button size="lg" className="font-medium" onClick={openLoginOptions}>
+                Get Started
+              </Button>
               <Button size="lg" variant="outline" className="font-medium" asChild>
                 <Link href="/explore">
                   Explore Stories
                 </Link>
               </Button>
             </div>
+            
+            <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
+              <DialogContent className="sm:max-w-md">
+                <LoginOptions />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </section>
@@ -175,15 +188,14 @@ export default function Home() {
             <p className="text-xl max-w-prose">
               Join our community of collaborative storytellers today.
             </p>
-            <a href="/api/login" className="mt-6">
-              <Button
-                size="lg"
-                variant="secondary"
-                className="bg-white text-primary hover:bg-neutral-100 font-medium"
-              >
-                Sign Up Now
-              </Button>
-            </a>
+            <Button
+              size="lg"
+              variant="secondary"
+              className="mt-6 bg-white text-primary hover:bg-neutral-100 font-medium"
+              onClick={openLoginOptions}
+            >
+              Sign Up Now
+            </Button>
           </div>
         </div>
       </section>

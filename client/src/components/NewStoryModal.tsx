@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { z } from "zod";
+import { storyFormSchema, Story } from "@shared/schema";
 
 import {
   Dialog,
@@ -36,25 +37,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CloseIcon } from "./assets/icons";
 
-// Story form schema
-const storyFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title is too long"),
-  description: z.string().min(10, "Description must be at least 10 characters").max(500, "Description is too long"),
-  genre: z.string().min(1, "Please select a genre"),
-  wordLimit: z.preprocess(
-    (val) => parseInt(String(val), 10),
-    z.number().min(50).max(500)
-  ),
-  characterLimit: z.preprocess(
-    (val) => parseInt(String(val), 10),
-    z.number().min(0).max(2000)
-  ),
-  maxSegments: z.preprocess(
-    (val) => parseInt(String(val), 10),
-    z.number().min(5).max(100)
-  ),
-  isPublic: z.boolean().default(true),
-});
+// We're using the storyFormSchema imported from shared/schema.ts
 
 interface NewStoryModalProps {
   open: boolean;
@@ -64,6 +47,7 @@ interface NewStoryModalProps {
 export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps) {
   const { toast } = useToast();
   const [inviteEmail, setInviteEmail] = useState("");
+  const [invites, setInvites] = useState<string[]>([]);
 
   const form = useForm<z.infer<typeof storyFormSchema>>({
     resolver: zodResolver(storyFormSchema),
@@ -80,14 +64,39 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   const createStoryMutation = useMutation({
     mutationFn: async (values: z.infer<typeof storyFormSchema>) => {
-      return await apiRequest("POST", "/api/stories", values);
+      // Create the story first
+      const story = await apiRequest<Story>("POST", "/api/stories", values);
+      
+      // If we have invites, send them after creating the story
+      if (invites.length > 0 && story && story.id) {
+        try {
+          await Promise.all(
+            invites.map(invite => 
+              apiRequest<{ message: string }>(
+                "POST", 
+                `/api/stories/${story.id}/invite`, 
+                { usernameOrEmail: invite }
+              )
+            )
+          );
+        } catch (error) {
+          console.error("Failed to send some invites:", error);
+          // We'll continue even if some invites fail
+        }
+      }
+      
+      return story;
     },
     onSuccess: () => {
       toast({
         title: "Story created!",
-        description: "Your new story has been created successfully.",
+        description: invites.length > 0 
+          ? `Your story has been created and ${invites.length} contributor${invites.length > 1 ? 's' : ''} invited.`
+          : "Your new story has been created successfully.",
       });
       form.reset();
+      setInvites([]);
+      setInviteEmail("");
       queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
       onOpenChange(false);
@@ -100,6 +109,26 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       });
     },
   });
+  
+  const addInvite = () => {
+    if (!inviteEmail.trim()) return;
+    
+    // Simple validation for email or username
+    if (!invites.includes(inviteEmail)) {
+      setInvites([...invites, inviteEmail.trim()]);
+      setInviteEmail("");
+    } else {
+      toast({
+        title: "Duplicate invite",
+        description: "This person has already been added to the invite list.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const removeInvite = (invite: string) => {
+    setInvites(invites.filter(i => i !== invite));
+  };
 
   function onSubmit(values: z.infer<typeof storyFormSchema>) {
     createStoryMutation.mutate(values);
@@ -307,29 +336,51 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
               )}
             />
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               <FormLabel>Invite Contributors (Optional)</FormLabel>
               <div className="flex space-x-2">
                 <Input 
                   placeholder="Enter email or username" 
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addInvite();
+                    }
+                  }}
                 />
                 <Button 
                   type="button" 
                   variant="outline"
-                  onClick={() => {
-                    // Would handle invites here
-                    toast({
-                      title: "Invitation feature",
-                      description: "Invitations will be implemented soon!",
-                    });
-                    setInviteEmail("");
-                  }}
+                  onClick={addInvite}
                 >
                   Add
                 </Button>
               </div>
+              
+              {invites.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500 mb-2">Invitees:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {invites.map((invite, index) => (
+                      <div 
+                        key={index} 
+                        className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full flex items-center"
+                      >
+                        <span>{invite}</span>
+                        <button
+                          type="button"
+                          className="ml-1.5 text-blue-600 hover:text-blue-800"
+                          onClick={() => removeInvite(invite)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <DialogFooter className="flex justify-end space-x-3 pt-2">

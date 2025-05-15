@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import {
   TimeIcon,
   ArrowRightIcon
 } from "./assets/icons";
+import InviteCollaboratorModal from "./InviteCollaboratorModal";
 
 interface StoryCardProps {
   story: any;
@@ -33,6 +35,7 @@ export default function StoryCard({
   onJoin
 }: StoryCardProps) {
   const { user } = useAuth();
+  const [showInviteModal, setShowInviteModal] = useState(false);
   
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -53,119 +56,144 @@ export default function StoryCard({
   const progress = segments ? 
     Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
 
+  // Check if the current user is the creator of the story
+  const isCreator = user && story.creatorId === user.id;
+  
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
-      <div className={cn(
-        "h-2",
-        status === "Your Turn" && "bg-primary",
-        status === "Waiting" && "bg-neutral-400",
-        status === "Active" && variant === "explore" && "bg-secondary",
-        status === "Completed" && "bg-accent"
-      )}></div>
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="font-bold text-lg">{story.title}</h3>
-          <span className={cn(
-            "text-xs px-2 py-1 rounded-full",
-            status === "Your Turn" && "bg-primary/10 text-primary",
-            status === "Waiting" && "bg-neutral-100 text-neutral-600",
-            status === "Active" && variant === "explore" && "bg-secondary/10 text-secondary",
-            status === "Completed" && "bg-accent/10 text-accent",
-          )}>
-            {status === "Waiting" && waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : status}
-          </span>
-        </div>
-        
-        <p className="text-neutral-600 text-sm line-clamp-3">{story.description}</p>
-        
-        <div className="flex items-center mt-4 text-sm text-neutral-500">
-          <UserIcon className="mr-1" />
-          <span>{participants?.length || 0} contributors</span>
-          <span className="mx-2">•</span>
-          <TimeIcon className="mr-1" />
-          <span>
-            {segments ? `${segments.length}/${story.maxSegments || 30} segments` : 'Updated recently'}
-          </span>
-        </div>
-        
-        {showProgress && (
-          <div className="mt-4 bg-neutral-50 rounded-md p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className={cn(
-                  "w-2 h-2 rounded-full mr-2",
-                  story.isComplete ? "bg-accent" : "bg-secondary"
-                )}></div>
-                <span className="text-sm text-neutral-600">{story.isComplete ? "Final:" : "Progress:"}</span>
-              </div>
-              <span className="text-sm font-medium">
-                {segments ? `${segments.length}/${story.maxSegments || 30} segments` : '0/0 segments'}
-              </span>
-            </div>
-            <div className="w-full bg-neutral-200 rounded-full h-2 mt-2">
-              <div 
-                className={cn(
-                  "h-2 rounded-full",
-                  story.isComplete ? "bg-accent" : "bg-secondary"
-                )} 
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
-        )}
-        
-        <div className="flex items-center justify-between mt-5">
-          <div className="flex -space-x-2">
-            {participants?.slice(0, 3).map((participant) => (
-              <Avatar key={participant.userId} className="w-7 h-7 border-2 border-white">
-                {participant.user?.profileImageUrl ? (
-                  <AvatarImage 
-                    src={participant.user.profileImageUrl} 
-                    alt={`${participant.user.firstName || participant.user.username}`} 
-                    className="object-cover"
-                  />
-                ) : (
-                  <AvatarFallback className="text-xs">
-                    {participant.user?.firstName?.[0] || participant.user?.username?.[0] || '?'}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-            ))}
-            {participants && participants.length > 3 && (
-              <div className="w-7 h-7 rounded-full bg-neutral-200 border-2 border-white flex items-center justify-center text-xs text-neutral-600">
-                +{participants.length - 3}
-              </div>
-            )}
+    <>
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+        <div className={cn(
+          "h-2",
+          status === "Your Turn" && "bg-primary",
+          status === "Waiting" && "bg-neutral-400",
+          status === "Active" && variant === "explore" && "bg-secondary",
+          status === "Completed" && "bg-accent"
+        )}></div>
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="font-bold text-lg">{story.title}</h3>
+            <span className={cn(
+              "text-xs px-2 py-1 rounded-full",
+              status === "Your Turn" && "bg-primary/10 text-primary",
+              status === "Waiting" && "bg-neutral-100 text-neutral-600",
+              status === "Active" && variant === "explore" && "bg-secondary/10 text-secondary",
+              status === "Completed" && "bg-accent/10 text-accent",
+            )}>
+              {status === "Waiting" && waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : status}
+            </span>
           </div>
           
-          {status === "Your Turn" && onContinue && (
-            <Button size="sm" onClick={onContinue}>Continue</Button>
+          <p className="text-neutral-600 text-sm line-clamp-3">{story.description}</p>
+          
+          <div className="flex items-center mt-4 text-sm text-neutral-500">
+            <UserIcon className="mr-1" />
+            <span>{participants?.length || 0} contributors</span>
+            <span className="mx-2">•</span>
+            <TimeIcon className="mr-1" />
+            <span>
+              {segments ? `${segments.length}/${story.maxSegments || 30} segments` : 'Updated recently'}
+            </span>
+          </div>
+          
+          {showProgress && (
+            <div className="mt-4 bg-neutral-50 rounded-md p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className={cn(
+                    "w-2 h-2 rounded-full mr-2",
+                    story.isComplete ? "bg-accent" : "bg-secondary"
+                  )}></div>
+                  <span className="text-sm text-neutral-600">{story.isComplete ? "Final:" : "Progress:"}</span>
+                </div>
+                <span className="text-sm font-medium">
+                  {segments ? `${segments.length}/${story.maxSegments || 30} segments` : '0/0 segments'}
+                </span>
+              </div>
+              <div className="w-full bg-neutral-200 rounded-full h-2 mt-2">
+                <div 
+                  className={cn(
+                    "h-2 rounded-full",
+                    story.isComplete ? "bg-accent" : "bg-secondary"
+                  )} 
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
           )}
           
-          {status === "Waiting" && (
-            <Button size="sm" variant="outline" className="bg-neutral-100 text-neutral-500 cursor-not-allowed">
-              {waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : 'Waiting'}
-            </Button>
-          )}
-          
-          {status === "Completed" && onPrint && (
+          <div className="flex items-center justify-between mt-5">
+            <div className="flex -space-x-2">
+              {participants?.slice(0, 3).map((participant) => (
+                <Avatar key={participant.userId} className="w-7 h-7 border-2 border-white">
+                  {participant.user?.profileImageUrl ? (
+                    <AvatarImage 
+                      src={participant.user.profileImageUrl} 
+                      alt={`${participant.user.firstName || participant.user.username}`} 
+                      className="object-cover"
+                    />
+                  ) : (
+                    <AvatarFallback className="text-xs">
+                      {participant.user?.firstName?.[0] || participant.user?.username?.[0] || '?'}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              ))}
+              {participants && participants.length > 3 && (
+                <div className="w-7 h-7 rounded-full bg-neutral-200 border-2 border-white flex items-center justify-center text-xs text-neutral-600">
+                  +{participants.length - 3}
+                </div>
+              )}
+            </div>
+            
             <div className="flex space-x-2">
-              <Button size="sm" variant="outline">Read</Button>
-              <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={onPrint}>Print</Button>
+              {status === "Your Turn" && onContinue && (
+                <Button size="sm" onClick={onContinue}>Continue</Button>
+              )}
+              
+              {status === "Waiting" && (
+                <Button size="sm" variant="outline" className="bg-neutral-100 text-neutral-500 cursor-not-allowed">
+                  {waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : 'Waiting'}
+                </Button>
+              )}
+              
+              {status === "Completed" && onPrint && (
+                <>
+                  <Button size="sm" variant="outline">Read</Button>
+                  <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={onPrint}>Print</Button>
+                </>
+              )}
+              
+              {variant === "explore" && onJoin && (
+                <Button 
+                  size="sm" 
+                  className={status === "Completed" ? "bg-accent hover:bg-accent/90" : "bg-secondary hover:bg-secondary/90"}
+                  onClick={onJoin}
+                >
+                  Join Story
+                </Button>
+              )}
+              
+              {/* Show invite button only to the creator and for non-completed stories */}
+              {variant !== "explore" && isCreator && !story.isComplete && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShowInviteModal(true)}
+                >
+                  Invite Collaborators
+                </Button>
+              )}
             </div>
-          )}
-          
-          {variant === "explore" && onJoin && (
-            <Button 
-              size="sm" 
-              className={status === "Completed" ? "bg-accent hover:bg-accent/90" : "bg-secondary hover:bg-secondary/90"}
-              onClick={onJoin}
-            >
-              Join Story
-            </Button>
-          )}
+          </div>
         </div>
       </div>
-    </div>
+      
+      {/* Invite collaborator modal */}
+      <InviteCollaboratorModal 
+        open={showInviteModal} 
+        onOpenChange={setShowInviteModal} 
+        storyId={story.id} 
+      />
+    </>
   );
 }

@@ -1,13 +1,16 @@
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { Strategy as LocalStrategy } from "passport-local";
+import * as bcrypt from "bcryptjs";
 
 import passport from "passport";
 import session from "express-session";
-import type { Express, RequestHandler } from "express";
+import type { Express, RequestHandler, Request } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { nanoid } from "nanoid";
 
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
@@ -85,6 +88,49 @@ export async function setupAuth(app: Express) {
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // Setup Local Strategy
+  passport.use(new LocalStrategy(
+    { usernameField: 'email' },
+    async (email, password, done) => {
+      try {
+        // Find user by email
+        const user = await storage.getUserByEmail(email);
+        
+        if (!user) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+        
+        // Check if password field exists (for users who registered with OAuth)
+        if (!user.password) {
+          return done(null, false, { message: 'Please log in with the method you used to create your account' });
+        }
+        
+        // Verify password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+          return done(null, false, { message: 'Invalid email or password' });
+        }
+        
+        // Create user session similar to other auth methods
+        const sessionUser = {
+          claims: {
+            sub: user.id,
+            email: user.email,
+            first_name: user.firstName,
+            last_name: user.lastName,
+            profile_image_url: user.profileImageUrl,
+          },
+          // No tokens for local users
+          expires_at: Math.floor(Date.now() / 1000) + 3600 * 24 * 7, // 1 week expiration
+        };
+        
+        return done(null, sessionUser);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  ));
 
   // Setup Replit Auth
   const config = await getOidcConfig();
@@ -178,15 +224,102 @@ export async function setupAuth(app: Express) {
       failureRedirect: "/api/login"
     })
   );
+  
+  // Local auth routes
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { email, username, password } = req.body;
+      
+      // Check if email already exists
+      const existingUserByEmail = await storage.getUserByEmail(email);
+      if (existingUserByEmail) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+      
+      // Check if username already exists
+      const existingUserByUsername = await storage.getUserByUsername(username);
+      if (existingUserByUsername) {
+        return res.status(400).json({ message: "Username already taken" });
+      }
+      
+      // Hash password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      
+      // Create user with unique ID
+      const userId = `local:${nanoid()}`;
+      const newUser = await storage.upsertUser({
+        id: userId,
+        email,
+        username,
+        password: hashedPassword,
+      });
+      
+      // Log user in automatically
+      req.login({
+        claims: {
+          sub: newUser.id,
+          email: newUser.email,
+          username: newUser.username,
+        },
+        expires_at: Math.floor(Date.now() / 1000) + 3600 * 24 * 7 // 1 week
+      }, (err) => {
+        if (err) {
+          return res.status(500).json({ message: "Error logging in after registration" });
+        }
+        return res.status(201).json({ 
+          message: "Registration successful",
+          user: {
+            id: newUser.id,
+            email: newUser.email,
+            username: newUser.username
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+  
+  app.post("/api/auth/login", (req, res, next) => {
+    passport.authenticate("local", (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        return res.status(401).json({ message: info.message || "Login failed" });
+      }
+      req.login(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        return res.json({ 
+          message: "Login successful",
+          user: {
+            id: user.claims.sub,
+            email: user.claims.email,
+            username: user.claims.username || user.claims.email.split('@')[0]
+          }
+        });
+      });
+    })(req, res, next);
+  });
 
   // Shared logout route
   app.get("/api/logout", (req, res) => {
     const user = req.user as any;
-    const isGoogleUser = user?.claims?.sub?.startsWith("google:");
+    let authType = "replit";
+    
+    if (user?.claims?.sub?.startsWith("google:")) {
+      authType = "google";
+    } else if (user?.claims?.sub?.startsWith("local:")) {
+      authType = "local";
+    }
     
     req.logout(() => {
-      if (isGoogleUser) {
-        // For Google users, just redirect to home
+      if (authType === "google" || authType === "local") {
+        // For Google and local users, just redirect to home
         res.redirect(`${req.protocol}://${req.hostname}`);
       } else {
         // For Replit users, use Replit's logout endpoint

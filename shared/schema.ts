@@ -29,6 +29,7 @@ export const sessions = pgTable(
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
+  password: varchar("password"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -188,6 +189,25 @@ export type StoryImage = typeof storyImages.$inferSelect;
 export const insertPrintOrderSchema = createInsertSchema(printOrders).omit({ id: true, orderId: true, createdAt: true });
 export type InsertPrintOrder = z.infer<typeof insertPrintOrderSchema>;
 export type PrintOrder = typeof printOrders.$inferSelect;
+
+// Auth schemas
+export const registerSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  username: z.string().min(3, "Username must be at least 3 characters").max(30, "Username must be less than 30 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string()
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"]
+});
+
+export const loginSchema = z.object({
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(1, "Password is required")
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
 
 // Extended schemas for validation
 export const storyFormSchema = insertStorySchema

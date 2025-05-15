@@ -44,6 +44,8 @@ export default function WritingModal({
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const SEGMENTS_PER_PAGE = 3;
 
   // Get story details
   const { data: story, isLoading: storyLoading } = useQuery({
@@ -129,8 +131,34 @@ export default function WritingModal({
   // Sort segments by turn number
   const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
   
-  // Get recent segments (up to 5 most recent)
-  const recentSegments = sortedSegments?.slice(-5);
+  // Calculate pagination info
+  const totalPages = sortedSegments?.length 
+    ? Math.ceil(sortedSegments.length / SEGMENTS_PER_PAGE) 
+    : 1;
+    
+  // Make sure current page is valid
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+  
+  // Get paginated segments
+  const startIndex = (currentPage - 1) * SEGMENTS_PER_PAGE;
+  const paginatedSegments = sortedSegments?.slice(startIndex, startIndex + SEGMENTS_PER_PAGE);
+  
+  // Navigate to next/previous page
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(current => current + 1);
+    }
+  };
+  
+  const goToPrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(current => current - 1);
+    }
+  };
 
   if (storyLoading || segmentsLoading || turnLoading) {
     return (
@@ -274,9 +302,52 @@ export default function WritingModal({
           
           {/* Story Content */}
           <div className="flex-grow overflow-y-auto p-6 bg-neutral-50">
-            <div className="max-w-3xl mx-auto space-y-8">
+            <div className="max-w-3xl mx-auto space-y-6">
+              {/* Story title and pagination */}
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium text-sm text-neutral-500">
+                  Story So Far ({sortedSegments?.length || 0} segments)
+                </h3>
+                
+                {/* Pagination controls */}
+                {sortedSegments && sortedSegments.length > SEGMENTS_PER_PAGE && (
+                  <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={goToPrevPage} 
+                      disabled={currentPage === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <span className="sr-only">Previous page</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    </Button>
+                    <span className="text-sm font-medium">
+                      {currentPage} / {totalPages}
+                    </span>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={goToNextPage} 
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <span className="sr-only">Next page</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                    </Button>
+                  </div>
+                )}
+              </div>
+              
+              {/* Display message if no segments yet */}
+              {(!sortedSegments || sortedSegments.length === 0) && (
+                <div className="py-6 text-center bg-white rounded-lg border border-dashed border-neutral-200">
+                  <p className="text-neutral-500">This will be the first contribution to this story!</p>
+                </div>
+              )}
+              
               {/* Previous Content */}
-              {recentSegments?.map((segment) => (
+              {paginatedSegments?.map((segment) => (
                 <div key={segment.id} className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
                   <div className="flex items-start space-x-3 mb-3">
                     <Avatar className="h-8 w-8">

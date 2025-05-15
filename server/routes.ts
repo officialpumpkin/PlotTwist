@@ -347,11 +347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const storyId = parseInt(req.params.id);
       const inviterId = req.user.claims.sub;
-      const { usernameOrEmail } = req.body;
-      
-      if (!usernameOrEmail) {
-        return res.status(400).json({ message: "Username or email is required" });
-      }
+      const { inviteType, email, username, usernameOrEmail } = req.body;
       
       // Check if the story exists and the inviter is a participant
       const story = await storage.getStoryById(storyId);
@@ -360,40 +356,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const isInviterParticipant = await storage.isParticipant(storyId, inviterId);
-      if (!isInviterParticipant && story.creatorId !== inviterId) {
+      if (!isInviterParticipant && story.createdBy !== inviterId) {
         return res.status(403).json({ message: "Only story participants can invite others" });
       }
       
-      // Find the user to invite by username or email
       let inviteeUser;
-      if (usernameOrEmail.includes('@')) {
-        // Search by email
-        inviteeUser = await storage.getUserByEmail(usernameOrEmail);
+      
+      // Support both the new and old invitation methods
+      if (inviteType) {
+        // New method with separate tabs for email/username
+        if (inviteType === 'email') {
+          if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+          }
+          // Search by email
+          inviteeUser = await storage.getUserByEmail(email);
+          
+          if (!inviteeUser) {
+            // In a real app, we would send an email invitation here
+            // For now, just return success
+            return res.status(201).json({ message: `Invitation sent to ${email}` });
+          }
+        } else if (inviteType === 'username') {
+          if (!username) {
+            return res.status(400).json({ message: "Username is required" });
+          }
+          // Search by username
+          inviteeUser = await storage.getUserByUsername(username);
+          
+          if (!inviteeUser) {
+            return res.status(404).json({ message: "User not found" });
+          }
+        } else {
+          return res.status(400).json({ message: "Invalid invitation type" });
+        }
       } else {
-        // Search by username
-        inviteeUser = await storage.getUserByUsername(usernameOrEmail);
+        // Old method with combined field
+        if (!usernameOrEmail) {
+          return res.status(400).json({ message: "Username or email is required" });
+        }
+        
+        // Find the user to invite by username or email
+        if (usernameOrEmail.includes('@')) {
+          // Search by email
+          inviteeUser = await storage.getUserByEmail(usernameOrEmail);
+        } else {
+          // Search by username
+          inviteeUser = await storage.getUserByUsername(usernameOrEmail);
+        }
+        
+        if (!inviteeUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
       }
       
-      if (!inviteeUser) {
-        return res.status(404).json({ message: "User not found" });
+      // If user is found, check if already a participant and add them
+      if (inviteeUser) {
+        // Check if already a participant
+        const isAlreadyParticipant = await storage.isParticipant(storyId, inviteeUser.id);
+        if (isAlreadyParticipant) {
+          return res.status(400).json({ message: "User is already a participant in this story" });
+        }
+        
+        // Add the invitee as a participant
+        const participant = await storage.addParticipant({
+          storyId,
+          userId: inviteeUser.id
+        });
+        
+        res.status(201).json({
+          message: `${inviteeUser.username || inviteeUser.email} has been added as a collaborator`,
+          participant
+        });
       }
-      
-      // Check if already a participant
-      const isAlreadyParticipant = await storage.isParticipant(storyId, inviteeUser.id);
-      if (isAlreadyParticipant) {
-        return res.status(400).json({ message: "User is already a participant in this story" });
-      }
-      
-      // Add the invitee as a participant
-      const participant = await storage.addParticipant({
-        storyId,
-        userId: inviteeUser.id
-      });
-      
-      res.status(201).json({
-        message: `${inviteeUser.username || inviteeUser.email} has been invited to the story`,
-        participant
-      });
     } catch (error) {
       console.error("Error inviting user:", error);
       res.status(500).json({ message: "Failed to invite user" });

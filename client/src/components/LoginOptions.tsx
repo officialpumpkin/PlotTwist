@@ -94,6 +94,19 @@ export default function LoginOptions() {
         </Button>
       </div>
       
+      <div className="mt-6 text-center">
+        <p className="text-sm mb-3">
+          Don't have an account yet?
+        </p>
+        <Button
+          onClick={handleRegister}
+          className="w-full"
+          variant="secondary"
+        >
+          Create Account
+        </Button>
+      </div>
+      
       <div className="mt-6 text-center text-xs text-neutral-500">
         By continuing, you agree to our Terms of Service and Privacy Policy.
       </div>

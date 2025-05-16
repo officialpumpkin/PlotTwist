@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import StoryCardSimple from "@/components/StoryCardSimple";
+import SimpleCard from "@/components/SimpleCard";
 import NewStoryModal from "@/components/NewStoryModal";
 import WritingModal from "@/components/WritingModal";
 import { Button } from "@/components/ui/button";
@@ -135,10 +135,16 @@ export default function Dashboard() {
         ) : myTurnStories?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {myTurnStories.map((story) => (
-              <StoryCardSimple
+              <SimpleCard
                 key={story.id}
-                story={story}
+                title={story.title}
+                description={story.description}
                 status="Your Turn"
+                stats={{
+                  contributors: 0,
+                  segments: story.segments || 0,
+                  maxSegments: story.maxSegments || 30
+                }}
                 onContinue={() => openWritingModal(story.id)}
               />
             ))}
@@ -203,11 +209,16 @@ export default function Dashboard() {
         ) : waitingStories?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {waitingStories.map((story) => (
-              <StoryCardSimple
+              <SimpleCard
                 key={story.id}
-                story={story}
+                title={story.title}
+                description={story.description}
                 status="Waiting"
-                waitingUserId={story.currentUserId}
+                stats={{
+                  contributors: 0,
+                  segments: story.segments || 0,
+                  maxSegments: story.maxSegments || 30
+                }}
               />
             ))}
           </div>

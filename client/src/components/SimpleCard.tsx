@@ -1,92 +1,75 @@
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
-import { 
-  UserIcon, 
-  TimeIcon
-} from "./assets/icons";
 
-interface StoryCardProps {
-  story: any;
+interface SimpleCardProps {
+  title: string;
+  description: string;
   status: "Your Turn" | "Waiting" | "Active" | "Completed";
-  variant?: "default" | "explore";
-  showProgress?: boolean;
-  waitingUserId?: string;
+  stats?: {
+    contributors?: number;
+    segments?: number;
+    maxSegments?: number;
+  };
   onContinue?: () => void;
-  onComplete?: () => void;
   onPrint?: () => void;
   onJoin?: () => void;
 }
 
-export default function StoryCard({
-  story,
+export default function SimpleCard({
+  title,
+  description,
   status,
-  variant = "default",
-  showProgress = false,
-  waitingUserId,
+  stats,
   onContinue,
-  onComplete,
   onPrint,
   onJoin
-}: StoryCardProps) {
-  const { user } = useAuth();
-  
-  // Fetch story participants
-  const { data: participants } = useQuery({
-    queryKey: [`/api/stories/${story.id}/participants`],
-    enabled: !!story?.id,
-  });
-  
-  // Fetch story segments
-  const { data: segments } = useQuery({
-    queryKey: [`/api/stories/${story.id}/segments`],
-    enabled: !!story?.id,
-  });
-  
-  // Calculate progress
-  const progress = segments ? 
-    Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
-  
+}: SimpleCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-neutral-200 hover:shadow-md transition-shadow">
-      {/* Color indicator */}
+      {/* Color bar */}
       <div className={cn(
         "h-2 rounded-t-xl",
         status === "Your Turn" && "bg-primary",
         status === "Waiting" && "bg-neutral-400",
-        status === "Active" && variant === "explore" && "bg-secondary",
+        status === "Active" && "bg-secondary",
         status === "Completed" && "bg-accent"
       )}></div>
       
+      {/* Card content */}
       <div className="p-4">
         {/* Header */}
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-bold text-lg">{story.title}</h3>
+          <h3 className="font-bold text-lg">{title}</h3>
           <span className={cn(
             "text-xs px-2 py-1 rounded-full whitespace-nowrap",
             status === "Your Turn" && "bg-primary/10 text-primary",
             status === "Waiting" && "bg-neutral-100 text-neutral-600",
-            status === "Active" && variant === "explore" && "bg-secondary/10 text-secondary",
-            status === "Completed" && "bg-accent/10 text-accent",
+            status === "Active" && "bg-secondary/10 text-secondary",
+            status === "Completed" && "bg-accent/10 text-accent"
           )}>
             {status}
           </span>
         </div>
         
         {/* Description */}
-        <p className="text-neutral-600 text-sm mb-3">{story.description}</p>
+        <p className="text-neutral-600 text-sm mb-4">{description}</p>
         
         {/* Stats */}
-        <div className="flex items-center text-xs text-neutral-500 my-3">
-          <UserIcon className="mr-1 w-3 h-3" />
-          <span>{participants?.length || 0} contributors</span>
-          <span className="mx-2">•</span>
-          <TimeIcon className="mr-1 w-3 h-3" />
-          <span>{segments ? `${segments.length}/${story.maxSegments || 30} segments` : 'New story'}</span>
-        </div>
+        {stats && (
+          <div className="flex items-center text-xs text-neutral-500 mt-3 mb-4">
+            {stats.contributors !== undefined && (
+              <>
+                <span>{stats.contributors} contributors</span>
+                <span className="mx-2">•</span>
+              </>
+            )}
+            {stats.segments !== undefined && stats.maxSegments !== undefined && (
+              <span>{stats.segments}/{stats.maxSegments} segments</span>
+            )}
+          </div>
+        )}
         
-        {/* Action Buttons */}
+        {/* Actions */}
         <div className="flex justify-end space-x-2 mt-4">
           {status === "Your Turn" && onContinue && (
             <Button size="sm" onClick={onContinue}>Continue</Button>
@@ -105,7 +88,7 @@ export default function StoryCard({
             </>
           )}
           
-          {variant === "explore" && onJoin && (
+          {onJoin && (
             <Button 
               size="sm" 
               className={status === "Completed" ? "bg-accent hover:bg-accent/90" : "bg-secondary hover:bg-secondary/90"}

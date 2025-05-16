@@ -40,10 +40,10 @@ export default function StoryCard({
     enabled: !!story?.id,
   });
   
-  // Fetch story segments
+  // Fetch story segments - always fetch for scrollbar feature
   const { data: segments } = useQuery({
     queryKey: [`/api/stories/${story.id}/segments`],
-    enabled: !!story?.id && showProgress,
+    enabled: !!story?.id,
   });
   
   // Find waiting user
@@ -80,8 +80,8 @@ export default function StoryCard({
         </div>
       </div>
       
-      {/* Scrollable content area */}
-      <div className="px-6 overflow-y-auto flex-1 custom-scrollbar">
+      {/* Scrollable content area with max height */}
+      <div className="px-6 overflow-y-auto flex-1 custom-scrollbar max-h-[250px]">
         {/* Initial description */}
         <div className="mb-4 pb-4 border-b border-neutral-100">
           <p className="text-neutral-600 text-sm">{story.description}</p>

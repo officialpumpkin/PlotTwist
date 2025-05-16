@@ -511,30 +511,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "It's not your turn" });
       }
       
-      // Validate segment data
-      const validatedData = storySegmentFormSchema.parse(req.body);
-      
-      // Check word count against story's word limit
-      if (validatedData.wordCount > story.wordLimit) {
+      let segment;
+      try {
+        // Extract just the content, wordCount, and characterCount from the request
+        const { content, wordCount, characterCount } = req.body;
+        
+        // We'll handle adding the storyId, userId, and turn manually
+        // so we don't need to validate against the full schema
+        if (!content || !wordCount || !characterCount) {
+          console.error("Missing required fields:", { content, wordCount, characterCount });
+          return res.status(400).json({ 
+            message: "Missing required fields"
+          });
+        }
+        
+        // Check word count against story's word limit
+        if (wordCount > story.wordLimit) {
+          return res.status(400).json({ 
+            message: `Exceeded word limit of ${story.wordLimit}` 
+          });
+        }
+        
+        // Check character count against story's character limit (if set)
+        if (story.characterLimit > 0 && characterCount > story.characterLimit) {
+          return res.status(400).json({
+            message: `Exceeded character limit of ${story.characterLimit}`
+          });
+        }
+        
+        // Add the segment
+        segment = await storage.addStorySegment({
+          content,
+          wordCount,
+          characterCount,
+          storyId,
+          userId,
+          turn: turn.currentTurn
+        });
+      } catch (error) {
+        console.error("Error adding segment:", error);
         return res.status(400).json({ 
-          message: `Exceeded word limit of ${story.wordLimit}` 
+          message: "Invalid segment data",
+          details: error instanceof Error ? error.message : String(error)
         });
       }
-      
-      // Check character count against story's character limit (if set)
-      if (story.characterLimit > 0 && validatedData.characterCount > story.characterLimit) {
-        return res.status(400).json({
-          message: `Exceeded character limit of ${story.characterLimit}`
-        });
-      }
-      
-      // Add the segment
-      const segment = await storage.addStorySegment({
-        ...validatedData,
-        storyId,
-        userId,
-        turn: turn.currentTurn
-      });
       
       // Get all participants to determine next turn
       const participants = await storage.getStoryParticipants(storyId);

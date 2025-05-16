@@ -80,20 +80,22 @@ export default function StoryCard({
         </div>
       </div>
       
-      {/* Main Content Area */}
-      <div className="p-6 overflow-y-auto" style={{maxHeight: "350px"}}>
+      {/* Story Content */}
+      <div className="p-6">
         {/* Description */}
         <div className="mb-4 pb-4 border-b border-neutral-100">
           <h4 className="text-sm font-semibold text-neutral-800 mb-2">Story Description:</h4>
           <p className="text-neutral-600 text-sm">{story.description}</p>
         </div>
         
-        {/* Segments */}
+        {/* Segments - Limited to 2 most recent */}
         {segments && segments.length > 0 && (
           <div>
-            <h4 className="text-sm font-semibold text-neutral-800 mb-3">Story Segments:</h4>
+            <h4 className="text-sm font-semibold text-neutral-800 mb-3">
+              Recent Segments {segments.length > 2 ? `(${segments.length} total)` : ''}:
+            </h4>
             <div className="space-y-3">
-              {segments.map((segment: any, index: number) => (
+              {segments.slice(-2).map((segment: any, index: number) => (
                 <div key={segment.id || index} className="bg-neutral-50 p-3 rounded-md mb-3">
                   <div className="flex items-start space-x-2 mb-1.5">
                     <Avatar className="w-5 h-5">

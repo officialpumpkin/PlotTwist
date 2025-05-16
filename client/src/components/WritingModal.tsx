@@ -79,10 +79,13 @@ export default function WritingModal({
   // Add segment mutation
   const addSegmentMutation = useMutation({
     mutationFn: async () => {
+      // We only need to send the content, wordCount and characterCount
+      // The server will handle adding storyId, userId and turn based on the URL params and auth
+      console.log("Submitting segment:", { content, wordCount, characterCount });
       return await apiRequest("POST", `/api/stories/${storyId}/segments`, {
         content,
         wordCount,
-        characterCount,
+        characterCount
       });
     },
     onSuccess: () => {
@@ -100,9 +103,10 @@ export default function WritingModal({
       onOpenChange(false);
     },
     onError: (error) => {
+      console.error("Error adding segment:", error);
       toast({
         title: "Error adding contribution",
-        description: error.message,
+        description: typeof error === 'string' ? error : error.message || "Something went wrong",
         variant: "destructive",
       });
     },

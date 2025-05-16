@@ -54,8 +54,8 @@ export default function StoryCard({
     Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow h-[500px] flex flex-col">
-      {/* Static header bar */}
+    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+      {/* Color indicator */}
       <div className={cn(
         "h-2",
         status === "Your Turn" && "bg-primary",
@@ -64,9 +64,9 @@ export default function StoryCard({
         status === "Completed" && "bg-accent"
       )}></div>
       
-      {/* Header content - always visible */}
-      <div className="px-6 pt-6 pb-3">
-        <div className="flex justify-between items-start mb-4">
+      {/* Header - Fixed */}
+      <div className="px-6 pt-4 pb-3 border-b border-neutral-100">
+        <div className="flex justify-between items-start">
           <h3 className="font-bold text-lg">{story.title}</h3>
           <span className={cn(
             "text-xs px-2 py-1 rounded-full whitespace-nowrap",
@@ -80,63 +80,64 @@ export default function StoryCard({
         </div>
       </div>
       
-      {/* Scrollable content area with flex-grow */}
-      <div className="px-6 py-4 overflow-y-auto flex-1 custom-scrollbar">
-        {/* Initial description */}
-        <div className="mb-4 pb-4 border-b border-neutral-100">
-          <h4 className="text-sm font-semibold text-neutral-800 mb-2">Story Description:</h4>
-          <p className="text-neutral-600 text-sm">{story.description}</p>
-        </div>
-        
-        {/* Story segments - always show if available */}
-        {segments && segments.length > 0 && (
-          <div className="space-y-4 mb-4">
-            <h4 className="text-sm font-medium text-neutral-800">Story Segments:</h4>
-            {segments.map((segment: any, index: number) => (
-              <div key={segment.id || index} className="bg-neutral-50 p-3 rounded-md">
-                <div className="flex items-start space-x-2 mb-2">
-                  <Avatar className="w-6 h-6">
-                    {segment.user?.profileImageUrl ? (
-                      <AvatarImage 
-                        src={segment.user.profileImageUrl} 
-                        alt={segment.user?.username || "User"} 
-                      />
-                    ) : (
-                      <AvatarFallback className="text-xs">
-                        {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div>
-                    <p className="text-xs font-medium text-neutral-700">
-                      {segment.user?.firstName || segment.user?.username || "Anonymous"}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      Turn {segment.turn || index + 1}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm text-neutral-700 font-serif">{segment.content}</p>
-              </div>
-            ))}
+      {/* Scrollable Area */}
+      <div className="h-[280px] overflow-y-auto border-b border-neutral-100" style={{scrollbarWidth: 'thin'}}>
+        <div className="px-6 py-4">
+          {/* Initial description */}
+          <div className="mb-4 pb-3 border-b border-neutral-100">
+            <h4 className="text-sm font-semibold text-neutral-800 mb-2">Story Description:</h4>
+            <p className="text-neutral-600 text-sm">{story.description}</p>
           </div>
-        )}
-        
-        {/* Stats */}
-        <div className="flex items-center text-sm text-neutral-500 pb-4">
-          <UserIcon className="mr-1" />
-          <span>{participants?.length || 0} contributors</span>
-          <span className="mx-2">•</span>
-          <TimeIcon className="mr-1" />
-          <span>
-            {segments ? `${segments.length}/${story.maxSegments || 30} segments` : 'Updated recently'}
-          </span>
+          
+          {/* Story Segments */}
+          {segments && segments.length > 0 && (
+            <div>
+              <h4 className="text-sm font-semibold text-neutral-800 mb-3">Story Segments:</h4>
+              {segments.map((segment: any, index: number) => (
+                <div key={segment.id || index} className="bg-neutral-50 p-3 rounded-md mb-3">
+                  <div className="flex items-start space-x-2 mb-2">
+                    <Avatar className="w-6 h-6">
+                      {segment.user?.profileImageUrl ? (
+                        <AvatarImage 
+                          src={segment.user.profileImageUrl} 
+                          alt={segment.user?.username || "User"} 
+                        />
+                      ) : (
+                        <AvatarFallback className="text-xs">
+                          {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <p className="text-xs font-medium text-neutral-700">
+                        {segment.user?.firstName || segment.user?.username || "Anonymous"}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        Turn {segment.turn || index + 1}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-neutral-700 font-serif">{segment.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Stats */}
+          <div className="flex items-center text-sm text-neutral-500 mt-3">
+            <UserIcon className="mr-1" />
+            <span>{participants?.length || 0} contributors</span>
+            <span className="mx-2">•</span>
+            <TimeIcon className="mr-1" />
+            <span>
+              {segments ? `${segments.length}/${story.maxSegments || 30} segments` : 'Updated recently'}
+            </span>
+          </div>
         </div>
-        
       </div>
       
-      {/* Fixed footer with progress and buttons */}
-      <div className="px-6 pt-4 pb-6 mt-auto border-t border-neutral-100">
+      {/* Footer - Fixed */}
+      <div className="px-6 py-4">
         {showProgress && (
           <div className="mb-4 bg-neutral-50 rounded-md p-3">
             <div className="flex items-center justify-between">

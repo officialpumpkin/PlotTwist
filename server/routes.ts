@@ -177,7 +177,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Story not found" });
       }
       
-      res.json(story);
+      // Get creator information
+      const creator = await storage.getUser(story.creatorId);
+      
+      // Return story with creator information
+      res.json({
+        ...story,
+        creator: creator ? {
+          id: creator.id,
+          username: creator.username,
+          firstName: creator.firstName,
+          lastName: creator.lastName,
+          profileImageUrl: creator.profileImageUrl
+        } : null
+      });
     } catch (error) {
       console.error("Error fetching story:", error);
       res.status(500).json({ message: "Failed to fetch story" });

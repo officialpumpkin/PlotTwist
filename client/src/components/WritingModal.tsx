@@ -340,32 +340,32 @@ export default function WritingModal({
               </div>
               
               {/* Initial prompt - always displayed on first page */}
-              {currentPage === 1 && (
+              {currentPage === 1 && story && (
                 <div className="bg-white rounded-lg shadow-sm p-5 border border-primary/20">
                   <div className="flex items-start space-x-3 mb-3">
                     <Avatar className="h-8 w-8">
-                      {story?.creator?.profileImageUrl ? (
+                      {story.creator?.profileImageUrl ? (
                         <AvatarImage 
                           src={story.creator.profileImageUrl} 
                           alt={story.creator.username || "Creator"} 
                         />
                       ) : (
                         <AvatarFallback>
-                          {story?.creator?.firstName?.[0] || story?.creator?.username?.[0] || "C"}
+                          {story.creator?.firstName?.[0] || story.creator?.username?.[0] || "C"}
                         </AvatarFallback>
                       )}
                     </Avatar>
                     <div>
                       <p className="font-medium text-neutral-800">
-                        {story?.creator?.firstName || story?.creator?.username || "Story Creator"}
+                        {story.creator?.firstName || story.creator?.username || "Story Creator"}
                       </p>
                       <p className="text-xs font-medium text-primary">
                         Initial Prompt
                       </p>
                     </div>
                   </div>
-                  <div className="prose prose-sm">
-                    <p>{story?.description}</p>
+                  <div className="prose prose-sm mt-3">
+                    <p>{story.description}</p>
                   </div>
                 </div>
               )}

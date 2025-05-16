@@ -54,7 +54,7 @@ export default function StoryCard({
     Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
+    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow h-[500px] flex flex-col">
       {/* Static header bar */}
       <div className={cn(
         "h-2",
@@ -80,25 +80,26 @@ export default function StoryCard({
         </div>
       </div>
       
-      {/* Scrollable content area with max height */}
-      <div className="px-6 overflow-y-auto flex-1 custom-scrollbar max-h-[250px]">
+      {/* Scrollable content area with flex-grow */}
+      <div className="px-6 py-4 overflow-y-auto flex-1 custom-scrollbar">
         {/* Initial description */}
         <div className="mb-4 pb-4 border-b border-neutral-100">
+          <h4 className="text-sm font-semibold text-neutral-800 mb-2">Story Description:</h4>
           <p className="text-neutral-600 text-sm">{story.description}</p>
         </div>
         
-        {/* Story segments - shown in scrollable area */}
-        {showProgress && segments && segments.length > 0 && (
+        {/* Story segments - always show if available */}
+        {segments && segments.length > 0 && (
           <div className="space-y-4 mb-4">
             <h4 className="text-sm font-medium text-neutral-800">Story Segments:</h4>
-            {segments.map((segment, index) => (
-              <div key={segment.id} className="bg-neutral-50 p-3 rounded-md">
+            {segments.map((segment: any, index: number) => (
+              <div key={segment.id || index} className="bg-neutral-50 p-3 rounded-md">
                 <div className="flex items-start space-x-2 mb-2">
                   <Avatar className="w-6 h-6">
                     {segment.user?.profileImageUrl ? (
                       <AvatarImage 
                         src={segment.user.profileImageUrl} 
-                        alt={segment.user.username || "User"} 
+                        alt={segment.user?.username || "User"} 
                       />
                     ) : (
                       <AvatarFallback className="text-xs">
@@ -111,7 +112,7 @@ export default function StoryCard({
                       {segment.user?.firstName || segment.user?.username || "Anonymous"}
                     </p>
                     <p className="text-xs text-neutral-500">
-                      Turn {segment.turn}
+                      Turn {segment.turn || index + 1}
                     </p>
                   </div>
                 </div>

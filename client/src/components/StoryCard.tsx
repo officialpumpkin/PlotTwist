@@ -54,7 +54,8 @@ export default function StoryCard({
     Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
+      {/* Static header bar */}
       <div className={cn(
         "h-2",
         status === "Your Turn" && "bg-primary",
@@ -62,11 +63,13 @@ export default function StoryCard({
         status === "Active" && variant === "explore" && "bg-secondary",
         status === "Completed" && "bg-accent"
       )}></div>
-      <div className="p-6">
+      
+      {/* Header content - always visible */}
+      <div className="px-6 pt-6 pb-3">
         <div className="flex justify-between items-start mb-4">
           <h3 className="font-bold text-lg">{story.title}</h3>
           <span className={cn(
-            "text-xs px-2 py-1 rounded-full",
+            "text-xs px-2 py-1 rounded-full whitespace-nowrap",
             status === "Your Turn" && "bg-primary/10 text-primary",
             status === "Waiting" && "bg-neutral-100 text-neutral-600",
             status === "Active" && variant === "explore" && "bg-secondary/10 text-secondary",
@@ -75,10 +78,51 @@ export default function StoryCard({
             {status === "Waiting" && waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : status}
           </span>
         </div>
+      </div>
+      
+      {/* Scrollable content area */}
+      <div className="px-6 overflow-y-auto flex-1 custom-scrollbar">
+        {/* Initial description */}
+        <div className="mb-4 pb-4 border-b border-neutral-100">
+          <p className="text-neutral-600 text-sm">{story.description}</p>
+        </div>
         
-        <p className="text-neutral-600 text-sm line-clamp-3">{story.description}</p>
+        {/* Story segments - shown in scrollable area */}
+        {showProgress && segments && segments.length > 0 && (
+          <div className="space-y-4 mb-4">
+            <h4 className="text-sm font-medium text-neutral-800">Story Segments:</h4>
+            {segments.map((segment, index) => (
+              <div key={segment.id} className="bg-neutral-50 p-3 rounded-md">
+                <div className="flex items-start space-x-2 mb-2">
+                  <Avatar className="w-6 h-6">
+                    {segment.user?.profileImageUrl ? (
+                      <AvatarImage 
+                        src={segment.user.profileImageUrl} 
+                        alt={segment.user.username || "User"} 
+                      />
+                    ) : (
+                      <AvatarFallback className="text-xs">
+                        {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <p className="text-xs font-medium text-neutral-700">
+                      {segment.user?.firstName || segment.user?.username || "Anonymous"}
+                    </p>
+                    <p className="text-xs text-neutral-500">
+                      Turn {segment.turn}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm text-neutral-700 font-serif">{segment.content}</p>
+              </div>
+            ))}
+          </div>
+        )}
         
-        <div className="flex items-center mt-4 text-sm text-neutral-500">
+        {/* Stats */}
+        <div className="flex items-center text-sm text-neutral-500 pb-4">
           <UserIcon className="mr-1" />
           <span>{participants?.length || 0} contributors</span>
           <span className="mx-2">•</span>
@@ -88,8 +132,12 @@ export default function StoryCard({
           </span>
         </div>
         
+      </div>
+      
+      {/* Fixed footer with progress and buttons */}
+      <div className="px-6 pt-4 pb-6 mt-auto border-t border-neutral-100">
         {showProgress && (
-          <div className="mt-4 bg-neutral-50 rounded-md p-3">
+          <div className="mb-4 bg-neutral-50 rounded-md p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className={cn(
@@ -114,7 +162,7 @@ export default function StoryCard({
           </div>
         )}
         
-        <div className="flex items-center justify-between mt-5">
+        <div className="flex items-center justify-between">
           <div className="flex -space-x-2">
             {participants?.slice(0, 3).map((participant) => (
               <Avatar key={participant.userId} className="w-7 h-7 border-2 border-white">

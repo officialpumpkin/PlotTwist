@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import StoryCard from "@/components/StoryCard";
+import StoryCardSimple from "@/components/StoryCardSimple";
 import NewStoryModal from "@/components/NewStoryModal";
 import WritingModal from "@/components/WritingModal";
 import { Button } from "@/components/ui/button";
@@ -135,7 +135,7 @@ export default function Dashboard() {
         ) : myTurnStories?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {myTurnStories.map((story) => (
-              <StoryCard
+              <StoryCardSimple
                 key={story.id}
                 story={story}
                 status="Your Turn"

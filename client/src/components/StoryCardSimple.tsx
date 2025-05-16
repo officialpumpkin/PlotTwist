@@ -5,8 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   UserIcon, 
-  TimeIcon,
-  ArrowRightIcon
+  TimeIcon
 } from "./assets/icons";
 
 interface StoryCardProps {
@@ -21,7 +20,7 @@ interface StoryCardProps {
   onJoin?: () => void;
 }
 
-export default function StoryCard({
+export default function StoryCardSimple({
   story,
   status,
   variant = "default",
@@ -47,7 +46,7 @@ export default function StoryCard({
   });
   
   // Find waiting user
-  const waitingUser = participants?.find(p => p.userId === waitingUserId)?.user;
+  const waitingUser = participants?.find((p: any) => p.userId === waitingUserId)?.user;
   
   // Calculate progress
   const progress = segments ? 
@@ -82,10 +81,10 @@ export default function StoryCard({
         {/* Description */}
         <p className="text-neutral-600 text-sm mb-4">{story.description}</p>
 
-        {/* Only show 1-2 most recent segments */}
+        {/* Only show up to 2 most recent segments */}
         {segments && segments.length > 0 && (
           <div className="my-3">
-            {segments.slice(-2).map((segment: any, index: number) => (
+            {segments.slice(-2).map((segment: any) => (
               <div key={segment.id} className="bg-neutral-50 p-3 rounded-md mb-2 text-sm">
                 <div className="flex items-center gap-2 mb-1">
                   <Avatar className="w-5 h-5">

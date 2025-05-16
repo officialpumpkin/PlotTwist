@@ -203,7 +203,7 @@ export default function Dashboard() {
         ) : waitingStories?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {waitingStories.map((story) => (
-              <StoryCard
+              <StoryCardSimple
                 key={story.id}
                 story={story}
                 status="Waiting"

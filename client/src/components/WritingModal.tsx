@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
+import { cn } from "@/lib/utils";
 
 import {
   Dialog,
@@ -411,7 +412,7 @@ export default function WritingModal({
                         </div>
                       </div>
                       <div className="font-serif text-neutral-700 leading-relaxed">
-                        <p>{segment.content}</p>
+                        <div dangerouslySetInnerHTML={{ __html: segment.content }} />
                       </div>
                     </div>
                   </div>
@@ -510,21 +511,24 @@ export default function WritingModal({
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-neutral-700 h-8 w-8 p-0"
+                        className={cn("text-neutral-700 h-8 w-8 p-0", isBold && "bg-primary-50 text-primary border-primary/30")}
+                        onClick={() => applyFormatting('bold')}
                       >
                         <BoldIcon className="h-3.5 w-3.5" />
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-neutral-700 h-8 w-8 p-0"
+                        className={cn("text-neutral-700 h-8 w-8 p-0", isItalic && "bg-primary-50 text-primary border-primary/30")}
+                        onClick={() => applyFormatting('italic')}
                       >
                         <ItalicIcon className="h-3.5 w-3.5" />
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="text-neutral-700 h-8 w-8 p-0"
+                        className={cn("text-neutral-700 h-8 w-8 p-0", isUnderline && "bg-primary-50 text-primary border-primary/30")}
+                        onClick={() => applyFormatting('underline')}
                       >
                         <UnderlineIcon className="h-3.5 w-3.5" />
                       </Button>

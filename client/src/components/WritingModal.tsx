@@ -181,7 +181,7 @@ export default function WritingModal({
         {/* Split into 3 fixed-height sections: header, scrollable content, footer */}
         <div className="flex flex-col h-full">
           {/* Fixed Story Header - absolute height */}
-          <div className="p-3 border-b border-neutral-200 shrink-0 bg-white z-10 h-[80px]">
+          <div className="p-3 border-b border-neutral-200 shrink-0 bg-white z-10 h-[100px]">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-lg font-bold text-neutral-900">{story?.title}</h2>
@@ -346,7 +346,7 @@ export default function WritingModal({
           
           {/* Fixed input area at the bottom */}
           {turn?.currentUserId === user?.id && (
-            <div className="border-t border-neutral-200 bg-white shrink-0 p-3 pb-4 h-[220px]">
+            <div className="border-t border-neutral-200 bg-white shrink-0 p-3 pb-6 h-[230px]">
               <div className="bg-white rounded-lg shadow-sm p-3 border-2 border-primary h-full flex flex-col">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-7 w-7">

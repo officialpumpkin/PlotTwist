@@ -165,7 +165,7 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 max-h-[80vh] flex flex-col overflow-hidden">
+      <DialogContent className="sm:max-w-3xl p-0 max-h-[90vh] flex flex-col overflow-hidden">
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 
@@ -177,9 +177,10 @@ export default function WritingModal({
           </Button>
         </div>
         
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Story Header */}
-          <div className="p-4 border-b border-neutral-200 shrink-0">
+        {/* Split into separate containers for better scroll management */}
+        <div className="flex flex-col h-full">
+          {/* Fixed Story Header */}
+          <div className="p-3 border-b border-neutral-200 shrink-0">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-bold text-neutral-900">{story?.title}</h3>
@@ -192,7 +193,7 @@ export default function WritingModal({
               </span>
             </div>
             
-            <div className="flex flex-wrap items-center gap-4 mt-3">
+            <div className="flex flex-wrap items-center gap-3 mt-2">
               <div className="flex items-center text-sm text-neutral-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -202,7 +203,7 @@ export default function WritingModal({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4 w-4 mr-1.5"
+                  className="h-4 w-4 mr-1"
                 >
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
@@ -220,7 +221,7 @@ export default function WritingModal({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4 w-4 mr-1.5"
+                  className="h-4 w-4 mr-1"
                 >
                   <path d="M4 7V4h16v3" />
                   <path d="M9 20h6" />
@@ -238,7 +239,7 @@ export default function WritingModal({
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4 mr-1.5"
+                    className="h-4 w-4 mr-1"
                   >
                     <path d="M18 6H6L2 12l4 6h12l4-6-4-6z" />
                     <path d="M12 10v4" />
@@ -247,34 +248,12 @@ export default function WritingModal({
                   <span>{story?.characterLimit} character limit</span>
                 </div>
               )}
-              <div className="flex items-center text-sm text-neutral-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 mr-1.5"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                <span>
-                  {new Date(story?.createdAt).toLocaleDateString(undefined, { 
-                    year: 'numeric', 
-                    month: 'short', 
-                    day: 'numeric' 
-                  })}
-                </span>
-              </div>
             </div>
           </div>
           
-          {/* Story Content - Scrollable area */}
+          {/* Scrollable Story Content */}
           <div className="flex-grow overflow-y-auto p-4 bg-neutral-50">
-            <div className="max-w-3xl mx-auto space-y-6">
+            <div className="max-w-3xl mx-auto space-y-5">
               {/* Story Title and First Turn */}
               {recentSegments?.length === 0 && (
                 <div className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
@@ -292,10 +271,10 @@ export default function WritingModal({
                   <div key={segment.id} className="relative">
                     {/* Vertical connecting line between segments */}
                     {index < (recentSegments?.length || 0) - 1 && (
-                      <div className="absolute left-4 top-16 w-0.5 bg-neutral-200 h-8 z-0"></div>
+                      <div className="absolute left-4 top-16 w-0.5 bg-neutral-200 h-6 z-0"></div>
                     )}
                     
-                    <div className={`bg-white rounded-lg shadow-sm p-5 border mb-8 relative z-10 ${
+                    <div className={`bg-white rounded-lg shadow-sm p-4 border mb-6 relative z-10 ${
                       segment.userId === user?.id 
                         ? "border-primary/30 bg-primary/5" 
                         : "border-neutral-200"
@@ -335,158 +314,176 @@ export default function WritingModal({
                   </div>
                 ))}
               </div>
-              
-              {/* Current Turn Input */}
-              {turn?.currentUserId === user?.id && (
-                <div className="bg-white rounded-lg shadow-sm p-5 border-2 border-primary">
-                  <div className="flex items-start space-x-3 mb-4">
-                    <Avatar className="h-8 w-8">
-                      {user?.profileImageUrl ? (
-                        <AvatarImage 
-                          src={user.profileImageUrl} 
-                          alt={user.username || "User"} 
-                        />
-                      ) : (
-                        <AvatarFallback className="bg-primary text-white">
-                          {user?.firstName?.[0] || user?.username?.[0] || "U"}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-neutral-800">Your Turn</p>
-                      <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <textarea 
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="w-full h-40 p-4 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
-                        placeholder="Continue the story... Let your imagination flow!"
-                      ></textarea>
-                      
-                      <div className="absolute bottom-4 right-4 bg-white/90 rounded-md px-3 py-2 shadow-sm border border-neutral-100 space-y-1 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          <span className="text-xs text-neutral-500">Words:</span>
-                          <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
-                            {wordCount}
-                          </span>
-                          <span className="text-xs text-neutral-500">/{story?.wordLimit}</span>
-                        </div>
-                        
-                        {story?.characterLimit > 0 && (
-                          <div className="flex items-center justify-end space-x-1">
-                            <span className="text-xs text-neutral-500">Chars:</span>
-                            <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-error" : "text-primary"}`}>
-                              {characterCount}
-                            </span>
-                            <span className="text-xs text-neutral-500">/{story?.characterLimit}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
-                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                          <BoldIcon />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                          <ItalicIcon />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                          <UnderlineIcon />
-                        </Button>
-                        <div className="w-px h-6 bg-neutral-200"></div>
-                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                          <EmojiIcon />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex space-x-3">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-neutral-700 flex items-center gap-1"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                            <polyline points="7 3 7 8 15 8"></polyline>
-                          </svg>
-                          Save Draft
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className="gap-1 relative overflow-hidden transition-all duration-300"
-                          disabled={!isValidContribution || addSegmentMutation.isPending}
-                          onClick={() => addSegmentMutation.mutate()}
-                        >
-                          {addSegmentMutation.isPending ? (
-                            <>
-                              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Submitting...
-                            </>
-                          ) : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <polyline points="19 12 12 19 5 12"></polyline>
-                              </svg>
-                              Submit Contribution
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
           
+          {/* Fixed input area at the bottom */}
+          {turn?.currentUserId === user?.id && (
+            <div className="p-4 border-t border-neutral-200 bg-white shrink-0">
+              <div className="bg-white rounded-lg shadow-sm p-4 border-2 border-primary">
+                <div className="flex items-start space-x-3 mb-3">
+                  <Avatar className="h-8 w-8">
+                    {user?.profileImageUrl ? (
+                      <AvatarImage 
+                        src={user.profileImageUrl} 
+                        alt={user.username || "User"} 
+                      />
+                    ) : (
+                      <AvatarFallback className="bg-primary text-white">
+                        {user?.firstName?.[0] || user?.username?.[0] || "U"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-neutral-800">Your Turn</p>
+                    <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="relative">
+                    <textarea 
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      className="w-full h-32 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
+                      placeholder="Continue the story... Let your imagination flow!"
+                    ></textarea>
+                    
+                    <div className="absolute bottom-3 right-3 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
+                      <div className="flex items-center justify-end space-x-1">
+                        <span className="text-xs text-neutral-500">Words:</span>
+                        <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
+                          {wordCount}
+                        </span>
+                        <span className="text-xs text-neutral-500">/{story?.wordLimit}</span>
+                      </div>
+                      
+                      {story?.characterLimit > 0 && (
+                        <div className="flex items-center justify-end space-x-1">
+                          <span className="text-xs text-neutral-500">Chars:</span>
+                          <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-error" : "text-primary"}`}>
+                            {characterCount}
+                          </span>
+                          <span className="text-xs text-neutral-500">/{story?.characterLimit}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between flex-wrap gap-2">
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-neutral-700 h-8 w-8 p-0"
+                      >
+                        <BoldIcon className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-neutral-700 h-8 w-8 p-0"
+                      >
+                        <ItalicIcon className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-neutral-700 h-8 w-8 p-0"
+                      >
+                        <UnderlineIcon className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-neutral-700 h-8 w-8 p-0"
+                      >
+                        <EmojiIcon className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-neutral-700 flex items-center gap-1 h-8"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                          <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Draft
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="gap-1 h-8"
+                        disabled={!isValidContribution || addSegmentMutation.isPending}
+                        onClick={() => addSegmentMutation.mutate()}
+                      >
+                        {addSegmentMutation.isPending ? (
+                          <>
+                            <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Submitting...
+                          </>
+                        ) : (
+                          <>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="5" x2="12" y2="19"></line>
+                              <polyline points="19 12 12 19 5 12"></polyline>
+                            </svg>
+                            Submit
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Story Progress */}
-          <div className="p-4 border-t border-neutral-200 bg-white">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="p-3 border-t border-neutral-200 bg-white shrink-0">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center">
-                <span className="text-sm text-neutral-600 mr-3">Progress:</span>
-                <div className="w-32 sm:w-48 bg-neutral-200 rounded-full h-2">
+                <span className="text-sm text-neutral-600 mr-2">Progress:</span>
+                <div className="w-28 sm:w-40 bg-neutral-200 rounded-full h-2">
                   <div 
                     className="bg-primary h-2 rounded-full" 
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
-                <span className="ml-3 text-sm font-medium text-neutral-700">
+                <span className="ml-2 text-sm font-medium text-neutral-700">
                   {segments?.length || 0}/{story?.maxSegments || 30}
                 </span>
               </div>
               
-              <div className="flex space-x-2">
-                {/* Show invite button only for the creator of the story */}
+              <div className="flex flex-wrap items-center gap-2">
                 {story?.creatorId === user?.id && !story?.isComplete && (
                   <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-sm text-neutral-600 hover:text-neutral-800"
+                    variant="outline" 
+                    size="sm"
+                    className="text-xs sm:text-sm h-8"
                     onClick={() => setShowInviteModal(true)}
                   >
-                    <UserIcon className="mr-1" /> Invite Collaborators
+                    <UserIcon className="h-3 w-3 mr-1" />
+                    Invite Collaborator
                   </Button>
                 )}
                 
-                {onComplete && (
+                {story?.creatorId === user?.id && progress >= 80 && onComplete && (
                   <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-sm text-neutral-600 hover:text-neutral-800"
+                    variant="outline" 
+                    size="sm"
+                    className="text-xs sm:text-sm h-8 text-amber-600 border-amber-300 hover:bg-amber-50"
                     onClick={onComplete}
                   >
-                    <FlagIcon className="mr-1" /> Mark as Complete
+                    <FlagIcon className="h-3 w-3 mr-1" />
+                    Complete Story
                   </Button>
                 )}
               </div>
@@ -498,8 +495,8 @@ export default function WritingModal({
       {/* Invite collaborator modal */}
       <InviteCollaboratorModal 
         open={showInviteModal} 
-        onOpenChange={setShowInviteModal} 
-        storyId={storyId} 
+        onOpenChange={setShowInviteModal}
+        storyId={storyId}
       />
     </Dialog>
   );

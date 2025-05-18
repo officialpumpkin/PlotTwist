@@ -232,7 +232,7 @@ export const serverStorySchema = storyFormSchema.extend({
   creatorId: z.string().min(1),
 });
 
-export const storySegmentFormSchema = insertStorySegmentSchema.extend({
+export const storySegmentFormSchema = z.object({
   content: z.string().min(1).max(5000),
   wordCount: z.preprocess(
     (val) => parseInt(String(val), 10),

@@ -47,7 +47,7 @@ export default function WritingModal({
   const [showInviteModal, setShowInviteModal] = useState(false);
   
   // Rich text editing state
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
@@ -131,68 +131,51 @@ export default function WritingModal({
   
   // Rich text editing functions
   const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
-    if (!textareaRef.current) return;
+    if (!editorRef.current) return;
     
-    const textarea = textareaRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end);
+    const editorDiv = editorRef.current;
     
-    if (start === end) {
-      // No text selected, toggle the formatting state for next input
-      switch (format) {
-        case 'bold':
-          setIsBold(!isBold);
-          break;
-        case 'italic':
-          setIsItalic(!isItalic);
-          break;
-        case 'underline':
-          setIsUnderline(!isUnderline);
-          break;
-      }
-      return;
-    }
+    // Get selection
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
     
-    let formattedText = '';
-    let newContent = '';
+    // Get the current range
+    const range = selection.getRangeAt(0);
+    
+    // Check if the selection is within our editor
+    if (!editorDiv.contains(range.commonAncestorContainer)) return;
+    
+    // Save selection state
+    const savedSelection = {
+      startContainer: range.startContainer,
+      startOffset: range.startOffset,
+      endContainer: range.endContainer,
+      endOffset: range.endOffset
+    };
+    
+    // Apply formatting using document.execCommand (for simplicity)
+    document.execCommand('styleWithCSS', false, 'true');
     
     switch (format) {
       case 'bold':
-        // Check if already bold
-        if (selectedText.startsWith('<strong>') && selectedText.endsWith('</strong>')) {
-          formattedText = selectedText.substring(8, selectedText.length - 9);
-        } else {
-          formattedText = `<strong>${selectedText}</strong>`;
-        }
+        document.execCommand('bold', false);
+        setIsBold(!isBold);
         break;
       case 'italic':
-        // Check if already italic
-        if (selectedText.startsWith('<em>') && selectedText.endsWith('</em>')) {
-          formattedText = selectedText.substring(4, selectedText.length - 5);
-        } else {
-          formattedText = `<em>${selectedText}</em>`;
-        }
+        document.execCommand('italic', false);
+        setIsItalic(!isItalic);
         break;
       case 'underline':
-        // Check if already underlined
-        if (selectedText.startsWith('<u>') && selectedText.endsWith('</u>')) {
-          formattedText = selectedText.substring(3, selectedText.length - 4);
-        } else {
-          formattedText = `<u>${selectedText}</u>`;
-        }
+        document.execCommand('underline', false);
+        setIsUnderline(!isUnderline);
         break;
     }
     
-    newContent = content.substring(0, start) + formattedText + content.substring(end);
-    setContent(newContent);
+    // Update content state
+    setContent(editorDiv.innerHTML);
     
-    // Set selection position after applying formatting
-    setTimeout(() => {
-      textarea.focus();
-      const newPosition = start + formattedText.length;
-      textarea.setSelectionRange(newPosition, newPosition);
-    }, 0);
+    // Focus the editor
+    editorDiv.focus();
   };
 
   // Check if the word and character counts are valid
@@ -449,40 +432,33 @@ export default function WritingModal({
 
 
                   <div className="relative flex-grow">
-                    {/* Hidden textarea for editing */}
-                    <textarea 
-                      ref={textareaRef}
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="sr-only" 
-                      placeholder="Continue the story... Let your imagination flow!"
-                    ></textarea>
-                    
                     {/* Visual editor with rich text preview */}
                     <div 
+                      ref={editorRef}
                       contentEditable
+                      suppressContentEditableWarning
                       className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm overflow-auto"
-                      dangerouslySetInnerHTML={{ __html: content || '<p class="text-neutral-400">Continue the story... Let your imagination flow!</p>' }}
+                      dangerouslySetInnerHTML={
+                        content ? 
+                          { __html: content } : 
+                          { __html: '<span class="text-neutral-400">Continue the story... Let your imagination flow!</span>' }
+                      }
                       onInput={(e) => {
                         const html = e.currentTarget.innerHTML;
-                        // If it's just the placeholder, set content to empty
                         if (html.includes('Continue the story... Let your imagination flow!')) {
                           setContent('');
-                          e.currentTarget.innerHTML = '';
                         } else {
                           setContent(html);
                         }
                       }}
-                      onBlur={(e) => {
-                        // If content is empty, show placeholder
-                        if (!content.trim()) {
-                          e.currentTarget.innerHTML = '<p class="text-neutral-400">Continue the story... Let your imagination flow!</p>';
-                        }
-                      }}
                       onFocus={(e) => {
-                        // Clear placeholder on focus if that's all that's there
                         if (e.currentTarget.innerHTML.includes('Continue the story... Let your imagination flow!')) {
                           e.currentTarget.innerHTML = '';
+                        }
+                      }}
+                      onBlur={(e) => {
+                        if (!e.currentTarget.innerHTML.trim()) {
+                          e.currentTarget.innerHTML = '<span class="text-neutral-400">Continue the story... Let your imagination flow!</span>';
                         }
                       }}
                     ></div>

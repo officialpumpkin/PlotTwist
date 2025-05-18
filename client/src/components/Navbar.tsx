@@ -20,7 +20,7 @@ export default function Navbar() {
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
           <Link href="/dashboard">
-            <a className="text-xl font-bold text-primary">PlotTwist</a>
+            <a className="text-xl font-bold text-primary">StoryWeave</a>
           </Link>
         </div>
         

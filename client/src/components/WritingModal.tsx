@@ -38,130 +38,99 @@ export default function WritingModal({
   storyId,
   onComplete 
 }: WritingModalProps) {
-  const { toast } = useToast();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const SEGMENTS_PER_PAGE = 3;
-  
-  // Query for story details
-  const { 
-    data: story,
-    isLoading: storyLoading 
-  } = useQuery({
-    queryKey: ['/api/stories', storyId],
+
+  // Get story details
+  const { data: story, isLoading: storyLoading } = useQuery({
+    queryKey: [`/api/stories/${storyId}`],
     enabled: open,
   });
-  
-  // Query for story segments
-  const { 
-    data: segments,
-    isLoading: segmentsLoading 
-  } = useQuery({
-    queryKey: ['/api/stories', storyId, 'segments'],
+
+  // Get story segments
+  const { data: segments, isLoading: segmentsLoading } = useQuery({
+    queryKey: [`/api/stories/${storyId}/segments`],
     enabled: open,
   });
-  
-  // Query for story turn
-  const { 
-    data: turn,
-    isLoading: turnLoading 
-  } = useQuery({
-    queryKey: ['/api/stories', storyId, 'turn'],
+
+  // Get story turn information
+  const { data: turn, isLoading: turnLoading } = useQuery({
+    queryKey: [`/api/stories/${storyId}/turn`],
     enabled: open,
   });
-  
-  // Query for story participants
-  const { 
-    data: participants
-  } = useQuery({
-    queryKey: ['/api/stories', storyId, 'participants'],
+
+  // Get participants
+  const { data: participants } = useQuery({
+    queryKey: [`/api/stories/${storyId}/participants`],
     enabled: open,
   });
-  
-  // Mutation for adding a new segment
+
+  // Calculate the progress
+  const progress = story && segments 
+    ? Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) 
+    : 0;
+
+  // Add segment mutation
   const addSegmentMutation = useMutation({
-    mutationFn: () => {
-      return apiRequest(`/api/stories/${storyId}/segments`, {
-        method: 'POST',
-        body: JSON.stringify({ content }),
+    mutationFn: async () => {
+      return await apiRequest("POST", `/api/stories/${storyId}/segments`, {
+        content,
+        wordCount,
+        characterCount,
       });
     },
     onSuccess: () => {
-      // Clear the input
-      setContent("");
-      
-      // Show toast
       toast({
-        title: "Contribution submitted!",
-        description: "Your part of the story has been saved.",
+        title: "Contribution added!",
+        description: "Your contribution has been successfully added to the story.",
       });
-      
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['/api/stories', storyId, 'segments'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/stories', storyId, 'turn'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
-      
-      // Check if story is complete
-      if (
-        segments?.length + 1 >= story?.maxSegments || 
-        (turn?.currentTurn && turn.currentTurn >= story?.maxSegments)
-      ) {
-        onComplete?.();
-      }
-      
-      // Close the modal
+      setContent("");
+      setWordCount(0);
+      setCharacterCount(0);
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/turn`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/waiting-turn"] });
       onOpenChange(false);
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to submit your contribution.",
+        title: "Error adding contribution",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
-  
-  // Update word and character count
+
+  // Update word and character count when content changes
   useEffect(() => {
-    if (content) {
-      const words = content.trim().split(/\s+/);
-      setWordCount(words.length);
-      setCharacterCount(content.length);
-    } else {
+    if (content.trim() === '') {
       setWordCount(0);
       setCharacterCount(0);
+    } else {
+      setWordCount(content.trim().split(/\s+/).length);
+      setCharacterCount(content.length);
     }
   }, [content]);
-  
-  // Check if contribution meets requirements
-  const isValidContribution = content.trim().length > 0 && 
-    (wordCount <= (story?.wordLimit || 100)) && 
-    (story?.characterLimit ? characterCount <= story.characterLimit : true);
-  
+
+  // Check if the word and character counts are valid
+  const isValidWordCount = wordCount > 0 && 
+    story && wordCount <= (story.wordLimit || 100);
+    
+  const isValidCharacterCount = characterCount > 0 && 
+    (!story?.characterLimit || characterCount <= story.characterLimit);
+    
+  const isValidContribution = isValidWordCount && isValidCharacterCount;
+
   // Sort segments by turn number
   const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
-  const totalPages = sortedSegments ? Math.ceil(sortedSegments.length / SEGMENTS_PER_PAGE) : 1;
   
-  // Get paginated segments
-  const startIndex = (currentPage - 1) * SEGMENTS_PER_PAGE;
-  const paginatedSegments = sortedSegments?.slice(startIndex, startIndex + SEGMENTS_PER_PAGE);
-  
-  // Navigate to next/previous page
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(current => current + 1);
-    }
-  };
-  
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(current => current - 1);
-    }
-  };
+  // Get recent segments (up to 5 most recent)
+  const recentSegments = sortedSegments?.slice(-5);
 
   if (storyLoading || segmentsLoading || turnLoading) {
     return (
@@ -196,9 +165,7 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 h-[90vh] max-h-[36rem] flex flex-col" aria-labelledby="writing-modal-title">
-        <h2 id="writing-modal-title" className="sr-only">Writing Story</h2>
-        {/* Close button */}
+      <DialogContent className="sm:max-w-3xl p-0 h-[36rem]">
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 
@@ -210,58 +177,23 @@ export default function WritingModal({
           </Button>
         </div>
         
-        {/* Story header information - Fixed at top */}
-        <div className="flex-shrink-0 p-4 sm:p-6 border-b border-neutral-200">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-neutral-900">{story?.title}</h3>
-              <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-                Turn {turn?.currentTurn} of {story?.maxSegments} • {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
-              </p>
+        <div className="flex flex-col h-full">
+          {/* Story Header */}
+          <div className="p-6 border-b border-neutral-200">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg font-bold text-neutral-900">{story?.title}</h3>
+                <p className="text-sm text-neutral-500 mt-1">
+                  Turn {turn?.currentTurn} of {story?.maxSegments} • {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
+                </p>
+              </div>
+              <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+                {story?.genre}
+              </span>
             </div>
-            <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
-              {story?.genre}
-            </span>
-          </div>
-          
-          <div className="flex flex-wrap gap-3 sm:gap-6 mt-4">
-            <div className="flex items-center text-xs sm:text-sm text-neutral-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
-              >
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              <span>{participants?.length || 0} contributors</span>
-            </div>
-            <div className="flex items-center text-xs sm:text-sm text-neutral-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
-              >
-                <path d="M4 7V4h16v3" />
-                <path d="M9 20h6" />
-                <path d="M12 4v16" />
-              </svg>
-              <span>{story?.wordLimit} words</span>
-            </div>
-            {story?.characterLimit > 0 && (
-              <div className="flex items-center text-xs sm:text-sm text-neutral-600">
+            
+            <div className="flex items-center space-x-6 mt-4">
+              <div className="flex items-center text-sm text-neutral-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -270,248 +202,248 @@ export default function WritingModal({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
+                  className="h-4 w-4 mr-1.5"
                 >
-                  <path d="M18 6H6L2 12l4 6h12l4-6-4-6z" />
-                  <path d="M12 10v4" />
-                  <path d="M12 16h.01" />
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                <span>{story?.characterLimit} chars</span>
+                <span>{participants?.length || 0} contributors</span>
               </div>
-            )}
-            <div className="flex items-center text-xs sm:text-sm text-neutral-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-3 w-3 sm:h-4 sm:w-4 mr-1"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <span>
-                {new Date(story?.createdAt).toLocaleDateString(undefined, { 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
-              </span>
+              <div className="flex items-center text-sm text-neutral-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 mr-1.5"
+                >
+                  <path d="M4 7V4h16v3" />
+                  <path d="M9 20h6" />
+                  <path d="M12 4v16" />
+                </svg>
+                <span>{story?.wordLimit} word limit</span>
+              </div>
+              {story?.characterLimit > 0 && (
+                <div className="flex items-center text-sm text-neutral-600">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4 mr-1.5"
+                  >
+                    <path d="M18 6H6L2 12l4 6h12l4-6-4-6z" />
+                    <path d="M12 10v4" />
+                    <path d="M12 16h.01" />
+                  </svg>
+                  <span>{story?.characterLimit} character limit</span>
+                </div>
+              )}
+              <div className="flex items-center text-sm text-neutral-600">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4 mr-1.5"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                <span>
+                  {new Date(story?.createdAt).toLocaleDateString(undefined, { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {/* Scrollable story content area */}
-        <div className="flex-grow overflow-y-auto p-3 sm:p-6 bg-neutral-50">
-          <div className="max-w-3xl mx-auto space-y-4 sm:space-y-6">
-            {/* Story title and pagination */}
-            <div className="flex justify-between items-center sticky top-0 bg-neutral-50 py-2 z-10">
-              <h3 className="font-medium text-xs sm:text-sm text-neutral-500">
-                Story So Far ({sortedSegments?.length || 0} segments)
-              </h3>
+          
+          {/* Story Content */}
+          <div className="flex-grow overflow-y-auto p-6 bg-neutral-50">
+            <div className="max-w-3xl mx-auto space-y-8">
+              {/* Previous Content */}
+              {recentSegments?.map((segment) => (
+                <div key={segment.id} className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <Avatar className="h-8 w-8">
+                      {segment.user?.profileImageUrl ? (
+                        <AvatarImage 
+                          src={segment.user.profileImageUrl} 
+                          alt={segment.user.username || "User"} 
+                        />
+                      ) : (
+                        <AvatarFallback>
+                          {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-neutral-800">
+                        {segment.user?.firstName || segment.user?.username || "Unknown User"}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        Turn {segment.turn} • {new Date(segment.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="font-serif text-neutral-700">
+                    <p>{segment.content}</p>
+                  </div>
+                </div>
+              ))}
               
-              {/* Pagination controls */}
-              {sortedSegments && sortedSegments.length > SEGMENTS_PER_PAGE && (
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={goToPrevPage} 
-                    disabled={currentPage === 1}
-                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                  >
-                    <span className="sr-only">Previous page</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-                  </Button>
-                  <span className="text-xs sm:text-sm font-medium">
-                    {currentPage} / {totalPages}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={goToNextPage} 
-                    disabled={currentPage === totalPages}
-                    className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                  >
-                    <span className="sr-only">Next page</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                  </Button>
+              {/* Current Turn Input */}
+              {turn?.currentUserId === user?.id && (
+                <div className="bg-white rounded-lg shadow-sm p-5 border-2 border-primary">
+                  <div className="flex items-start space-x-3 mb-4">
+                    <Avatar className="h-8 w-8">
+                      {user?.profileImageUrl ? (
+                        <AvatarImage 
+                          src={user.profileImageUrl} 
+                          alt={user.username || "User"} 
+                        />
+                      ) : (
+                        <AvatarFallback>
+                          {user?.firstName?.[0] || user?.username?.[0] || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <p className="font-medium text-neutral-800">Your Turn</p>
+                      <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <textarea 
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        className="w-full h-32 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none" 
+                        placeholder="Continue the story..."
+                      ></textarea>
+                      <div className="absolute bottom-3 right-3 space-y-1 text-right">
+                        <div>
+                          <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
+                            {wordCount}
+                          </span>
+                          <span className="text-neutral-500">/{story?.wordLimit} words</span>
+                        </div>
+                        {story?.characterLimit > 0 && (
+                          <div>
+                            <span className={characterCount > (story?.characterLimit || 0) ? "text-error font-medium" : "font-medium"}>
+                              {characterCount}
+                            </span>
+                            <span className="text-neutral-500">/{story?.characterLimit} chars</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <BoldIcon />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <ItalicIcon />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <UnderlineIcon />
+                        </Button>
+                        <div className="w-px h-6 bg-neutral-200"></div>
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <EmojiIcon />
+                        </Button>
+                      </div>
+                      
+                      <div className="flex space-x-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-neutral-700"
+                        >
+                          Save Draft
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          disabled={!isValidContribution || addSegmentMutation.isPending}
+                          onClick={() => addSegmentMutation.mutate()}
+                        >
+                          {addSegmentMutation.isPending ? "Submitting..." : "Submit"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
-            
-            {/* Initial prompt - always displayed on first page */}
-            {currentPage === 1 && story && (
-              <div className="bg-white rounded-lg shadow-sm p-3 sm:p-5 border border-primary/20 mb-4">
-                <div className="flex items-start space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                    {story.creator && story.creator.profileImageUrl ? (
-                      <AvatarImage 
-                        src={story.creator.profileImageUrl} 
-                        alt={story.creator.username || "Creator"} 
-                      />
-                    ) : (
-                      <AvatarFallback>
-                        {story.creator && (story.creator.firstName?.[0] || story.creator.username?.[0]) || "C"}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-sm sm:text-base text-neutral-800">
-                      {story.creator && (story.creator.firstName || story.creator.username) || "Story Creator"}
-                    </p>
-                    <p className="text-xs font-medium text-primary">
-                      Initial Prompt
-                    </p>
-                  </div>
-                </div>
-                <div className="prose prose-sm mt-2 sm:mt-3 text-sm sm:text-base">
-                  <p>{story && story.description}</p>
-                </div>
-              </div>
-            )}
-            
-            {/* Display message if no segments yet */}
-            {(!sortedSegments || sortedSegments.length === 0) && (
-              <div className="py-4 sm:py-6 text-center bg-white rounded-lg border border-dashed border-neutral-200">
-                <p className="text-sm sm:text-base text-neutral-500">This will be the first contribution to this story!</p>
-              </div>
-            )}
-            
-            {/* Previous Content */}
-            {paginatedSegments?.map((segment) => (
-              <div key={segment.id} className="bg-white rounded-lg shadow-sm p-3 sm:p-5 border border-neutral-200">
-                <div className="flex items-start space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-                  <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                    {segment.user?.profileImageUrl ? (
-                      <AvatarImage 
-                        src={segment.user.profileImageUrl} 
-                        alt={segment.user.username || "User"} 
-                      />
-                    ) : (
-                      <AvatarFallback>
-                        {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-sm sm:text-base text-neutral-800">
-                      {segment.user?.firstName || segment.user?.username || "Unknown User"}
-                    </p>
-                    <p className="text-xs text-neutral-500">
-                      Turn {segment.turn} • {new Date(segment.createdAt).toLocaleDateString(undefined, {month: 'short', day: 'numeric'})}
-                    </p>
-                  </div>
-                </div>
-                <div className="font-serif text-sm sm:text-base text-neutral-700">
-                  <p>{segment.content}</p>
-                </div>
-              </div>
-            ))}
-            
-            {/* Add extra space to enable scrolling past the last item */}
-            <div className="h-8"></div>
           </div>
-        </div>
-        
-        {/* Fixed input area at bottom */}
-        {turn?.currentUserId === user?.id && (
-          <div className="flex-shrink-0 p-3 sm:p-6 bg-white border-t border-neutral-200">
-            <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-              <div className="flex items-start space-x-2 sm:space-x-3 mb-1 sm:mb-2">
-                <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                  {user?.profileImageUrl ? (
-                    <AvatarImage 
-                      src={user.profileImageUrl} 
-                      alt={user.username || "User"} 
-                    />
-                  ) : (
-                    <AvatarFallback>
-                      {user?.firstName?.[0] || user?.username?.[0] || "U"}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <p className="font-medium text-sm sm:text-base text-neutral-800">Your Turn</p>
-                  <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
+          
+          {/* Story Progress */}
+          <div className="p-4 border-t border-neutral-200 bg-white">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center">
+                <span className="text-sm text-neutral-600 mr-3">Progress:</span>
+                <div className="w-32 sm:w-48 bg-neutral-200 rounded-full h-2">
+                  <div 
+                    className="bg-primary h-2 rounded-full" 
+                    style={{ width: `${progress}%` }}
+                  ></div>
                 </div>
+                <span className="ml-3 text-sm font-medium text-neutral-700">
+                  {segments?.length || 0}/{story?.maxSegments || 30}
+                </span>
               </div>
               
-              <div className="relative">
-                <textarea 
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full h-20 sm:h-24 p-2 sm:p-3 text-sm sm:text-base font-serif text-neutral-700 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none" 
-                  placeholder="Continue the story..."
-                ></textarea>
-                <div className="absolute bottom-2 sm:bottom-3 right-2 sm:right-3 space-y-0.5 sm:space-y-1 text-right text-xs sm:text-sm">
-                  <div>
-                    <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
-                      {wordCount}
-                    </span>
-                    <span className="text-neutral-500">/{story?.wordLimit} words</span>
-                  </div>
-                  {story?.characterLimit > 0 && (
-                    <div>
-                      <span className={characterCount > (story?.characterLimit || 0) ? "text-error font-medium" : "font-medium"}>
-                        {characterCount}
-                      </span>
-                      <span className="text-neutral-500">/{story?.characterLimit} chars</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <BoldIcon className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <ItalicIcon className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <UnderlineIcon className="h-4 w-4" />
-                  </Button>
-                  <div className="hidden sm:block w-px h-6 bg-neutral-200"></div>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <EmojiIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="flex justify-end space-x-2 sm:space-x-3">
+              <div className="flex space-x-2">
+                {/* Show invite button only for the creator of the story */}
+                {story?.creatorId === user?.id && !story?.isComplete && (
                   <Button 
-                    variant="outline" 
+                    variant="ghost" 
                     size="sm" 
-                    className="text-xs sm:text-sm text-neutral-700 h-8 px-2 sm:px-3"
+                    className="text-sm text-neutral-600 hover:text-neutral-800"
                     onClick={() => setShowInviteModal(true)}
                   >
-                    <UserIcon className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                    Invite
+                    <UserIcon className="mr-1" /> Invite Collaborators
                   </Button>
-                  
+                )}
+                
+                {onComplete && (
                   <Button 
-                    size="sm"
-                    className="text-xs sm:text-sm h-8 px-3 sm:px-4"
-                    disabled={!isValidContribution || addSegmentMutation.isPending}
-                    onClick={() => addSegmentMutation.mutate()}
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-sm text-neutral-600 hover:text-neutral-800"
+                    onClick={onComplete}
                   >
-                    {addSegmentMutation.isPending ? "Submitting..." : "Submit"}
+                    <FlagIcon className="mr-1" /> Mark as Complete
                   </Button>
-                </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </div>
       </DialogContent>
       
-      {/* Invite modal */}
+      {/* Invite collaborator modal */}
       <InviteCollaboratorModal 
-        open={showInviteModal}
-        onOpenChange={setShowInviteModal}
-        storyId={storyId}
+        open={showInviteModal} 
+        onOpenChange={setShowInviteModal} 
+        storyId={storyId} 
       />
     </Dialog>
   );

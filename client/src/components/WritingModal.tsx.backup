@@ -38,113 +38,114 @@ export default function WritingModal({
   storyId,
   onComplete 
 }: WritingModalProps) {
-  const { toast } = useToast();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [content, setContent] = useState("");
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const SEGMENTS_PER_PAGE = 3;
-  
-  // Query for story details
-  const { 
-    data: story,
-    isLoading: storyLoading 
-  } = useQuery({
-    queryKey: ['/api/stories', storyId],
+
+  // Get story details
+  const { data: story, isLoading: storyLoading } = useQuery({
+    queryKey: [`/api/stories/${storyId}`],
     enabled: open,
   });
-  
-  // Query for story segments
-  const { 
-    data: segments,
-    isLoading: segmentsLoading 
-  } = useQuery({
-    queryKey: ['/api/stories', storyId, 'segments'],
+
+  // Get story segments
+  const { data: segments, isLoading: segmentsLoading } = useQuery({
+    queryKey: [`/api/stories/${storyId}/segments`],
     enabled: open,
   });
-  
-  // Query for story turn
-  const { 
-    data: turn,
-    isLoading: turnLoading 
-  } = useQuery({
-    queryKey: ['/api/stories', storyId, 'turn'],
+
+  // Get story turn information
+  const { data: turn, isLoading: turnLoading } = useQuery({
+    queryKey: [`/api/stories/${storyId}/turn`],
     enabled: open,
   });
-  
-  // Query for story participants
-  const { 
-    data: participants
-  } = useQuery({
-    queryKey: ['/api/stories', storyId, 'participants'],
+
+  // Get participants
+  const { data: participants } = useQuery({
+    queryKey: [`/api/stories/${storyId}/participants`],
     enabled: open,
   });
-  
-  // Mutation for adding a new segment
+
+  // Calculate the progress
+  const progress = story && segments 
+    ? Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) 
+    : 0;
+
+  // Add segment mutation
   const addSegmentMutation = useMutation({
-    mutationFn: () => {
-      return apiRequest(`/api/stories/${storyId}/segments`, {
-        method: 'POST',
-        body: JSON.stringify({ content }),
+    mutationFn: async () => {
+      // We only need to send the content, wordCount and characterCount
+      // The server will handle adding storyId, userId and turn based on the URL params and auth
+      console.log("Submitting segment:", { content, wordCount, characterCount });
+      return await apiRequest("POST", `/api/stories/${storyId}/segments`, {
+        content,
+        wordCount,
+        characterCount
       });
     },
     onSuccess: () => {
-      // Clear the input
-      setContent("");
-      
-      // Show toast
       toast({
-        title: "Contribution submitted!",
-        description: "Your part of the story has been saved.",
+        title: "Contribution added!",
+        description: "Your contribution has been successfully added to the story.",
       });
-      
-      // Invalidate queries
-      queryClient.invalidateQueries({ queryKey: ['/api/stories', storyId, 'segments'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/stories', storyId, 'turn'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
-      
-      // Check if story is complete
-      if (
-        segments?.length + 1 >= story?.maxSegments || 
-        (turn?.currentTurn && turn.currentTurn >= story?.maxSegments)
-      ) {
-        onComplete?.();
-      }
-      
-      // Close the modal
+      setContent("");
+      setWordCount(0);
+      setCharacterCount(0);
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/turn`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/waiting-turn"] });
       onOpenChange(false);
     },
     onError: (error) => {
+      console.error("Error adding segment:", error);
       toast({
-        title: "Error",
-        description: "Failed to submit your contribution.",
+        title: "Error adding contribution",
+        description: typeof error === 'string' ? error : error.message || "Something went wrong",
         variant: "destructive",
       });
     },
   });
-  
-  // Update word and character count
+
+  // Update word and character count when content changes
   useEffect(() => {
-    if (content) {
-      const words = content.trim().split(/\s+/);
-      setWordCount(words.length);
-      setCharacterCount(content.length);
-    } else {
+    if (content.trim() === '') {
       setWordCount(0);
       setCharacterCount(0);
+    } else {
+      setWordCount(content.trim().split(/\s+/).length);
+      setCharacterCount(content.length);
     }
   }, [content]);
-  
-  // Check if contribution meets requirements
-  const isValidContribution = content.trim().length > 0 && 
-    (wordCount <= (story?.wordLimit || 100)) && 
-    (story?.characterLimit ? characterCount <= story.characterLimit : true);
-  
+
+  // Check if the word and character counts are valid
+  const isValidWordCount = wordCount > 0 && 
+    story && wordCount <= (story.wordLimit || 100);
+    
+  const isValidCharacterCount = characterCount > 0 && 
+    (!story?.characterLimit || characterCount <= story.characterLimit);
+    
+  const isValidContribution = isValidWordCount && isValidCharacterCount;
+
   // Sort segments by turn number
   const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
-  const totalPages = sortedSegments ? Math.ceil(sortedSegments.length / SEGMENTS_PER_PAGE) : 1;
+  
+  // Calculate pagination info
+  const totalPages = sortedSegments?.length 
+    ? Math.ceil(sortedSegments.length / SEGMENTS_PER_PAGE) 
+    : 1;
+    
+  // Make sure current page is valid
+  useEffect(() => {
+    if (totalPages > 0 && currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
   
   // Get paginated segments
   const startIndex = (currentPage - 1) * SEGMENTS_PER_PAGE;
@@ -196,8 +197,8 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 h-[36rem] flex flex-col">
-        {/* Close button */}
+      <DialogContent className="sm:max-w-3xl p-0 h-[36rem]">
+        <DialogTitle className="sr-only">Writing Story</DialogTitle>
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 
@@ -209,7 +210,7 @@ export default function WritingModal({
           </Button>
         </div>
         
-        {/* Story header information - Fixed at top */}
+        {/* Header section - Fixed at top */}
         <div className="flex-shrink-0 p-6 border-b border-neutral-200">
           <div className="flex justify-between items-start">
             <div>
@@ -303,10 +304,10 @@ export default function WritingModal({
           </div>
         </div>
         
-        {/* Scrollable story content area */}
+        {/* Middle section - Scrollable story content */}
         <div className="flex-grow overflow-y-auto p-6 bg-neutral-50">
           <div className="max-w-3xl mx-auto space-y-6">
-            {/* Story title and pagination */}
+            {/* Story title and pagination - Sticky at top of scroll area */}
             <div className="flex justify-between items-center sticky top-0 bg-neutral-50 py-2 z-10">
               <h3 className="font-medium text-sm text-neutral-500">
                 Story So Far ({sortedSegments?.length || 0} segments)
@@ -411,106 +412,149 @@ export default function WritingModal({
               </div>
             ))}
             
-            {/* Add extra space to enable scrolling past the last item */}
+            {/* Extra space at the bottom to ensure content can be scrolled up enough */}
             <div className="h-8"></div>
           </div>
         </div>
-        
-        {/* Fixed input area at bottom */}
-        {turn?.currentUserId === user?.id && (
-          <div className="flex-shrink-0 p-6 bg-white border-t border-neutral-200">
-            <div className="max-w-3xl mx-auto space-y-4">
-              <div className="flex items-start space-x-3 mb-2">
-                <Avatar className="h-8 w-8">
-                  {user?.profileImageUrl ? (
-                    <AvatarImage 
-                      src={user.profileImageUrl} 
-                      alt={user.username || "User"} 
-                    />
-                  ) : (
-                    <AvatarFallback>
-                      {user?.firstName?.[0] || user?.username?.[0] || "U"}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div>
-                  <p className="font-medium text-neutral-800">Your Turn</p>
-                  <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
-                </div>
-              </div>
               
-              <div className="relative">
-                <textarea 
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="w-full h-24 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none" 
-                  placeholder="Continue the story..."
-                ></textarea>
-                <div className="absolute bottom-3 right-3 space-y-1 text-right">
-                  <div>
-                    <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
-                      {wordCount}
-                    </span>
-                    <span className="text-neutral-500">/{story?.wordLimit} words</span>
-                  </div>
-                  {story?.characterLimit > 0 && (
+              {/* Current Turn Input */}
+              {turn?.currentUserId === user?.id && (
+                <div className="bg-white rounded-lg shadow-sm p-5 border-2 border-primary">
+                  <div className="flex items-start space-x-3 mb-4">
+                    <Avatar className="h-8 w-8">
+                      {user?.profileImageUrl ? (
+                        <AvatarImage 
+                          src={user.profileImageUrl} 
+                          alt={user.username || "User"} 
+                        />
+                      ) : (
+                        <AvatarFallback>
+                          {user?.firstName?.[0] || user?.username?.[0] || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
                     <div>
-                      <span className={characterCount > (story?.characterLimit || 0) ? "text-error font-medium" : "font-medium"}>
-                        {characterCount}
-                      </span>
-                      <span className="text-neutral-500">/{story?.characterLimit} chars</span>
+                      <p className="font-medium text-neutral-800">Your Turn</p>
+                      <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
                     </div>
-                  )}
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <textarea 
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        className="w-full h-32 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none" 
+                        placeholder="Continue the story..."
+                      ></textarea>
+                      <div className="absolute bottom-3 right-3 space-y-1 text-right">
+                        <div>
+                          <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
+                            {wordCount}
+                          </span>
+                          <span className="text-neutral-500">/{story?.wordLimit} words</span>
+                        </div>
+                        {story?.characterLimit > 0 && (
+                          <div>
+                            <span className={characterCount > (story?.characterLimit || 0) ? "text-error font-medium" : "font-medium"}>
+                              {characterCount}
+                            </span>
+                            <span className="text-neutral-500">/{story?.characterLimit} chars</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center space-x-3">
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <BoldIcon />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <ItalicIcon />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <UnderlineIcon />
+                        </Button>
+                        <div className="w-px h-6 bg-neutral-200"></div>
+                        <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
+                          <EmojiIcon />
+                        </Button>
+                      </div>
+                      
+                      <div className="flex space-x-3">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-neutral-700"
+                        >
+                          Save Draft
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          disabled={!isValidContribution || addSegmentMutation.isPending}
+                          onClick={() => addSegmentMutation.mutate()}
+                        >
+                          {addSegmentMutation.isPending ? "Submitting..." : "Submit"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+          </div>
+          
+          {/* Story Progress */}
+          <div className="p-4 border-t border-neutral-200 bg-white">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center">
+                <span className="text-sm text-neutral-600 mr-3">Progress:</span>
+                <div className="w-32 sm:w-48 bg-neutral-200 rounded-full h-2">
+                  <div 
+                    className="bg-primary h-2 rounded-full" 
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+                <span className="ml-3 text-sm font-medium text-neutral-700">
+                  {segments?.length || 0}/{story?.maxSegments || 30}
+                </span>
               </div>
               
-              <div className="flex justify-between items-center">
-                <div className="flex items-center space-x-3">
-                  <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <BoldIcon />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <ItalicIcon />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <UnderlineIcon />
-                  </Button>
-                  <div className="w-px h-6 bg-neutral-200"></div>
-                  <Button variant="ghost" size="icon" className="text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100">
-                    <EmojiIcon />
-                  </Button>
-                </div>
-                
-                <div className="flex space-x-3">
+              <div className="flex space-x-2">
+                {/* Show invite button only for the creator of the story */}
+                {story?.creatorId === user?.id && !story?.isComplete && (
                   <Button 
-                    variant="outline" 
+                    variant="ghost" 
                     size="sm" 
-                    className="text-neutral-700"
+                    className="text-sm text-neutral-600 hover:text-neutral-800"
                     onClick={() => setShowInviteModal(true)}
                   >
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    Invite
+                    <UserIcon className="mr-1" /> Invite Collaborators
                   </Button>
-                  
+                )}
+                
+                {onComplete && (
                   <Button 
+                    variant="ghost" 
                     size="sm" 
-                    disabled={!isValidContribution || addSegmentMutation.isPending}
-                    onClick={() => addSegmentMutation.mutate()}
+                    className="text-sm text-neutral-600 hover:text-neutral-800"
+                    onClick={onComplete}
                   >
-                    {addSegmentMutation.isPending ? "Submitting..." : "Submit"}
+                    <FlagIcon className="mr-1" /> Mark as Complete
                   </Button>
-                </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </div>
       </DialogContent>
       
-      {/* Invite modal */}
+      {/* Invite collaborator modal */}
       <InviteCollaboratorModal 
-        open={showInviteModal}
-        onOpenChange={setShowInviteModal}
-        storyId={storyId}
+        open={showInviteModal} 
+        onOpenChange={setShowInviteModal} 
+        storyId={storyId} 
       />
     </Dialog>
   );

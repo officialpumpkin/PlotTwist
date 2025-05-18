@@ -45,6 +45,7 @@ export interface IStorage {
   addParticipant(participant: InsertStoryParticipant): Promise<StoryParticipant>;
   getStoryParticipants(storyId: number): Promise<StoryParticipant[]>;
   isParticipant(storyId: number, userId: string): Promise<boolean>;
+  removeParticipant(storyId: number, userId: string): Promise<void>;
   
   // Story segments
   addStorySegment(segment: InsertStorySegment): Promise<StorySegment>;

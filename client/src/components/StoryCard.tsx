@@ -62,10 +62,12 @@ export default function StoryCard({
         status === "Active" && variant === "explore" && "bg-secondary",
         status === "Completed" && "bg-accent"
       )}></div>
-      <div className="p-6 pt-8 pr-8"> {/* Added more top and right padding */}
-        <div className="flex flex-col mb-4">
-          <h3 className="font-bold text-lg mb-2">{story.title}</h3>
-          <div className="flex items-center">
+      <div className="p-6">
+        <div className="mb-3 flex items-start justify-between">
+          <div className="flex-1 pr-2">
+            <h3 className="font-bold text-lg mb-2">{story.title}</h3>
+          </div>
+          <div>
             <span className={cn(
               "text-xs px-2 py-1 rounded-full inline-block",
               status === "Your Turn" && "bg-primary/10 text-primary",

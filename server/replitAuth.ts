@@ -213,15 +213,13 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
   
-  // Google Auth routes
-  app.get("/api/auth/google", passport.authenticate("google", {
-    scope: ["profile", "email"]
-  }));
+  // Google OAuth routes
+  app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
   
-  app.get("/api/auth/google/callback", 
-    passport.authenticate("google", {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login"
+  app.get('/api/auth/google/callback', 
+    passport.authenticate('google', { 
+      failureRedirect: '/login',
+      successRedirect: '/'
     })
   );
   

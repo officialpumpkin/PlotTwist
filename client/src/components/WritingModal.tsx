@@ -255,16 +255,42 @@ export default function WritingModal({
           {/* Scrollable Story Content - takes remaining space minus header and input form */}
           <div className="overflow-y-auto bg-neutral-50 flex-grow">
             <div className="p-4 max-w-3xl mx-auto space-y-4">
-              {/* Story Title and First Turn */}
-              {recentSegments?.length === 0 && (
-                <div className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
-                  <h3 className="text-xl font-bold text-neutral-900 mb-2">{story?.title}</h3>
-                  <p className="text-neutral-600 italic">{story?.description}</p>
-                  <div className="mt-4 pt-4 border-t border-neutral-100">
-                    <p className="text-sm text-neutral-500">It's time to begin the story! You're the first contributor.</p>
+              {/* Original Story Prompt - Always show this */}
+              <div className="bg-white rounded-lg shadow-sm p-4 border border-neutral-200 mb-5">
+                <div className="flex items-start space-x-3 mb-2">
+                  <div className="h-8 w-8 flex items-center justify-center bg-primary text-white rounded-full ring-2 ring-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-medium text-neutral-800">Story Prompt</p>
+                    <div className="flex items-center gap-2 text-xs text-neutral-500">
+                      <span className="bg-neutral-100 px-2 py-0.5 rounded-full">
+                        Original
+                      </span>
+                      <span>
+                        {new Date(story?.createdAt || Date.now()).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              )}
+                <div className="font-serif text-neutral-700 leading-relaxed">
+                  <h3 className="text-lg font-semibold mb-2">{story?.title}</h3>
+                  <p className="italic">{story?.description}</p>
+                  
+                  {recentSegments?.length === 0 && (
+                    <div className="mt-3 pt-3 border-t border-neutral-100">
+                      <p className="text-sm text-neutral-500">It's time to begin the story! You're the first contributor.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
               
               {/* Previous Content with connecting lines to show the story flow */}
               <div className="relative">

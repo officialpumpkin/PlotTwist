@@ -449,13 +449,43 @@ export default function WritingModal({
 
 
                   <div className="relative flex-grow">
+                    {/* Hidden textarea for editing */}
                     <textarea 
                       ref={textareaRef}
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
+                      className="sr-only" 
                       placeholder="Continue the story... Let your imagination flow!"
                     ></textarea>
+                    
+                    {/* Visual editor with rich text preview */}
+                    <div 
+                      contentEditable
+                      className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm overflow-auto"
+                      dangerouslySetInnerHTML={{ __html: content || '<p class="text-neutral-400">Continue the story... Let your imagination flow!</p>' }}
+                      onInput={(e) => {
+                        const html = e.currentTarget.innerHTML;
+                        // If it's just the placeholder, set content to empty
+                        if (html.includes('Continue the story... Let your imagination flow!')) {
+                          setContent('');
+                          e.currentTarget.innerHTML = '';
+                        } else {
+                          setContent(html);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // If content is empty, show placeholder
+                        if (!content.trim()) {
+                          e.currentTarget.innerHTML = '<p class="text-neutral-400">Continue the story... Let your imagination flow!</p>';
+                        }
+                      }}
+                      onFocus={(e) => {
+                        // Clear placeholder on focus if that's all that's there
+                        if (e.currentTarget.innerHTML.includes('Continue the story... Let your imagination flow!')) {
+                          e.currentTarget.innerHTML = '';
+                        }
+                      }}
+                    ></div>
                     
                     <div className="absolute bottom-2 right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
                       <div className="flex items-center justify-end space-x-1">

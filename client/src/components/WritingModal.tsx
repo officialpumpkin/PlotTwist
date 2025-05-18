@@ -81,9 +81,10 @@ export default function WritingModal({
     ? Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) 
     : 0;
 
-  // Add segment mutation
+  // Add segment mutation with rich text support
   const addSegmentMutation = useMutation({
     mutationFn: async () => {
+      // The content already has HTML formatting applied through the applyFormatting function
       return await apiRequest("POST", `/api/stories/${storyId}/segments`, {
         content,
         wordCount,
@@ -445,36 +446,7 @@ export default function WritingModal({
                 </div>
                 
                 <div className="flex-grow flex flex-col justify-between mt-2">
-                  {/* Text formatting toolbar */}
-                  <div className="flex items-center gap-1 mb-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={cn("h-7 w-8 rounded-md", isBold && "bg-primary-50 text-primary")}
-                      onClick={() => applyFormatting('bold')}
-                    >
-                      <BoldIcon className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={cn("h-7 w-8 rounded-md", isItalic && "bg-primary-50 text-primary")}
-                      onClick={() => applyFormatting('italic')}
-                    >
-                      <ItalicIcon className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={cn("h-7 w-8 rounded-md", isUnderline && "bg-primary-50 text-primary")}
-                      onClick={() => applyFormatting('underline')}
-                    >
-                      <UnderlineIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
+
 
                   <div className="relative flex-grow">
                     <textarea 
@@ -513,6 +485,7 @@ export default function WritingModal({
                         size="sm" 
                         className={cn("text-neutral-700 h-8 w-8 p-0", isBold && "bg-primary-50 text-primary border-primary/30")}
                         onClick={() => applyFormatting('bold')}
+                        title="Bold"
                       >
                         <BoldIcon className="h-3.5 w-3.5" />
                       </Button>
@@ -521,6 +494,7 @@ export default function WritingModal({
                         size="sm" 
                         className={cn("text-neutral-700 h-8 w-8 p-0", isItalic && "bg-primary-50 text-primary border-primary/30")}
                         onClick={() => applyFormatting('italic')}
+                        title="Italic"
                       >
                         <ItalicIcon className="h-3.5 w-3.5" />
                       </Button>
@@ -529,15 +503,9 @@ export default function WritingModal({
                         size="sm" 
                         className={cn("text-neutral-700 h-8 w-8 p-0", isUnderline && "bg-primary-50 text-primary border-primary/30")}
                         onClick={() => applyFormatting('underline')}
+                        title="Underline"
                       >
                         <UnderlineIcon className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-neutral-700 h-8 w-8 p-0"
-                      >
-                        <EmojiIcon className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                     

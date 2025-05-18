@@ -333,22 +333,40 @@ export default function WritingModal({
                       <textarea 
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        className="w-full h-32 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none" 
-                        placeholder="Continue the story..."
+                        className="w-full h-40 p-4 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
+                        placeholder="Continue the story... Let your imagination flow!"
                       ></textarea>
-                      <div className="absolute bottom-3 right-3 space-y-1 text-right">
-                        <div>
-                          <span className={wordCount > (story?.wordLimit || 100) ? "text-error font-medium" : "font-medium"}>
+                      
+                      <div className="absolute bottom-4 right-4 bg-white/90 rounded-md px-3 py-2 shadow-sm border border-neutral-100 space-y-1 text-right">
+                        <div className="flex items-center justify-end space-x-1">
+                          <span className="text-xs text-neutral-500">Words:</span>
+                          <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
                             {wordCount}
                           </span>
-                          <span className="text-neutral-500">/{story?.wordLimit} words</span>
+                          <span className="text-xs text-neutral-500">/{story?.wordLimit}</span>
+                          
+                          <div className="w-5 h-1">
+                            <div 
+                              className={`h-1 rounded-full ${wordCount > (story?.wordLimit || 100) ? "bg-error" : "bg-primary"}`} 
+                              style={{ width: `${Math.min(100, (wordCount / (story?.wordLimit || 100)) * 100)}%` }}
+                            ></div>
+                          </div>
                         </div>
+                        
                         {story?.characterLimit > 0 && (
-                          <div>
-                            <span className={characterCount > (story?.characterLimit || 0) ? "text-error font-medium" : "font-medium"}>
+                          <div className="flex items-center justify-end space-x-1">
+                            <span className="text-xs text-neutral-500">Chars:</span>
+                            <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-error" : "text-primary"}`}>
                               {characterCount}
                             </span>
-                            <span className="text-neutral-500">/{story?.characterLimit} chars</span>
+                            <span className="text-xs text-neutral-500">/{story?.characterLimit}</span>
+                            
+                            <div className="w-5 h-1">
+                              <div 
+                                className={`h-1 rounded-full ${characterCount > (story?.characterLimit || 0) ? "bg-error" : "bg-primary"}`} 
+                                style={{ width: `${Math.min(100, (characterCount / (story?.characterLimit || 1)) * 100)}%` }}
+                              ></div>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -375,16 +393,38 @@ export default function WritingModal({
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-neutral-700"
+                          className="text-neutral-700 flex items-center gap-1"
                         >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                          </svg>
                           Save Draft
                         </Button>
                         <Button 
                           size="sm" 
+                          className="gap-1 relative overflow-hidden transition-all duration-300"
                           disabled={!isValidContribution || addSegmentMutation.isPending}
                           onClick={() => addSegmentMutation.mutate()}
                         >
-                          {addSegmentMutation.isPending ? "Submitting..." : "Submit"}
+                          {addSegmentMutation.isPending ? (
+                            <>
+                              <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Submitting...
+                            </>
+                          ) : (
+                            <>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                              </svg>
+                              Submit Contribution
+                            </>
+                          )}
                         </Button>
                       </div>
                     </div>

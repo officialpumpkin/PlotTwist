@@ -538,17 +538,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Validate segment data
-      const validatedData = storySegmentFormSchema.parse(req.body);
+      const { content, wordCount, characterCount } = req.body;
+      
+      // Check for required fields
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+      
+      if (!wordCount || isNaN(parseInt(wordCount))) {
+        return res.status(400).json({ message: "Valid word count is required" });
+      }
+      
+      if (!characterCount || isNaN(parseInt(characterCount))) {
+        return res.status(400).json({ message: "Valid character count is required" });
+      }
       
       // Check word count against story's word limit
-      if (validatedData.wordCount > story.wordLimit) {
+      if (parseInt(wordCount) > story.wordLimit) {
         return res.status(400).json({ 
           message: `Exceeded word limit of ${story.wordLimit}` 
         });
       }
       
       // Check character count against story's character limit (if set)
-      if (story.characterLimit > 0 && validatedData.characterCount > story.characterLimit) {
+      if (story.characterLimit > 0 && parseInt(characterCount) > story.characterLimit) {
         return res.status(400).json({
           message: `Exceeded character limit of ${story.characterLimit}`
         });
@@ -556,7 +569,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Add the segment
       const segment = await storage.addStorySegment({
-        ...validatedData,
+        content,
+        wordCount: parseInt(wordCount),
+        characterCount: parseInt(characterCount),
         storyId,
         userId,
         turn: turn.currentTurn

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +44,12 @@ export default function WritingModal({
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  
+  // Rich text editing state
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isBold, setIsBold] = useState(false);
+  const [isItalic, setIsItalic] = useState(false);
+  const [isUnderline, setIsUnderline] = useState(false);
 
   // Get story details
   const { data: story, isLoading: storyLoading } = useQuery({
@@ -112,10 +118,80 @@ export default function WritingModal({
       setWordCount(0);
       setCharacterCount(0);
     } else {
-      setWordCount(content.trim().split(/\s+/).length);
-      setCharacterCount(content.length);
+      // Count words excluding HTML markup
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+      const textContent = tempDiv.textContent || tempDiv.innerText;
+      setWordCount(textContent.trim().split(/\s+/).length);
+      setCharacterCount(textContent.length);
     }
   }, [content]);
+  
+  // Rich text editing functions
+  const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
+    if (!textareaRef.current) return;
+    
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+    
+    if (start === end) {
+      // No text selected, toggle the formatting state for next input
+      switch (format) {
+        case 'bold':
+          setIsBold(!isBold);
+          break;
+        case 'italic':
+          setIsItalic(!isItalic);
+          break;
+        case 'underline':
+          setIsUnderline(!isUnderline);
+          break;
+      }
+      return;
+    }
+    
+    let formattedText = '';
+    let newContent = '';
+    
+    switch (format) {
+      case 'bold':
+        // Check if already bold
+        if (selectedText.startsWith('<strong>') && selectedText.endsWith('</strong>')) {
+          formattedText = selectedText.substring(8, selectedText.length - 9);
+        } else {
+          formattedText = `<strong>${selectedText}</strong>`;
+        }
+        break;
+      case 'italic':
+        // Check if already italic
+        if (selectedText.startsWith('<em>') && selectedText.endsWith('</em>')) {
+          formattedText = selectedText.substring(4, selectedText.length - 5);
+        } else {
+          formattedText = `<em>${selectedText}</em>`;
+        }
+        break;
+      case 'underline':
+        // Check if already underlined
+        if (selectedText.startsWith('<u>') && selectedText.endsWith('</u>')) {
+          formattedText = selectedText.substring(3, selectedText.length - 4);
+        } else {
+          formattedText = `<u>${selectedText}</u>`;
+        }
+        break;
+    }
+    
+    newContent = content.substring(0, start) + formattedText + content.substring(end);
+    setContent(newContent);
+    
+    // Set selection position after applying formatting
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = start + formattedText.length;
+      textarea.setSelectionRange(newPosition, newPosition);
+    }, 0);
+  };
 
   // Check if the word and character counts are valid
   const isValidWordCount = wordCount > 0 && 
@@ -368,8 +444,40 @@ export default function WritingModal({
                 </div>
                 
                 <div className="flex-grow flex flex-col justify-between mt-2">
+                  {/* Text formatting toolbar */}
+                  <div className="flex items-center gap-1 mb-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={cn("h-7 w-8 rounded-md", isBold && "bg-primary-50 text-primary")}
+                      onClick={() => applyFormatting('bold')}
+                    >
+                      <BoldIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={cn("h-7 w-8 rounded-md", isItalic && "bg-primary-50 text-primary")}
+                      onClick={() => applyFormatting('italic')}
+                    >
+                      <ItalicIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={cn("h-7 w-8 rounded-md", isUnderline && "bg-primary-50 text-primary")}
+                      onClick={() => applyFormatting('underline')}
+                    >
+                      <UnderlineIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+
                   <div className="relative flex-grow">
                     <textarea 
+                      ref={textareaRef}
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
                       className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 

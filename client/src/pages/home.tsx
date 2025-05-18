@@ -36,7 +36,7 @@ export default function Home() {
                 <path d="M12 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path>
                 <path d="M12 21H3a2 2 0 0 1-2-2V5"></path>
               </svg>
-              <span className="text-xl font-bold text-primary">StoryWeave</span>
+              <span className="text-xl font-bold text-primary">PlotTwist</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-neutral-900 max-w-3xl">
               Collaborate on stories with friends, one turn at a time

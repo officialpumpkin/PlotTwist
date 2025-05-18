@@ -52,6 +52,9 @@ export default function StoryCard({
   // Calculate progress
   const progress = segments ? 
     Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
+    
+  // Check if user is the creator (needed for leave story logic)
+  const isCreator = user && story.creatorId === user.id;
   
   return (
     <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">

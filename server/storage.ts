@@ -196,6 +196,17 @@ export class DatabaseStorage implements IStorage {
     return !!participant;
   }
   
+  async removeParticipant(storyId: number, userId: string): Promise<void> {
+    await db
+      .delete(storyParticipants)
+      .where(
+        and(
+          eq(storyParticipants.storyId, storyId),
+          eq(storyParticipants.userId, userId)
+        )
+      );
+  }
+  
   // Story segments
   async addStorySegment(segmentData: InsertStorySegment): Promise<StorySegment> {
     const [segment] = await db

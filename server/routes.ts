@@ -470,6 +470,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch participants" });
     }
   });
+  
+  // Leave a story (remove yourself as a participant)
+  app.delete('/api/stories/:id/leave', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Check if story exists
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      // Check if user is a participant
+      const isParticipant = await storage.isParticipant(storyId, userId);
+      if (!isParticipant) {
+        return res.status(400).json({ message: "You are not a participant in this story" });
+      }
+      
+      // Check if user is the creator - creators can't leave their own stories
+      if (story.creatorId === userId) {
+        return res.status(400).json({ message: "Story creators cannot leave their own stories" });
+      }
+      
+      // Check if it's currently the user's turn
+      const turn = await storage.getStoryTurn(storyId);
+      if (turn && turn.currentUserId === userId) {
+        return res.status(400).json({ message: "You cannot leave a story when it's your turn to contribute" });
+      }
+      
+      // Remove user as participant
+      await storage.removeParticipant(storyId, userId);
+      
+      res.status(200).json({ message: "Successfully left the story" });
+    } catch (error) {
+      console.error("Error leaving story:", error);
+      res.status(500).json({ message: "Failed to leave story" });
+    }
+  });
 
   // Add a segment to a story
   app.post('/api/stories/:id/segments', isAuthenticated, async (req: any, res) => {

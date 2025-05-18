@@ -275,36 +275,66 @@ export default function WritingModal({
           {/* Story Content */}
           <div className="flex-grow overflow-y-auto p-6 bg-neutral-50">
             <div className="max-w-3xl mx-auto space-y-8">
-              {/* Previous Content */}
-              {recentSegments?.map((segment) => (
-                <div key={segment.id} className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <Avatar className="h-8 w-8">
-                      {segment.user?.profileImageUrl ? (
-                        <AvatarImage 
-                          src={segment.user.profileImageUrl} 
-                          alt={segment.user.username || "User"} 
-                        />
-                      ) : (
-                        <AvatarFallback>
-                          {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div>
-                      <p className="font-medium text-neutral-800">
-                        {segment.user?.firstName || segment.user?.username || "Unknown User"}
-                      </p>
-                      <p className="text-xs text-neutral-500">
-                        Turn {segment.turn} • {new Date(segment.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="font-serif text-neutral-700">
-                    <p>{segment.content}</p>
+              {/* Story Title and First Turn */}
+              {recentSegments?.length === 0 && (
+                <div className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
+                  <h3 className="text-xl font-bold text-neutral-900 mb-2">{story?.title}</h3>
+                  <p className="text-neutral-600 italic">{story?.description}</p>
+                  <div className="mt-4 pt-4 border-t border-neutral-100">
+                    <p className="text-sm text-neutral-500">It's time to begin the story! You're the first contributor.</p>
                   </div>
                 </div>
-              ))}
+              )}
+              
+              {/* Previous Content with connecting lines to show the story flow */}
+              <div className="relative">
+                {recentSegments?.map((segment, index) => (
+                  <div key={segment.id} className="relative">
+                    {/* Vertical connecting line between segments */}
+                    {index < (recentSegments?.length || 0) - 1 && (
+                      <div className="absolute left-4 top-16 w-0.5 bg-neutral-200 h-8 z-0"></div>
+                    )}
+                    
+                    <div className={`bg-white rounded-lg shadow-sm p-5 border mb-8 relative z-10 ${
+                      segment.userId === user?.id 
+                        ? "border-primary/30 bg-primary/5" 
+                        : "border-neutral-200"
+                    }`}>
+                      <div className="flex items-start space-x-3 mb-3">
+                        <Avatar className="h-8 w-8 ring-2 ring-white">
+                          {segment.user?.profileImageUrl ? (
+                            <AvatarImage 
+                              src={segment.user.profileImageUrl} 
+                              alt={segment.user?.username || "User"} 
+                            />
+                          ) : (
+                            <AvatarFallback className={segment.userId === user?.id ? "bg-primary text-white" : ""}>
+                              {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-neutral-800">
+                            {segment.userId === user?.id 
+                              ? "You" 
+                              : (segment.user?.firstName || segment.user?.username || "Unknown User")}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-neutral-500">
+                            <span className="bg-neutral-100 px-2 py-0.5 rounded-full">Turn {segment.turn}</span>
+                            <span>{new Date(segment.createdAt).toLocaleDateString(undefined, {
+                              month: 'short',
+                              day: 'numeric'
+                            })}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="font-serif text-neutral-700 leading-relaxed">
+                        <p>{segment.content}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
               
               {/* Current Turn Input */}
               {turn?.currentUserId === user?.id && (

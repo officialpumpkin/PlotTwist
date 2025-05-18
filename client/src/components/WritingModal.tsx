@@ -165,7 +165,7 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 h-[36rem]">
+      <DialogContent className="sm:max-w-3xl p-0 max-h-[80vh] flex flex-col overflow-hidden">
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 
@@ -177,9 +177,9 @@ export default function WritingModal({
           </Button>
         </div>
         
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Story Header */}
-          <div className="p-6 border-b border-neutral-200">
+          <div className="p-4 border-b border-neutral-200 shrink-0">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-bold text-neutral-900">{story?.title}</h3>
@@ -192,7 +192,7 @@ export default function WritingModal({
               </span>
             </div>
             
-            <div className="flex items-center space-x-6 mt-4">
+            <div className="flex flex-wrap items-center gap-4 mt-3">
               <div className="flex items-center text-sm text-neutral-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -272,9 +272,9 @@ export default function WritingModal({
             </div>
           </div>
           
-          {/* Story Content */}
-          <div className="flex-grow overflow-y-auto p-6 bg-neutral-50">
-            <div className="max-w-3xl mx-auto space-y-8">
+          {/* Story Content - Scrollable area */}
+          <div className="flex-grow overflow-y-auto p-4 bg-neutral-50">
+            <div className="max-w-3xl mx-auto space-y-6">
               {/* Story Title and First Turn */}
               {recentSegments?.length === 0 && (
                 <div className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
@@ -347,7 +347,7 @@ export default function WritingModal({
                           alt={user.username || "User"} 
                         />
                       ) : (
-                        <AvatarFallback>
+                        <AvatarFallback className="bg-primary text-white">
                           {user?.firstName?.[0] || user?.username?.[0] || "U"}
                         </AvatarFallback>
                       )}

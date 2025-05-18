@@ -63,7 +63,7 @@ export default function RegisterForm() {
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-bold mb-2">Create your account</h2>
         <p className="text-neutral-600 text-sm">
-          Join StoryWeave to start collaborating on stories
+          Join PlotTwist to start collaborating on stories
         </p>
       </div>
       

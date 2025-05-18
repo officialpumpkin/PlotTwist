@@ -36,7 +36,7 @@ export default function Home() {
                 <path d="M12 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path>
                 <path d="M12 21H3a2 2 0 0 1-2-2V5"></path>
               </svg>
-              <span className="text-xl font-bold text-primary">StoryWeave</span>
+              <span className="text-xl font-bold text-primary">PlotTwist</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-neutral-900 max-w-3xl">
               Collaborate on stories with friends, one turn at a time
@@ -152,14 +152,14 @@ export default function Home() {
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-neutral-900">Creative Collaboration</h2>
             <p className="text-lg text-neutral-600 mt-2">
-              See how others are using StoryWeave
+              See how others are using PlotTwist
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
                 <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                  "Our book club uses StoryWeave between meetings to keep our creative writing flowing."
+                  "Our book club uses PlotTwist between meetings to keep our creative writing flowing."
                 </h3>
                 <p className="text-neutral-600 italic">
                   — Sarah L., Book Club Organizer

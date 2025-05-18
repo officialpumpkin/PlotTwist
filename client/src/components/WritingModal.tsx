@@ -304,7 +304,7 @@ export default function WritingModal({
             </div>
           </div>
           
-          {/* Story Content */}
+          {/* Story Content - Scrollable Area */}
           <div className="flex-grow overflow-y-auto p-6 bg-neutral-50">
             <div className="max-w-3xl mx-auto space-y-6">
               {/* Story title and pagination */}

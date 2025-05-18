@@ -165,7 +165,8 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="sm:max-w-3xl p-0 h-[90vh] flex flex-col overflow-hidden" aria-describedby="writing-modal-description">
+        <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 
@@ -177,13 +178,13 @@ export default function WritingModal({
           </Button>
         </div>
         
-        {/* Split into separate containers for better scroll management */}
+        {/* Split into 3 fixed-height sections: header, scrollable content, footer */}
         <div className="flex flex-col h-full">
-          {/* Fixed Story Header */}
-          <div className="p-3 border-b border-neutral-200 shrink-0">
+          {/* Fixed Story Header - absolute height */}
+          <div className="p-3 border-b border-neutral-200 shrink-0 bg-white z-10 h-[80px]">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-bold text-neutral-900">{story?.title}</h3>
+                <h2 className="text-lg font-bold text-neutral-900">{story?.title}</h2>
                 <p className="text-sm text-neutral-500 mt-1">
                   Turn {turn?.currentTurn} of {story?.maxSegments} • {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
                 </p>
@@ -193,8 +194,8 @@ export default function WritingModal({
               </span>
             </div>
             
-            <div className="flex flex-wrap items-center gap-3 mt-2">
-              <div className="flex items-center text-sm text-neutral-600">
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <div className="flex items-center text-xs text-neutral-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -203,16 +204,16 @@ export default function WritingModal({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4 w-4 mr-1"
+                  className="h-3 w-3 mr-1"
                 >
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                <span>{participants?.length || 0} contributors</span>
+                <span>{participants?.length || 0}</span>
               </div>
-              <div className="flex items-center text-sm text-neutral-600">
+              <div className="flex items-center text-xs text-neutral-600">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -221,16 +222,16 @@ export default function WritingModal({
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4 w-4 mr-1"
+                  className="h-3 w-3 mr-1"
                 >
                   <path d="M4 7V4h16v3" />
                   <path d="M9 20h6" />
                   <path d="M12 4v16" />
                 </svg>
-                <span>{story?.wordLimit} word limit</span>
+                <span>{story?.wordLimit} words</span>
               </div>
               {story?.characterLimit > 0 && (
-                <div className="flex items-center text-sm text-neutral-600">
+                <div className="flex items-center text-xs text-neutral-600">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -239,21 +240,21 @@ export default function WritingModal({
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4 mr-1"
+                    className="h-3 w-3 mr-1"
                   >
                     <path d="M18 6H6L2 12l4 6h12l4-6-4-6z" />
                     <path d="M12 10v4" />
                     <path d="M12 16h.01" />
                   </svg>
-                  <span>{story?.characterLimit} character limit</span>
+                  <span>{story?.characterLimit} chars</span>
                 </div>
               )}
             </div>
           </div>
           
-          {/* Scrollable Story Content */}
-          <div className="flex-grow overflow-y-auto p-4 bg-neutral-50">
-            <div className="max-w-3xl mx-auto space-y-5">
+          {/* Scrollable Story Content - takes remaining space minus header and input form */}
+          <div className="overflow-y-auto bg-neutral-50 flex-grow">
+            <div className="p-4 max-w-3xl mx-auto space-y-4">
               {/* Story Title and First Turn */}
               {recentSegments?.length === 0 && (
                 <div className="bg-white rounded-lg shadow-sm p-5 border border-neutral-200">
@@ -274,12 +275,12 @@ export default function WritingModal({
                       <div className="absolute left-4 top-16 w-0.5 bg-neutral-200 h-6 z-0"></div>
                     )}
                     
-                    <div className={`bg-white rounded-lg shadow-sm p-4 border mb-6 relative z-10 ${
+                    <div className={`bg-white rounded-lg shadow-sm p-4 border mb-5 relative z-10 ${
                       segment.userId === user?.id 
                         ? "border-primary/30 bg-primary/5" 
                         : "border-neutral-200"
                     }`}>
-                      <div className="flex items-start space-x-3 mb-3">
+                      <div className="flex items-start space-x-3 mb-2">
                         <Avatar className="h-8 w-8 ring-2 ring-white">
                           {segment.user?.profileImageUrl ? (
                             <AvatarImage 
@@ -319,10 +320,10 @@ export default function WritingModal({
           
           {/* Fixed input area at the bottom */}
           {turn?.currentUserId === user?.id && (
-            <div className="p-4 border-t border-neutral-200 bg-white shrink-0">
-              <div className="bg-white rounded-lg shadow-sm p-4 border-2 border-primary">
-                <div className="flex items-start space-x-3 mb-3">
-                  <Avatar className="h-8 w-8">
+            <div className="border-t border-neutral-200 bg-white shrink-0 p-3 h-[210px]">
+              <div className="bg-white rounded-lg shadow-sm p-3 border-2 border-primary h-full flex flex-col">
+                <div className="flex items-start space-x-3">
+                  <Avatar className="h-7 w-7">
                     {user?.profileImageUrl ? (
                       <AvatarImage 
                         src={user.profileImageUrl} 
@@ -335,21 +336,21 @@ export default function WritingModal({
                     )}
                   </Avatar>
                   <div>
-                    <p className="font-medium text-neutral-800">Your Turn</p>
+                    <p className="font-medium text-neutral-800 text-sm">Your Turn</p>
                     <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
                   </div>
                 </div>
                 
-                <div className="space-y-3">
-                  <div className="relative">
+                <div className="flex-grow flex flex-col justify-between mt-2">
+                  <div className="relative flex-grow">
                     <textarea 
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      className="w-full h-32 p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
+                      className="w-full h-[90px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
                       placeholder="Continue the story... Let your imagination flow!"
                     ></textarea>
                     
-                    <div className="absolute bottom-3 right-3 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
+                    <div className="absolute bottom-2 right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
                       <div className="flex items-center justify-end space-x-1">
                         <span className="text-xs text-neutral-500">Words:</span>
                         <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
@@ -370,7 +371,7 @@ export default function WritingModal({
                     </div>
                   </div>
                   
-                  <div className="flex justify-between flex-wrap gap-2">
+                  <div className="flex justify-between items-center mt-2">
                     <div className="flex gap-1">
                       <Button 
                         variant="outline" 
@@ -404,18 +405,6 @@ export default function WritingModal({
                     
                     <div className="flex gap-2">
                       <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-neutral-700 flex items-center gap-1 h-8"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                          <polyline points="7 3 7 8 15 8"></polyline>
-                        </svg>
-                        Save Draft
-                      </Button>
-                      <Button 
                         size="sm" 
                         className="gap-1 h-8"
                         disabled={!isValidContribution || addSegmentMutation.isPending}
@@ -446,32 +435,32 @@ export default function WritingModal({
             </div>
           )}
           
-          {/* Story Progress */}
-          <div className="p-3 border-t border-neutral-200 bg-white shrink-0">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Story Progress - Fixed height footer */}
+          <div className="p-3 border-t border-neutral-200 bg-white shrink-0 h-[60px]">
+            <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center">
-                <span className="text-sm text-neutral-600 mr-2">Progress:</span>
-                <div className="w-28 sm:w-40 bg-neutral-200 rounded-full h-2">
+                <span className="text-xs text-neutral-600 mr-2">Progress:</span>
+                <div className="w-24 sm:w-32 bg-neutral-200 rounded-full h-2">
                   <div 
                     className="bg-primary h-2 rounded-full" 
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
-                <span className="ml-2 text-sm font-medium text-neutral-700">
+                <span className="ml-2 text-xs font-medium text-neutral-700">
                   {segments?.length || 0}/{story?.maxSegments || 30}
                 </span>
               </div>
               
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2">
                 {story?.creatorId === user?.id && !story?.isComplete && (
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="text-xs sm:text-sm h-8"
+                    className="text-xs h-7 px-2"
                     onClick={() => setShowInviteModal(true)}
                   >
                     <UserIcon className="h-3 w-3 mr-1" />
-                    Invite Collaborator
+                    Invite
                   </Button>
                 )}
                 
@@ -479,11 +468,11 @@ export default function WritingModal({
                   <Button 
                     variant="outline" 
                     size="sm"
-                    className="text-xs sm:text-sm h-8 text-amber-600 border-amber-300 hover:bg-amber-50"
+                    className="text-xs h-7 px-2 text-amber-600 border-amber-300 hover:bg-amber-50"
                     onClick={onComplete}
                   >
                     <FlagIcon className="h-3 w-3 mr-1" />
-                    Complete Story
+                    Complete
                   </Button>
                 )}
               </div>

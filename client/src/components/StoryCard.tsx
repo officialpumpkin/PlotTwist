@@ -62,12 +62,12 @@ export default function StoryCard({
         status === "Active" && variant === "explore" && "bg-secondary",
         status === "Completed" && "bg-accent"
       )}></div>
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-3">
-            <h3 className="font-bold text-lg">{story.title}</h3>
+      <div className="p-6 pt-8 pr-8"> {/* Added more top and right padding */}
+        <div className="flex flex-col mb-4">
+          <h3 className="font-bold text-lg mb-2">{story.title}</h3>
+          <div className="flex items-center">
             <span className={cn(
-              "text-xs px-2 py-1 rounded-full",
+              "text-xs px-2 py-1 rounded-full inline-block",
               status === "Your Turn" && "bg-primary/10 text-primary",
               status === "Waiting" && "bg-neutral-100 text-neutral-600",
               status === "Active" && variant === "explore" && "bg-secondary/10 text-secondary",
@@ -76,8 +76,6 @@ export default function StoryCard({
               {status === "Waiting" && waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : status}
             </span>
           </div>
-          {/* Added empty div to reserve space at the top-right corner for better modal closing */}
-          <div className="w-6"></div>
         </div>
         
         <p className="text-neutral-600 text-sm line-clamp-3">{story.description}</p>

@@ -372,7 +372,7 @@ export default function WritingModal({
                     <textarea 
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      className="w-full h-[90px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
+                      className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm" 
                       placeholder="Continue the story... Let your imagination flow!"
                     ></textarea>
                     
@@ -397,7 +397,7 @@ export default function WritingModal({
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center mt-2">
+                  <div className="flex justify-between items-center mt-4 pt-2 border-t border-neutral-100">
                     <div className="flex gap-1">
                       <Button 
                         variant="outline" 

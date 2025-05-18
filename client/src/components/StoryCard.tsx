@@ -1,8 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   UserIcon, 
   TimeIcon,
@@ -33,6 +36,7 @@ export default function StoryCard({
   onJoin
 }: StoryCardProps) {
   const { user } = useAuth();
+  const { toast } = useToast();
   
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -55,6 +59,28 @@ export default function StoryCard({
     
   // Check if user is the creator (needed for leave story logic)
   const isCreator = user && story.creatorId === user.id;
+  
+  // Mutation for leaving a story
+  const leaveStoryMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/stories/${story.id}/leave`),
+    onSuccess: () => {
+      toast({
+        title: "Left story",
+        description: "You have successfully left this story",
+      });
+      // Refresh stories lists
+      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/waiting-turn"] });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to leave the story",
+      });
+    }
+  });
   
   return (
     <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -166,6 +192,19 @@ export default function StoryCard({
                 onClick={onJoin}
               >
                 Join Story
+              </Button>
+            )}
+            
+            {/* Leave Story button - only visible for participants who are not creators */}
+            {variant !== "explore" && !isCreator && user && status !== "Completed" && (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="border-red-200 text-red-500 hover:bg-red-50"
+                onClick={() => leaveStoryMutation.mutate()}
+                disabled={leaveStoryMutation.isPending}
+              >
+                {leaveStoryMutation.isPending ? 'Leaving...' : 'Leave Story'}
               </Button>
             )}
           </div>

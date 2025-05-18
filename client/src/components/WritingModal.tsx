@@ -374,13 +374,6 @@ export default function WritingModal({
                             {wordCount}
                           </span>
                           <span className="text-xs text-neutral-500">/{story?.wordLimit}</span>
-                          
-                          <div className="w-5 h-1">
-                            <div 
-                              className={`h-1 rounded-full ${wordCount > (story?.wordLimit || 100) ? "bg-error" : "bg-primary"}`} 
-                              style={{ width: `${Math.min(100, (wordCount / (story?.wordLimit || 100)) * 100)}%` }}
-                            ></div>
-                          </div>
                         </div>
                         
                         {story?.characterLimit > 0 && (
@@ -390,13 +383,6 @@ export default function WritingModal({
                               {characterCount}
                             </span>
                             <span className="text-xs text-neutral-500">/{story?.characterLimit}</span>
-                            
-                            <div className="w-5 h-1">
-                              <div 
-                                className={`h-1 rounded-full ${characterCount > (story?.characterLimit || 0) ? "bg-error" : "bg-primary"}`} 
-                                style={{ width: `${Math.min(100, (characterCount / (story?.characterLimit || 1)) * 100)}%` }}
-                              ></div>
-                            </div>
                           </div>
                         )}
                       </div>

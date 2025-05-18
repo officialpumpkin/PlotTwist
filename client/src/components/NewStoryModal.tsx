@@ -138,16 +138,6 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <div className="absolute top-0 right-0 pt-4 pr-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => onOpenChange(false)}
-              className="h-6 w-6 text-neutral-400 hover:text-neutral-500"
-            >
-              <CloseIcon className="h-4 w-4" />
-            </Button>
-          </div>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
           <DialogDescription>
             Set up your collaborative storytelling project

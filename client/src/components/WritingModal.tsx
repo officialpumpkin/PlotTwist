@@ -8,7 +8,6 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -169,7 +168,6 @@ export default function WritingModal({
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-3xl p-0 h-[36rem]">
-          <DialogTitle className="sr-only">Story Writing Interface</DialogTitle>
           <div className="flex flex-col h-full">
             <div className="p-6 border-b border-neutral-200">
               <Skeleton className="h-6 w-64 mb-2" />
@@ -200,7 +198,6 @@ export default function WritingModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl p-0 h-[36rem]">
-        <DialogTitle className="sr-only">Story Writing Interface</DialogTitle>
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import StoryCardSimple from "@/components/StoryCardSimple";
+import StoryCard from "@/components/StoryCard";
 import NewStoryModal from "@/components/NewStoryModal";
 import WritingModal from "@/components/WritingModal";
 import CompleteStoryModal from "@/components/CompleteStoryModal";
@@ -217,7 +217,7 @@ export default function MyStories() {
         ) : filteredStories.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => (
-              <StoryCardSimple
+              <StoryCard
                 key={story.id}
                 story={story}
                 status={story.isComplete ? "Completed" : "Active"}

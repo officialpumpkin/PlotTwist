@@ -60,7 +60,7 @@ export default function LoginForm() {
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-bold mb-2">Welcome back</h2>
         <p className="text-neutral-600 text-sm">
-          Log in to your StoryWeave account
+          Log in to your PlotTwist account
         </p>
       </div>
       

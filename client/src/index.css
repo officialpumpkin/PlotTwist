@@ -56,3 +56,28 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* Custom styles for React Quill editor */
+.editor-container {
+  font-family: inherit;
+}
+
+.editor-container .ql-toolbar {
+  @apply rounded-t-lg border border-neutral-300 bg-white;
+  border-bottom: none;
+}
+
+.editor-container .ql-container {
+  @apply rounded-b-lg border border-neutral-300 font-serif text-neutral-700;
+  font-size: inherit;
+  min-height: 100px;
+}
+
+.editor-container .ql-editor {
+  @apply min-h-[100px] max-h-[200px] overflow-y-auto;
+}
+
+.editor-container .ql-editor.ql-blank::before {
+  @apply text-neutral-400 italic;
+  font-style: italic;
+}

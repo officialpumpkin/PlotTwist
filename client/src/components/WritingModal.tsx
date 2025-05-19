@@ -399,7 +399,7 @@ export default function WritingModal({
 
                   <div className="relative flex-grow">
                     {/* React Quill Editor */}
-                    <div className="h-[120px] editor-container">
+                    <div className="h-[150px] editor-container">
                       <ReactQuill
                         ref={quillRef}
                         theme="snow"
@@ -412,7 +412,7 @@ export default function WritingModal({
                       />
                     </div>
                     
-                    <div className="absolute bottom-2 right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
+                    <div className="absolute bottom-[-40px] right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
                       <div className="flex items-center justify-end space-x-1">
                         <span className="text-xs text-neutral-500">Words:</span>
                         <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
@@ -435,32 +435,16 @@ export default function WritingModal({
                   
                   <div className="flex justify-between items-center mt-4 pt-2 border-t border-neutral-100">
                     <div className="flex gap-1">
+                      {/* Removed custom formatting buttons since React Quill has its own toolbar */}
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className={cn("text-neutral-700 h-8 w-8 p-0", isBold && "bg-primary-50 text-primary border-primary/30")}
-                        onClick={() => applyFormatting('bold')}
-                        title="Bold"
+                        onClick={() => setShowInviteModal(true)}
+                        className="text-neutral-700 h-8 flex items-center gap-1 text-xs"
+                        title="Invite collaborator"
                       >
-                        <BoldIcon className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className={cn("text-neutral-700 h-8 w-8 p-0", isItalic && "bg-primary-50 text-primary border-primary/30")}
-                        onClick={() => applyFormatting('italic')}
-                        title="Italic"
-                      >
-                        <ItalicIcon className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className={cn("text-neutral-700 h-8 w-8 p-0", isUnderline && "bg-primary-50 text-primary border-primary/30")}
-                        onClick={() => applyFormatting('underline')}
-                        title="Underline"
-                      >
-                        <UnderlineIcon className="h-3.5 w-3.5" />
+                        <UserIcon className="h-3.5 w-3.5" />
+                        <span>Invite</span>
                       </Button>
                     </div>
                     

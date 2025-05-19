@@ -8,17 +8,29 @@ import {
   UserIcon,
   HomeIcon
 } from "./assets/icons";
+import { Bell } from "lucide-react";
 import { useState } from "react";
 import NewStoryModal from "./NewStoryModal";
 import LoginOptions from "./LoginOptions";
+import MobileNotificationsDialog from "./MobileNotificationsDialog";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { Badge } from "@/components/ui/badge";
 
 export default function MobileNav() {
   const [location] = useLocation();
   const [newStoryModal, setNewStoryModal] = useState(false);
   const [showLoginOptions, setShowLoginOptions] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const { isAuthenticated } = useAuth();
+  
+  // Fetch pending invitations
+  const { data: invitations } = useQuery({
+    queryKey: ['/api/invitations/pending'],
+    enabled: isAuthenticated,
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
 
   // Navigation items based on authentication status
   const authenticatedNavItems = [
@@ -55,16 +67,36 @@ export default function MobileNav() {
             </Link>
           ))}
           {isAuthenticated && (
-            <button 
-              onClick={() => setNewStoryModal(true)} 
-              className={cn(
-                "flex flex-col items-center py-1",
-                newStoryModal ? "text-secondary" : "text-muted-foreground"
-              )}
-            >
-              <AddCircleIcon className="text-xl" />
-              <span className="text-xs mt-1">New Story</span>
-            </button>
+            <>
+              <button 
+                onClick={() => setShowNotifications(true)}
+                className={cn(
+                  "flex flex-col items-center py-1 relative",
+                  showNotifications ? "text-secondary" : "text-muted-foreground"
+                )}
+              >
+                <Bell className="h-5 w-5" />
+                {Array.isArray(invitations) && invitations.length > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs"
+                  >
+                    {invitations.length}
+                  </Badge>
+                )}
+                <span className="text-xs mt-1">Invites</span>
+              </button>
+              <button 
+                onClick={() => setNewStoryModal(true)} 
+                className={cn(
+                  "flex flex-col items-center py-1",
+                  newStoryModal ? "text-secondary" : "text-muted-foreground"
+                )}
+              >
+                <AddCircleIcon className="text-xl" />
+                <span className="text-xs mt-1">New Story</span>
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -76,6 +108,11 @@ export default function MobileNav() {
           <LoginOptions />
         </DialogContent>
       </Dialog>
+      
+      <MobileNotificationsDialog 
+        open={showNotifications} 
+        onOpenChange={setShowNotifications} 
+      />
     </>
   );
 }

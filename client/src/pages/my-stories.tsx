@@ -6,6 +6,7 @@ import NewStoryModal from "@/components/NewStoryModal";
 import WritingModal from "@/components/WritingModal";
 import CompleteStoryModal from "@/components/CompleteStoryModal";
 import PrintModal from "@/components/PrintModal";
+import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -72,7 +73,7 @@ export default function MyStories() {
     : [];
 
   return (
-    <>
+    <Layout>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
@@ -286,6 +287,6 @@ export default function MyStories() {
           />
         </>
       )}
-    </>
+    </Layout>
   );
 }

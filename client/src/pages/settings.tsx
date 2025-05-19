@@ -224,14 +224,14 @@ export default function SettingsPage() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">Your Account</h3>
-                  <div className="bg-neutral-50 p-4 rounded-lg">
+                  <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label className="text-neutral-500">Username</Label>
+                        <Label className="text-muted-foreground">Username</Label>
                         <p className="font-medium">{user?.username}</p>
                       </div>
                       <div>
-                        <Label className="text-neutral-500">Email</Label>
+                        <Label className="text-muted-foreground">Email</Label>
                         <p className="font-medium">{user?.email}</p>
                       </div>
                     </div>
@@ -243,11 +243,11 @@ export default function SettingsPage() {
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Security</h3>
                   
-                  <div className="bg-neutral-50 p-4 rounded-lg">
+                  <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">Password</p>
-                        <p className="text-sm text-neutral-500">
+                        <p className="text-sm text-muted-foreground">
                           Last changed: {settings?.passwordLastChanged 
                             ? new Date(settings.passwordLastChanged).toLocaleDateString() 
                             : 'Never'}
@@ -262,17 +262,17 @@ export default function SettingsPage() {
                     </div>
                     
                     {user?.authProvider === "google" && (
-                      <div className="mt-2 text-sm text-neutral-500 bg-yellow-50 p-2 rounded border border-yellow-200">
+                      <div className="mt-2 text-sm text-muted-foreground bg-yellow-950/10 dark:bg-yellow-900/20 p-2 rounded border border-yellow-600/20 dark:border-yellow-500/30">
                         You're using Google to sign in. Password management is handled by Google.
                       </div>
                     )}
                   </div>
                   
-                  <div className="bg-neutral-50 p-4 rounded-lg">
+                  <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="font-medium">Delete Account</p>
-                        <p className="text-sm text-neutral-500">
+                        <p className="text-sm text-muted-foreground">
                           Permanently delete your account and all your data
                         </p>
                       </div>

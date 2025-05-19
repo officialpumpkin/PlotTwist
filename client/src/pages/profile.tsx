@@ -223,24 +223,24 @@ export default function ProfilePage() {
               
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
+                  <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.storiesCreated}</span>
-                    <span className="text-sm text-neutral-600">Stories Created</span>
+                    <span className="text-sm text-muted-foreground">Stories Created</span>
                   </div>
                   
-                  <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
+                  <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.storiesContributed}</span>
-                    <span className="text-sm text-neutral-600">Stories Contributed</span>
+                    <span className="text-sm text-muted-foreground">Stories Contributed</span>
                   </div>
                   
-                  <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
+                  <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.totalSegments}</span>
-                    <span className="text-sm text-neutral-600">Total Segments</span>
+                    <span className="text-sm text-muted-foreground">Total Segments</span>
                   </div>
                   
-                  <div className="bg-primary/5 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
+                  <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.completedStories}</span>
-                    <span className="text-sm text-neutral-600">Completed Stories</span>
+                    <span className="text-sm text-muted-foreground">Completed Stories</span>
                   </div>
                 </div>
                 
@@ -252,13 +252,13 @@ export default function ProfilePage() {
                   {userData?.recentActivity?.length > 0 ? (
                     <div className="space-y-4">
                       {userData.recentActivity.map((activity: any) => (
-                        <div key={activity.id} className="bg-neutral-50 p-3 rounded-lg">
+                        <div key={activity.id} className="bg-card text-card-foreground border border-border p-3 rounded-lg">
                           <p className="text-sm font-medium">
                             {activity.type === 'contribution' 
                               ? `Contributed to "${activity.storyTitle}"` 
                               : `Created story "${activity.storyTitle}"`}
                           </p>
-                          <p className="text-xs text-neutral-500 mt-1">
+                          <p className="text-xs text-muted-foreground mt-1">
                             {new Date(activity.date).toLocaleDateString(undefined, {
                               year: 'numeric',
                               month: 'short',
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-neutral-500 text-center py-4">No recent activity</p>
+                    <p className="text-muted-foreground text-center py-4">No recent activity</p>
                   )}
                 </div>
               </CardContent>

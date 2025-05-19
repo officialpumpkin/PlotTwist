@@ -10,6 +10,8 @@ import MyStories from "@/pages/my-stories";
 import Explore from "@/pages/explore";
 import Login from "@/pages/login";
 import Register from "@/pages/register";
+import Profile from "@/pages/profile";
+import Settings from "@/pages/settings";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -23,6 +25,8 @@ function Router() {
       <Route path="/" component={isLoading ? LoadingScreen : (isAuthenticated ? Dashboard : Home)} />
       <Route path="/dashboard" component={isAuthenticated ? Dashboard : Login} />
       <Route path="/my-stories" component={isAuthenticated ? MyStories : Login} />
+      <Route path="/profile" component={isAuthenticated ? Profile : Login} />
+      <Route path="/settings" component={isAuthenticated ? Settings : Login} />
       <Route path="/explore" component={Explore} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />

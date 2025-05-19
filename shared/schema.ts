@@ -247,6 +247,14 @@ export const insertPrintOrderSchema = createInsertSchema(printOrders).omit({ id:
 export type InsertPrintOrder = z.infer<typeof insertPrintOrderSchema>;
 export type PrintOrder = typeof printOrders.$inferSelect;
 
+export const insertStoryInvitationSchema = createInsertSchema(storyInvitations).omit({ id: true, createdAt: true });
+export type InsertStoryInvitation = z.infer<typeof insertStoryInvitationSchema>;
+export type StoryInvitation = typeof storyInvitations.$inferSelect;
+
+export const insertUserSettingsSchema = createInsertSchema(userSettings).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
+export type UserSettings = typeof userSettings.$inferSelect;
+
 // Auth schemas
 export const registerSchema = z.object({
   email: z.string().email("Please enter a valid email"),

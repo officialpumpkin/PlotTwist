@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -86,11 +87,15 @@ export default function UserMenu() {
         </DropdownMenuTrigger>
         
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem className="cursor-pointer">
-            Your Profile
+          <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
+            <Link href="/profile">
+              <a>Your Profile</a>
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer">
-            Settings
+          <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
+            <Link href="/settings">
+              <a>Settings</a>
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer" asChild>

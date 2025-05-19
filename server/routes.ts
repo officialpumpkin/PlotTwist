@@ -1111,7 +1111,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to change password" });
     }
   });
+  
+  // Delete account
+  app.delete('/api/users/account', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get user's stories
+      const userStories = await storage.getStoriesByUser(userId);
+      
+      // Remove user from all story participants
+      for (const story of userStories) {
+        // If user is creator and there are other participants, transfer ownership
+        if (story.creatorId === userId) {
+          const participants = await storage.getStoryParticipants(story.id);
+          const otherParticipants = participants.filter(p => p.userId !== userId);
+          
+          if (otherParticipants.length > 0) {
+            // Transfer ownership to the first participant that isn't the user
+            await storage.updateStory(story.id, {
+              creatorId: otherParticipants[0].userId
+            });
+          } else {
+            // No other participants, story will be orphaned
+            // Could alternatively delete the story here
+          }
+        }
+        
+        // Remove user as participant
+        await storage.removeParticipant(story.id, userId);
+      }
+      
+      // Delete user's settings
+      const settings = await storage.getUserSettings(userId);
+      if (settings) {
+        // If we had a deleteUserSettings method, we would call it here
+        // For now, we'll update with empty values
+        await storage.updateUserSettings(userId, {
+          turnNotifications: false,
+          invitationNotifications: false,
+          completionNotifications: false
+        });
+      }
+      
+      // Anonymize the user rather than delete
+      // This preserves story structure while removing personal data
+      await storage.upsertUser({
+        id: userId,
+        username: `deleted_user_${Date.now()}`,
+        email: `deleted_${Date.now()}@example.com`,
+        firstName: null,
+        lastName: null,
+        password: null,
+        profileImageUrl: null,
+        authProvider: null
+      });
+      
+      // Log the user out (destroy session)
+      req.logout(() => {
+        res.json({ message: "Account deleted successfully" });
+      });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
 
+  // Invitation accept endpoint
+  app.post('/api/invitations/:id/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get the invitation
+      const invitation = await storage.getStoryInvitationById(invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      
+      // Check if invitation is for this user
+      if (invitation.inviteeId !== userId) {
+        return res.status(403).json({ message: "This invitation is not for you" });
+      }
+      
+      // Check if invitation is pending
+      if (invitation.status !== "pending") {
+        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+      }
+      
+      // Check if invitation has expired
+      if (invitation.expiresAt && new Date(invitation.expiresAt) < new Date()) {
+        await storage.updateStoryInvitation(invitationId, { status: "expired" });
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+      
+      // Update invitation status
+      await storage.updateStoryInvitation(invitationId, { status: "accepted" });
+      
+      // Add user as participant
+      await storage.addParticipant({
+        storyId: invitation.storyId,
+        userId: userId
+      });
+      
+      res.json({ message: "Invitation accepted successfully" });
+    } catch (error) {
+      console.error("Error accepting invitation:", error);
+      res.status(500).json({ message: "Failed to accept invitation" });
+    }
+  });
+  
+  // Invitation decline endpoint
+  app.post('/api/invitations/:id/decline', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get the invitation
+      const invitation = await storage.getStoryInvitationById(invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      
+      // Check if invitation is for this user
+      if (invitation.inviteeId !== userId) {
+        return res.status(403).json({ message: "This invitation is not for you" });
+      }
+      
+      // Check if invitation is pending
+      if (invitation.status !== "pending") {
+        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+      }
+      
+      // Update invitation status
+      await storage.updateStoryInvitation(invitationId, { status: "declined" });
+      
+      res.json({ message: "Invitation declined successfully" });
+    } catch (error) {
+      console.error("Error declining invitation:", error);
+      res.status(500).json({ message: "Failed to decline invitation" });
+    }
+  });
+  
   // Story invitation routes with acceptance
   app.post('/api/stories/:id/invite-with-acceptance', isAuthenticated, async (req: any, res) => {
     try {

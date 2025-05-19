@@ -72,14 +72,21 @@
 .editor-container .ql-container {
   @apply rounded-b-lg border border-neutral-300 font-serif text-neutral-700;
   font-size: inherit;
-  min-height: 120px;
+  min-height: 140px;
   border-bottom-width: 2px;
   border-bottom-right-radius: 8px;
   border-bottom-left-radius: 8px;
 }
 
 .editor-container .ql-editor {
-  @apply min-h-[120px] max-h-[200px] overflow-y-auto;
+  @apply min-h-[140px] max-h-[200px] overflow-y-auto;
+}
+
+/* Fix focus outline alignment */
+.editor-container .ql-container:focus-within {
+  outline: 2px solid #3b82f6; /* Primary blue color */
+  outline-offset: -1px;
+  border-color: transparent;
 }
 
 .editor-container .ql-editor.ql-blank::before {

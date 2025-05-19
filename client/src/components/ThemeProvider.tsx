@@ -9,20 +9,20 @@ type ThemeProviderProps = {
   defaultTheme?: Theme;
 };
 
-type ThemeProviderState = {
+interface ThemeContextValue {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   saveUserThemePreference: (theme: Theme) => Promise<void>;
-};
+}
 
-const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({
   children,
   defaultTheme = "system",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(defaultTheme);
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Load user's theme preference from settings
@@ -34,7 +34,7 @@ export function ThemeProvider({
         if (response.ok) {
           const settings = await response.json();
           if (settings?.theme) {
-            setTheme(settings.theme as Theme);
+            setThemeState(settings.theme as Theme);
           }
         }
       } catch (error) {
@@ -62,31 +62,20 @@ export function ThemeProvider({
     }
   };
 
-  const value = {
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    saveUserThemePreference(newTheme);
+  };
+
+  // Create a memoized context value
+  const contextValue: ThemeContextValue = {
     theme,
-    setTheme: (newTheme: Theme) => {
-      setTheme(newTheme);
-      saveUserThemePreference(newTheme);
-    },
+    setTheme,
     saveUserThemePreference
   };
 
-  if (!isInitialized) {
-    // Return a minimal provider with the default theme until user preferences are loaded
-    return (
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme={defaultTheme}
-        enableSystem
-        {...props}
-      >
-        {children}
-      </NextThemesProvider>
-    );
-  }
-
   return (
-    <ThemeProviderContext.Provider value={value}>
+    <ThemeContext.Provider value={contextValue}>
       <NextThemesProvider
         attribute="class"
         value={{ light: "light", dark: "dark", system: "system" }}
@@ -96,16 +85,16 @@ export function ThemeProvider({
       >
         {children}
       </NextThemesProvider>
-    </ThemeProviderContext.Provider>
+    </ThemeContext.Provider>
   );
 }
 
-export const useTheme = () => {
-  const context = useContext(ThemeProviderContext);
+export function useTheme(): ThemeContextValue {
+  const context = useContext(ThemeContext);
   
   if (context === undefined) {
     throw new Error("useTheme must be used within a ThemeProvider");
   }
   
   return context;
-};
+}

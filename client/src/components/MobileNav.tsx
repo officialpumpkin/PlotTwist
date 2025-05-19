@@ -27,7 +27,7 @@ export default function MobileNav() {
 
   return (
     <>
-      <div className="md:hidden bg-white border-b border-neutral-200 px-4 py-2">
+      <div className="md:hidden bg-background border-b border-border px-4 py-2">
         <div className="flex justify-between">
           {navItems.map((item) => (
             <Link key={item.path} href={item.path}>
@@ -36,7 +36,7 @@ export default function MobileNav() {
                   "flex flex-col items-center py-1",
                   location === item.path 
                     ? "text-primary" 
-                    : "text-neutral-500"
+                    : "text-muted-foreground"
                 )}
               >
                 {item.icon}
@@ -49,7 +49,7 @@ export default function MobileNav() {
               onClick={() => setNewStoryModal(true)} 
               className={cn(
                 "flex flex-col items-center py-1",
-                newStoryModal ? "text-secondary" : "text-neutral-500"
+                newStoryModal ? "text-secondary" : "text-muted-foreground"
               )}
             >
               <AddCircleIcon className="text-xl" />
@@ -58,7 +58,7 @@ export default function MobileNav() {
           ) : (
             <button 
               onClick={() => setShowLoginOptions(true)} 
-              className="flex flex-col items-center py-1 text-neutral-500"
+              className="flex flex-col items-center py-1 text-muted-foreground"
             >
               <UserIcon className="text-xl" />
               <span className="text-xs mt-1">Log in</span>

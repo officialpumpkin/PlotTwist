@@ -34,7 +34,7 @@ export default function Navbar() {
                   "transition-colors",
                   location === item.path 
                     ? "text-primary font-medium" 
-                    : "text-neutral-500 hover:text-neutral-700"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {item.label}

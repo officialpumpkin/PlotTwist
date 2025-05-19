@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="font-sans min-h-screen flex flex-col">
+    <div className="font-sans min-h-screen flex flex-col bg-background text-foreground">
       {/* Only show navigation when authenticated */}
       {isAuthenticated && (
         <>

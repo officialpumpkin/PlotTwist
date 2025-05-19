@@ -23,7 +23,9 @@ export function ThemeSwitcher() {
       <DropdownMenuContent 
         align="end" 
         sideOffset={8}
-        className="origin-top-right animate-in fade-in-0 zoom-in-95"
+        alignOffset={0}
+        avoidCollisions={true}
+        className="animate-in slide-in-from-top-1 duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out"
       >
         <DropdownMenuItem onClick={() => setTheme("light")}>
           <Sun className="mr-2 h-4 w-4" />

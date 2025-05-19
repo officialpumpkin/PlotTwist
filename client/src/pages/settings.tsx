@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme, type Theme } from "@/components/ThemeProvider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 import Layout from "@/components/Layout";
@@ -28,6 +29,7 @@ import {
 export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -42,7 +44,7 @@ export default function SettingsPage() {
   const [appearanceSettings, setAppearanceSettings] = useState({
     fontSize: 16,
     editorHeight: 200,
-    theme: "light"
+    theme: theme || "light"
   });
 
   // Get user settings
@@ -151,6 +153,11 @@ export default function SettingsPage() {
       ...prev,
       [key]: value
     }));
+    
+    // Update theme immediately when changed in settings
+    if (key === 'theme' && typeof value === 'string') {
+      setTheme(value as Theme);
+    }
   }
 
   // Submit appearance settings

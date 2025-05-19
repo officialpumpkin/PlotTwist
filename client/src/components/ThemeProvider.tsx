@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { apiRequest } from "@/lib/queryClient";
 
-type Theme = "light" | "dark" | "system";
+export type Theme = "light" | "dark" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -44,6 +44,10 @@ export function ThemeProvider({
       }
     };
 
+    // Set a fallback theme immediately
+    setIsInitialized(true);
+    
+    // Then try to fetch user preferences if they're logged in
     fetchUserTheme();
   }, []);
 

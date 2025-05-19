@@ -60,6 +60,7 @@
 /* Custom styles for React Quill editor */
 .editor-container {
   font-family: inherit;
+  margin-bottom: 40px;
 }
 
 .editor-container .ql-toolbar {
@@ -71,6 +72,7 @@
   @apply rounded-b-lg border border-neutral-300 font-serif text-neutral-700;
   font-size: inherit;
   min-height: 100px;
+  border-bottom-width: 2px;
 }
 
 .editor-container .ql-editor {
@@ -82,7 +84,17 @@
   font-style: italic;
 }
 
-/* Fix button spacing to ensure they're visible */
-.editor-container + .flex {
-  @apply mt-14;
+/* Ensure buttons and counts have proper spacing */
+.editor-container + div.flex {
+  @apply mt-4;
+}
+
+/* Dialog content fix for rich text editor */
+.writing-modal-content {
+  @apply p-0 h-[95vh] overflow-auto;
+}
+
+/* Counter styles */
+.word-counter {
+  @apply z-10 bg-white/95 shadow-sm;
 }

@@ -192,8 +192,9 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 h-[95vh] flex flex-col overflow-hidden" aria-describedby="writing-modal-description">
+      <DialogContent className="sm:max-w-3xl p-0 h-[95vh] flex flex-col writing-modal-content" aria-describedby="writing-modal-description">
         <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
+        <h2 className="sr-only">Story Writing Interface</h2>
         <div className="absolute top-4 right-4 z-10">
           <Button 
             variant="ghost" 
@@ -397,7 +398,7 @@ export default function WritingModal({
                 <div className="flex-grow flex flex-col justify-between mt-2">
 
 
-                  <div className="relative flex-grow mb-12">
+                  <div className="relative flex-grow mb-20">
                     {/* React Quill Editor */}
                     <div className="editor-container">
                       <ReactQuill
@@ -412,7 +413,7 @@ export default function WritingModal({
                       />
                     </div>
                     
-                    <div className="absolute bottom-[-50px] right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
+                    <div className="absolute bottom-[-30px] left-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-left">
                       <div className="flex items-center justify-end space-x-1">
                         <span className="text-xs text-neutral-500">Words:</span>
                         <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
@@ -433,7 +434,7 @@ export default function WritingModal({
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center mt-4 pt-2 border-t border-neutral-100">
+                  <div className="flex justify-between items-center mt-12 pt-2 border-t border-neutral-100">
                     <div className="flex gap-1">
                       {/* Removed custom formatting buttons since React Quill has its own toolbar */}
                       <Button 

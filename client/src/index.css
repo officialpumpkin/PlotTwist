@@ -24,6 +24,7 @@
 --ring: 20 14.3% 4.1%;
 --radius: 0.5rem;
   }
+  
   .dark {
       --background: 240 10% 3.9%;
 --foreground: 0 0% 98%;
@@ -46,6 +47,13 @@
 --ring: 240 4.9% 83.9%;
 --radius: 0.5rem;
   }
+
+/* Adding smooth transition between themes */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
 
 @layer base {
   * {

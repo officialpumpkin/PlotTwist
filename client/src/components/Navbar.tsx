@@ -2,6 +2,7 @@ import { useLocation, Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import UserMenu from "./UserMenu";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import NotificationBell from "./NotificationBell";
 import { cn } from "@/lib/utils";
 import { QuillPenIcon } from "./assets/icons";
 import { Button } from "@/components/ui/button";
@@ -50,9 +51,13 @@ export default function Navbar() {
           ))}
         </div>
         
-        {/* Theme Switcher and User Menu/Auth Buttons */}
+        {/* Theme Switcher, Notifications and User Menu/Auth Buttons */}
         <div className="flex items-center gap-3">
           <ThemeSwitcher />
+          
+          {isAuthenticated && (
+            <NotificationBell />
+          )}
           
           {isAuthenticated ? (
             <UserMenu />

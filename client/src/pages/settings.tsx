@@ -444,7 +444,7 @@ export default function SettingsPage() {
                           className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
                             appearanceSettings.theme === 'light' 
                               ? 'border-primary bg-primary/5' 
-                              : 'border-neutral-200 bg-white'
+                              : 'border-border bg-card'
                           }`}
                           onClick={() => handleAppearanceChange('theme', 'light')}
                         >
@@ -457,7 +457,7 @@ export default function SettingsPage() {
                           className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
                             appearanceSettings.theme === 'dark' 
                               ? 'border-primary bg-primary/5' 
-                              : 'border-neutral-200 bg-white'
+                              : 'border-border bg-card'
                           }`}
                           onClick={() => handleAppearanceChange('theme', 'dark')}
                         >
@@ -470,7 +470,7 @@ export default function SettingsPage() {
                           className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
                             appearanceSettings.theme === 'system' 
                               ? 'border-primary bg-primary/5' 
-                              : 'border-neutral-200 bg-white'
+                              : 'border-border bg-card'
                           }`}
                           onClick={() => handleAppearanceChange('theme', 'system')}
                         >

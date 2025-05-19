@@ -64,6 +64,17 @@ export interface IStorage {
   // Print orders
   createPrintOrder(order: InsertPrintOrder): Promise<PrintOrder>;
   getUserOrders(userId: string): Promise<PrintOrder[]>;
+  
+  // User settings
+  getUserSettings(userId: string): Promise<UserSettings | undefined>;
+  createUserSettings(settings: InsertUserSettings): Promise<UserSettings>;
+  updateUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings>;
+  
+  // Story invitations
+  createStoryInvitation(invitation: InsertStoryInvitation): Promise<StoryInvitation>;
+  getStoryInvitationById(id: number): Promise<StoryInvitation | undefined>;
+  updateStoryInvitation(id: number, updates: Partial<StoryInvitation>): Promise<StoryInvitation>;
+  getPendingInvitationsForUser(userId: string): Promise<StoryInvitation[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -304,6 +315,92 @@ export class DatabaseStorage implements IStorage {
       .from(printOrders)
       .where(eq(printOrders.userId, userId))
       .orderBy(desc(printOrders.createdAt));
+  }
+
+  // User settings methods
+  async getUserSettings(userId: string): Promise<UserSettings | undefined> {
+    const [settings] = await db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId));
+    return settings;
+  }
+
+  async createUserSettings(settingsData: InsertUserSettings): Promise<UserSettings> {
+    const [settings] = await db
+      .insert(userSettings)
+      .values({
+        ...settingsData,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return settings;
+  }
+
+  async updateUserSettings(userId: string, settingsData: Partial<UserSettings>): Promise<UserSettings> {
+    const [settings] = await db
+      .update(userSettings)
+      .set({
+        ...settingsData,
+        updatedAt: new Date()
+      })
+      .where(eq(userSettings.userId, userId))
+      .returning();
+    
+    if (!settings) {
+      throw new Error("User settings not found");
+    }
+    
+    return settings;
+  }
+
+  // Story invitation methods
+  async createStoryInvitation(invitationData: InsertStoryInvitation): Promise<StoryInvitation> {
+    const [invitation] = await db
+      .insert(storyInvitations)
+      .values({
+        ...invitationData,
+        createdAt: new Date()
+      })
+      .returning();
+    return invitation;
+  }
+
+  async getStoryInvitationById(id: number): Promise<StoryInvitation | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(storyInvitations)
+      .where(eq(storyInvitations.id, id));
+    return invitation;
+  }
+
+  async updateStoryInvitation(id: number, updates: Partial<StoryInvitation>): Promise<StoryInvitation> {
+    const [invitation] = await db
+      .update(storyInvitations)
+      .set(updates)
+      .where(eq(storyInvitations.id, id))
+      .returning();
+    
+    if (!invitation) {
+      throw new Error("Invitation not found");
+    }
+    
+    return invitation;
+  }
+
+  async getPendingInvitationsForUser(userId: string): Promise<StoryInvitation[]> {
+    // Get invitations where user is the invitee and status is pending
+    return await db
+      .select()
+      .from(storyInvitations)
+      .where(
+        and(
+          eq(storyInvitations.inviteeId, userId),
+          eq(storyInvitations.status, "pending")
+        )
+      )
+      .orderBy(desc(storyInvitations.createdAt));
   }
 }
 

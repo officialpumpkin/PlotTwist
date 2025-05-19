@@ -821,6 +821,488 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile routes
+  app.get('/api/users/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user statistics
+      const userStories = await storage.getStoriesByUser(userId);
+      const completedStories = userStories.filter(story => story.isComplete);
+      
+      // Get story segments by user
+      let totalSegments = 0;
+      let storiesContributed = 0;
+      let seenStoryIds = new Set();
+      
+      const storyIds = userStories.map(story => story.id);
+      for (const storyId of storyIds) {
+        const segments = await storage.getStorySegments(storyId);
+        const userSegments = segments.filter(segment => segment.userId === userId);
+        totalSegments += userSegments.length;
+        
+        // Count distinct stories contributed to
+        if (userSegments.length > 0 && !seenStoryIds.has(storyId)) {
+          seenStoryIds.add(storyId);
+          storiesContributed++;
+        }
+      }
+      
+      // Get user settings
+      let userSettings = null;
+      try {
+        userSettings = await storage.getUserSettings(userId);
+      } catch (error) {
+        console.log("User settings not found, will create default");
+      }
+      
+      if (!userSettings) {
+        userSettings = await storage.createUserSettings({
+          userId,
+          turnNotifications: true,
+          invitationNotifications: true,
+          completionNotifications: true,
+          fontSize: 16,
+          editorHeight: 200,
+          theme: "light"
+        });
+      }
+      
+      // Get pending invitations
+      const pendingInvitations = await storage.getPendingInvitationsForUser(userId);
+      
+      // Get recent activity
+      const recentActivity = [];
+      
+      // Add contributions to activity
+      for (const storyId of storyIds) {
+        const segments = await storage.getStorySegments(storyId);
+        const story = await storage.getStoryById(storyId);
+        
+        const userSegments = segments
+          .filter(segment => segment.userId === userId)
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 5); // Get 5 most recent
+        
+        userSegments.forEach(segment => {
+          recentActivity.push({
+            id: `segment-${segment.id}`,
+            type: 'contribution',
+            storyId: storyId,
+            storyTitle: story?.title || 'Unknown Story',
+            date: segment.createdAt,
+          });
+        });
+      }
+      
+      // Sort activity by date
+      recentActivity.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      // Return user profile data
+      res.json({
+        ...user,
+        stats: {
+          storiesCreated: userStories.filter(story => story.creatorId === userId).length,
+          storiesContributed,
+          completedStories: completedStories.length,
+          totalSegments
+        },
+        settings: userSettings,
+        invitations: pendingInvitations,
+        recentActivity: recentActivity.slice(0, 10) // Limit to 10 most recent activities
+      });
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  // User settings routes
+  app.get('/api/users/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      let settings = await storage.getUserSettings(userId);
+      
+      if (!settings) {
+        // Create default settings if none exist
+        settings = await storage.createUserSettings({
+          userId,
+          turnNotifications: true,
+          invitationNotifications: true,
+          completionNotifications: true,
+          fontSize: 16,
+          editorHeight: 200,
+          theme: "light"
+        });
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching user settings:", error);
+      res.status(500).json({ message: "Failed to fetch user settings" });
+    }
+  });
+
+  // Update notification settings
+  app.patch('/api/users/settings/notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { turnNotifications, invitationNotifications, completionNotifications } = req.body;
+      
+      // Get current settings
+      let settings = await storage.getUserSettings(userId);
+      
+      if (!settings) {
+        // Create default settings if none exist
+        settings = await storage.createUserSettings({
+          userId,
+          turnNotifications: turnNotifications ?? true,
+          invitationNotifications: invitationNotifications ?? true,
+          completionNotifications: completionNotifications ?? true,
+          fontSize: 16,
+          editorHeight: 200,
+          theme: "light"
+        });
+      } else {
+        // Update existing settings
+        settings = await storage.updateUserSettings(userId, {
+          turnNotifications: turnNotifications ?? settings.turnNotifications,
+          invitationNotifications: invitationNotifications ?? settings.invitationNotifications,
+          completionNotifications: completionNotifications ?? settings.completionNotifications
+        });
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating notification settings:", error);
+      res.status(500).json({ message: "Failed to update notification settings" });
+    }
+  });
+
+  // Update appearance settings
+  app.patch('/api/users/settings/appearance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { fontSize, editorHeight, theme } = req.body;
+      
+      // Get current settings
+      let settings = await storage.getUserSettings(userId);
+      
+      if (!settings) {
+        // Create default settings if none exist
+        settings = await storage.createUserSettings({
+          userId,
+          turnNotifications: true,
+          invitationNotifications: true,
+          completionNotifications: true,
+          fontSize: fontSize ?? 16,
+          editorHeight: editorHeight ?? 200,
+          theme: theme ?? "light"
+        });
+      } else {
+        // Update existing settings
+        settings = await storage.updateUserSettings(userId, {
+          fontSize: fontSize ?? settings.fontSize,
+          editorHeight: editorHeight ?? settings.editorHeight,
+          theme: theme ?? settings.theme
+        });
+      }
+      
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating appearance settings:", error);
+      res.status(500).json({ message: "Failed to update appearance settings" });
+    }
+  });
+
+  // Update user profile
+  app.patch('/api/users/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { username, firstName, lastName, email } = req.body;
+      
+      // Get current user
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if username is changing and if it's unique
+      if (username && username !== user.username) {
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Username already taken" });
+        }
+      }
+      
+      // Check if email is changing and if it's unique
+      if (email && email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Email already in use" });
+        }
+      }
+      
+      // Update user
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        username: username || user.username,
+        firstName: firstName !== undefined ? firstName : user.firstName,
+        lastName: lastName !== undefined ? lastName : user.lastName,
+        email: email || user.email,
+        // Don't update other fields like password
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  // Change password
+  app.post('/api/users/change-password', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { currentPassword, newPassword } = req.body;
+      
+      // Validate input
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: "Current password and new password are required" });
+      }
+      
+      // Get user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if user's auth is not password-based
+      if (user.authProvider && user.authProvider !== 'local') {
+        return res.status(400).json({ message: "Password cannot be changed for this account type" });
+      }
+      
+      // Verify current password
+      const isMatch = await bcrypt.compare(currentPassword, user.password || "");
+      if (!isMatch) {
+        return res.status(401).json({ message: "Current password is incorrect" });
+      }
+      
+      // Hash new password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      
+      // Update password
+      await storage.upsertUser({
+        id: userId,
+        password: hashedPassword,
+        passwordLastChanged: new Date()
+      });
+      
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Error changing password:", error);
+      res.status(500).json({ message: "Failed to change password" });
+    }
+  });
+
+  // Story invitation routes with acceptance
+  app.post('/api/stories/:id/invite-with-acceptance', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const inviterId = req.user.claims.sub;
+      const { inviteType, email, username } = req.body;
+      
+      // Check if the story exists and the inviter is a participant
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      const isInviterParticipant = await storage.isParticipant(storyId, inviterId);
+      if (!isInviterParticipant && story.creatorId !== inviterId) {
+        return res.status(403).json({ message: "Only story participants can invite others" });
+      }
+      
+      // Generate token for invitation
+      const token = nanoid(32);
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + 7); // Expire in 7 days
+
+      if (inviteType === 'email') {
+        if (!email) {
+          return res.status(400).json({ message: "Email is required" });
+        }
+        
+        // Check if user with this email exists
+        const inviteeUser = await storage.getUserByEmail(email);
+        
+        if (inviteeUser) {
+          // Check if already a participant
+          const isAlreadyParticipant = await storage.isParticipant(storyId, inviteeUser.id);
+          if (isAlreadyParticipant) {
+            return res.status(400).json({ message: "User is already a participant in this story" });
+          }
+          
+          // Create invitation
+          const invitation = await storage.createStoryInvitation({
+            storyId,
+            inviterId,
+            inviteeId: inviteeUser.id,
+            status: "pending",
+            token,
+            expiresAt: expirationDate
+          });
+          
+          res.status(201).json({ 
+            message: `Invitation sent to ${email}`,
+            invitation
+          });
+        } else {
+          // Create invitation with email only
+          const invitation = await storage.createStoryInvitation({
+            storyId,
+            inviterId,
+            inviteeEmail: email,
+            status: "pending",
+            token,
+            expiresAt: expirationDate
+          });
+          
+          // In a real app, we would send an email here
+          
+          res.status(201).json({ 
+            message: `Invitation sent to ${email}`,
+            invitation
+          });
+        }
+      } else if (inviteType === 'username') {
+        if (!username) {
+          return res.status(400).json({ message: "Username is required" });
+        }
+        
+        // Find user by username
+        const inviteeUser = await storage.getUserByUsername(username);
+        
+        if (!inviteeUser) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        // Check if already a participant
+        const isAlreadyParticipant = await storage.isParticipant(storyId, inviteeUser.id);
+        if (isAlreadyParticipant) {
+          return res.status(400).json({ message: "User is already a participant in this story" });
+        }
+        
+        // Create invitation
+        const invitation = await storage.createStoryInvitation({
+          storyId,
+          inviterId,
+          inviteeId: inviteeUser.id,
+          status: "pending",
+          token,
+          expiresAt: expirationDate
+        });
+        
+        res.status(201).json({ 
+          message: `Invitation sent to ${username}`,
+          invitation
+        });
+      } else {
+        return res.status(400).json({ message: "Invalid invitation type" });
+      }
+    } catch (error) {
+      console.error("Error creating invitation:", error);
+      res.status(500).json({ message: "Failed to create invitation" });
+    }
+  });
+
+  // Accept story invitation
+  app.post('/api/invitations/:id/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get invitation
+      const invitation = await storage.getStoryInvitationById(invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      
+      // Check if invitation is for this user
+      if (invitation.inviteeId !== userId) {
+        return res.status(403).json({ message: "This invitation is not for you" });
+      }
+      
+      // Check if invitation is expired
+      if (new Date(invitation.expiresAt) < new Date()) {
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+      
+      // Check if invitation is already accepted or declined
+      if (invitation.status !== "pending") {
+        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+      }
+      
+      // Update invitation status
+      await storage.updateStoryInvitation(invitationId, { status: "accepted" });
+      
+      // Add user as participant
+      const participant = await storage.addParticipant({
+        storyId: invitation.storyId,
+        userId
+      });
+      
+      res.json({ 
+        message: "Invitation accepted successfully",
+        participant
+      });
+    } catch (error) {
+      console.error("Error accepting invitation:", error);
+      res.status(500).json({ message: "Failed to accept invitation" });
+    }
+  });
+
+  // Decline story invitation
+  app.post('/api/invitations/:id/decline', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      
+      // Get invitation
+      const invitation = await storage.getStoryInvitationById(invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      
+      // Check if invitation is for this user
+      if (invitation.inviteeId !== userId) {
+        return res.status(403).json({ message: "This invitation is not for you" });
+      }
+      
+      // Check if invitation is already accepted or declined
+      if (invitation.status !== "pending") {
+        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+      }
+      
+      // Update invitation status
+      await storage.updateStoryInvitation(invitationId, { status: "declined" });
+      
+      res.json({ message: "Invitation declined successfully" });
+    } catch (error) {
+      console.error("Error declining invitation:", error);
+      res.status(500).json({ message: "Failed to decline invitation" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

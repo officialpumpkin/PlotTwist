@@ -61,6 +61,7 @@
 .editor-container {
   font-family: inherit;
   margin-bottom: 40px;
+  position: relative;
 }
 
 .editor-container .ql-toolbar {
@@ -71,8 +72,10 @@
 .editor-container .ql-container {
   @apply rounded-b-lg border border-neutral-300 font-serif text-neutral-700;
   font-size: inherit;
-  min-height: 100px;
+  min-height: 120px;
   border-bottom-width: 2px;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 8px;
 }
 
 .editor-container .ql-editor {

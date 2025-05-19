@@ -400,7 +400,7 @@ export default function WritingModal({
 
                   <div className="relative flex-grow mb-20">
                     {/* React Quill Editor */}
-                    <div className="editor-container">
+                    <div className="editor-container mb-10">
                       <ReactQuill
                         ref={quillRef}
                         theme="snow"
@@ -413,7 +413,7 @@ export default function WritingModal({
                       />
                     </div>
                     
-                    <div className="absolute bottom-[-30px] left-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-left">
+                    <div className="absolute top-[calc(100%+10px)] left-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-left">
                       <div className="flex items-center justify-end space-x-1">
                         <span className="text-xs text-neutral-500">Words:</span>
                         <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>

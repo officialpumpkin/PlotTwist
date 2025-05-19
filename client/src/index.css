@@ -74,10 +74,15 @@
 }
 
 .editor-container .ql-editor {
-  @apply min-h-[100px] max-h-[200px] overflow-y-auto;
+  @apply min-h-[120px] max-h-[200px] overflow-y-auto;
 }
 
 .editor-container .ql-editor.ql-blank::before {
   @apply text-neutral-400 italic;
   font-style: italic;
+}
+
+/* Fix button spacing to ensure they're visible */
+.editor-container + .flex {
+  @apply mt-14;
 }

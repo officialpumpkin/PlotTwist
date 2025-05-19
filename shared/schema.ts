@@ -109,11 +109,43 @@ export const printOrders = pgTable("print_orders", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Story invitations
+export const storyInvitations = pgTable("story_invitations", {
+  id: serial("id").primaryKey(),
+  storyId: integer("story_id").notNull().references(() => stories.id),
+  inviterId: varchar("inviter_id").notNull().references(() => users.id),
+  inviteeId: varchar("invitee_id").references(() => users.id),
+  inviteeEmail: varchar("invitee_email"),
+  status: varchar("status").notNull().default("pending"), // pending, accepted, declined
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  uniqInvitationIdx: index("uniq_invitation_idx").on(table.storyId, table.inviteeId),
+}));
+
+// User settings
+export const userSettings = pgTable("user_settings", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  turnNotifications: boolean("turn_notifications").notNull().default(true),
+  invitationNotifications: boolean("invitation_notifications").notNull().default(true),
+  completionNotifications: boolean("completion_notifications").notNull().default(true),
+  fontSize: integer("font_size").notNull().default(16),
+  editorHeight: integer("editor_height").notNull().default(200),
+  theme: varchar("theme").notNull().default("light"), // light, dark, system
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   stories: many(stories),
   segments: many(storySegments),
   participations: many(storyParticipants),
+  sentInvitations: many(storyInvitations, { relationName: "inviter" }),
+  receivedInvitations: many(storyInvitations, { relationName: "invitee" }),
+  settings: one(userSettings),
 }));
 
 export const storiesRelations = relations(stories, ({ one, many }) => ({
@@ -126,6 +158,7 @@ export const storiesRelations = relations(stories, ({ one, many }) => ({
   turn: one(storyTurns),
   images: many(storyImages),
   orders: many(printOrders),
+  invitations: many(storyInvitations),
 }));
 
 export const storyParticipantsRelations = relations(storyParticipants, ({ one }) => ({
@@ -157,6 +190,30 @@ export const storyTurnsRelations = relations(storyTurns, ({ one }) => ({
   }),
   currentUser: one(users, {
     fields: [storyTurns.currentUserId],
+    references: [users.id],
+  }),
+}));
+
+export const storyInvitationsRelations = relations(storyInvitations, ({ one }) => ({
+  story: one(stories, {
+    fields: [storyInvitations.storyId],
+    references: [stories.id],
+  }),
+  inviter: one(users, {
+    fields: [storyInvitations.inviterId],
+    references: [users.id],
+    relationName: "inviter"
+  }),
+  invitee: one(users, {
+    fields: [storyInvitations.inviteeId],
+    references: [users.id],
+    relationName: "invitee"
+  }),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [userSettings.userId],
     references: [users.id],
   }),
 }));

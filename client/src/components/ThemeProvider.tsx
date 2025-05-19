@@ -35,6 +35,14 @@ function ThemeContextProvider({ children, defaultTheme = "system" }: ThemeProvid
   };
 
   const setTheme = (newTheme: Theme) => {
+    // Add a subtle fade effect during theme change
+    document.body.classList.add('theme-fade');
+    
+    // Schedule removal of the fade effect 
+    setTimeout(() => {
+      document.body.classList.remove('theme-fade');
+    }, 400); // Half the transition time to ensure it completes before the theme change
+    
     setThemeState(newTheme);
     saveUserThemePreference(newTheme);
   };

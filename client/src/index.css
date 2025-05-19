@@ -49,10 +49,36 @@
   }
 
 /* Adding smooth transition between themes */
+:root, html {
+  /* Set transition variables at the root level to ensure synchronized timing */
+  --theme-transition-duration: 800ms;
+  --theme-transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main transition for all elements */
 * {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
+  /* Apply transitions to all elements */
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: var(--theme-transition-timing);
+  transition-duration: var(--theme-transition-duration);
+}
+
+/* Special body transition when theme changes */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  z-index: 9999;
+  transition: background-color 0.3s ease;
+}
+
+body.theme-fade::before {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 @layer base {

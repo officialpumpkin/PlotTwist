@@ -5,6 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 import {
   Dialog,
@@ -46,11 +48,8 @@ export default function WritingModal({
   const [characterCount, setCharacterCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
   
-  // Rich text editing state
-  const editorRef = useRef<HTMLTextAreaElement>(null);
-  const [isBold, setIsBold] = useState(false);
-  const [isItalic, setIsItalic] = useState(false);
-  const [isUnderline, setIsUnderline] = useState(false);
+  // Rich text editor reference
+  const quillRef = useRef<ReactQuill>(null);
 
   // Get story details
   const { data: story, isLoading: storyLoading } = useQuery({
@@ -129,56 +128,21 @@ export default function WritingModal({
     }
   }, [content]);
   
-  // Rich text editing functions
-  const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
-    if (!editorRef.current) return;
-    
-    const textarea = editorRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end);
-    
-    if (start === end) {
-      // No text selected, toggle the formatting state for next input
-      switch (format) {
-        case 'bold':
-          setIsBold(!isBold);
-          break;
-        case 'italic':
-          setIsItalic(!isItalic);
-          break;
-        case 'underline':
-          setIsUnderline(!isUnderline);
-          break;
-      }
-      return;
+  // Quill editor modules and formats
+  const modules = {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+    ],
+    clipboard: {
+      matchVisual: false,
     }
-    
-    let formattedText = '';
-    let newContent = '';
-    
-    switch (format) {
-      case 'bold':
-        formattedText = `<strong>${selectedText}</strong>`;
-        break;
-      case 'italic':
-        formattedText = `<em>${selectedText}</em>`;
-        break;
-      case 'underline':
-        formattedText = `<u>${selectedText}</u>`;
-        break;
-    }
-    
-    newContent = content.substring(0, start) + formattedText + content.substring(end);
-    setContent(newContent);
-    
-    // Set selection position after applying formatting
-    setTimeout(() => {
-      textarea.focus();
-      const newPosition = start + formattedText.length;
-      textarea.setSelectionRange(start, newPosition);
-    }, 0);
   };
+  
+  const formats = [
+    'bold', 'italic', 'underline',
+    'list', 'bullet'
+  ];
 
   // Check if the word and character counts are valid
   const isValidWordCount = wordCount > 0 && 
@@ -434,20 +398,19 @@ export default function WritingModal({
 
 
                   <div className="relative flex-grow">
-                    {/* Regular textarea for input */}
-                    <textarea 
-                      ref={editorRef}
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm overflow-auto" 
-                      placeholder="Continue the story... Let your imagination flow!"
-                    ></textarea>
-                    
-                    {/* Hidden preview div to show formatted content */}
-                    <div 
-                      className="absolute top-0 left-0 w-full h-0 overflow-hidden"
-                      dangerouslySetInnerHTML={{ __html: content }}
-                    ></div>
+                    {/* React Quill Editor */}
+                    <div className="h-[120px] editor-container">
+                      <ReactQuill
+                        ref={quillRef}
+                        theme="snow"
+                        value={content}
+                        onChange={setContent}
+                        modules={modules}
+                        formats={formats}
+                        placeholder="Continue the story... Let your imagination flow!"
+                        className="h-full font-serif text-neutral-700"
+                      />
+                    </div>
                     
                     <div className="absolute bottom-2 right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">
                       <div className="flex items-center justify-end space-x-1">

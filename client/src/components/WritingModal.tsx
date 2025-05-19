@@ -47,7 +47,7 @@ export default function WritingModal({
   const [showInviteModal, setShowInviteModal] = useState(false);
   
   // Rich text editing state
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
@@ -133,49 +133,51 @@ export default function WritingModal({
   const applyFormatting = (format: 'bold' | 'italic' | 'underline') => {
     if (!editorRef.current) return;
     
-    const editorDiv = editorRef.current;
+    const textarea = editorRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
     
-    // Get selection
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
+    if (start === end) {
+      // No text selected, toggle the formatting state for next input
+      switch (format) {
+        case 'bold':
+          setIsBold(!isBold);
+          break;
+        case 'italic':
+          setIsItalic(!isItalic);
+          break;
+        case 'underline':
+          setIsUnderline(!isUnderline);
+          break;
+      }
+      return;
+    }
     
-    // Get the current range
-    const range = selection.getRangeAt(0);
-    
-    // Check if the selection is within our editor
-    if (!editorDiv.contains(range.commonAncestorContainer)) return;
-    
-    // Save selection state
-    const savedSelection = {
-      startContainer: range.startContainer,
-      startOffset: range.startOffset,
-      endContainer: range.endContainer,
-      endOffset: range.endOffset
-    };
-    
-    // Apply formatting using document.execCommand (for simplicity)
-    document.execCommand('styleWithCSS', false, 'true');
+    let formattedText = '';
+    let newContent = '';
     
     switch (format) {
       case 'bold':
-        document.execCommand('bold', false);
-        setIsBold(!isBold);
+        formattedText = `<strong>${selectedText}</strong>`;
         break;
       case 'italic':
-        document.execCommand('italic', false);
-        setIsItalic(!isItalic);
+        formattedText = `<em>${selectedText}</em>`;
         break;
       case 'underline':
-        document.execCommand('underline', false);
-        setIsUnderline(!isUnderline);
+        formattedText = `<u>${selectedText}</u>`;
         break;
     }
     
-    // Update content state
-    setContent(editorDiv.innerHTML);
+    newContent = content.substring(0, start) + formattedText + content.substring(end);
+    setContent(newContent);
     
-    // Focus the editor
-    editorDiv.focus();
+    // Set selection position after applying formatting
+    setTimeout(() => {
+      textarea.focus();
+      const newPosition = start + formattedText.length;
+      textarea.setSelectionRange(start, newPosition);
+    }, 0);
   };
 
   // Check if the word and character counts are valid
@@ -432,35 +434,19 @@ export default function WritingModal({
 
 
                   <div className="relative flex-grow">
-                    {/* Visual editor with rich text preview */}
-                    <div 
+                    {/* Regular textarea for input */}
+                    <textarea 
                       ref={editorRef}
-                      contentEditable
-                      suppressContentEditableWarning
-                      className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm overflow-auto"
-                      dangerouslySetInnerHTML={
-                        content ? 
-                          { __html: content } : 
-                          { __html: '<span class="text-neutral-400">Continue the story... Let your imagination flow!</span>' }
-                      }
-                      onInput={(e) => {
-                        const html = e.currentTarget.innerHTML;
-                        if (html.includes('Continue the story... Let your imagination flow!')) {
-                          setContent('');
-                        } else {
-                          setContent(html);
-                        }
-                      }}
-                      onFocus={(e) => {
-                        if (e.currentTarget.innerHTML.includes('Continue the story... Let your imagination flow!')) {
-                          e.currentTarget.innerHTML = '';
-                        }
-                      }}
-                      onBlur={(e) => {
-                        if (!e.currentTarget.innerHTML.trim()) {
-                          e.currentTarget.innerHTML = '<span class="text-neutral-400">Continue the story... Let your imagination flow!</span>';
-                        }
-                      }}
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      className="w-full h-[80px] p-3 font-serif text-neutral-700 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none shadow-sm overflow-auto" 
+                      placeholder="Continue the story... Let your imagination flow!"
+                    ></textarea>
+                    
+                    {/* Hidden preview div to show formatted content */}
+                    <div 
+                      className="absolute top-0 left-0 w-full h-0 overflow-hidden"
+                      dangerouslySetInnerHTML={{ __html: content }}
                     ></div>
                     
                     <div className="absolute bottom-2 right-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-right">

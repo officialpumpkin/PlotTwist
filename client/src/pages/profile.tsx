@@ -312,7 +312,21 @@ export default function ProfilePage() {
                                 variant="outline" 
                                 className="text-destructive border-destructive/30 hover:bg-destructive/10"
                                 onClick={() => {
-                                  // Implement decline invitation logic
+                                  apiRequest("POST", `/api/invitations/${invitation.id}/decline`)
+                                    .then(() => {
+                                      toast({
+                                        title: "Invitation declined",
+                                        description: "You have declined the invitation to join this story."
+                                      });
+                                      queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                                    })
+                                    .catch((error) => {
+                                      toast({
+                                        title: "Error",
+                                        description: error.message || "Failed to decline invitation",
+                                        variant: "destructive"
+                                      });
+                                    });
                                 }}
                               >
                                 Decline
@@ -320,7 +334,22 @@ export default function ProfilePage() {
                               <Button 
                                 size="sm" 
                                 onClick={() => {
-                                  // Implement accept invitation logic
+                                  apiRequest("POST", `/api/invitations/${invitation.id}/accept`)
+                                    .then(() => {
+                                      toast({
+                                        title: "Invitation accepted",
+                                        description: "You have joined the story!"
+                                      });
+                                      queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                                      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
+                                    })
+                                    .catch((error) => {
+                                      toast({
+                                        title: "Error",
+                                        description: error.message || "Failed to accept invitation",
+                                        variant: "destructive"
+                                      });
+                                    });
                                 }}
                               >
                                 Accept
@@ -349,7 +378,23 @@ export default function ProfilePage() {
                         variant={userData?.settings?.turnNotifications ? "default" : "outline"}
                         className={userData?.settings?.turnNotifications ? "" : "text-neutral-500"}
                         onClick={() => {
-                          // Implement toggle notification setting
+                          apiRequest("PATCH", "/api/users/settings/notifications", {
+                            turnNotifications: !userData?.settings?.turnNotifications
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                              toast({
+                                title: "Settings updated",
+                                description: `Turn notifications ${userData?.settings?.turnNotifications ? "disabled" : "enabled"}`
+                              });
+                            })
+                            .catch(error => {
+                              toast({
+                                title: "Error",
+                                description: error.message || "Failed to update settings", 
+                                variant: "destructive"
+                              });
+                            });
                         }}
                       >
                         {userData?.settings?.turnNotifications ? "Enabled" : "Disabled"}
@@ -365,7 +410,23 @@ export default function ProfilePage() {
                         variant={userData?.settings?.invitationNotifications ? "default" : "outline"}
                         className={userData?.settings?.invitationNotifications ? "" : "text-neutral-500"}
                         onClick={() => {
-                          // Implement toggle notification setting
+                          apiRequest("PATCH", "/api/users/settings/notifications", {
+                            invitationNotifications: !userData?.settings?.invitationNotifications
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                              toast({
+                                title: "Settings updated",
+                                description: `Invitation notifications ${userData?.settings?.invitationNotifications ? "disabled" : "enabled"}`
+                              });
+                            })
+                            .catch(error => {
+                              toast({
+                                title: "Error",
+                                description: error.message || "Failed to update settings", 
+                                variant: "destructive"
+                              });
+                            });
                         }}
                       >
                         {userData?.settings?.invitationNotifications ? "Enabled" : "Disabled"}
@@ -381,7 +442,23 @@ export default function ProfilePage() {
                         variant={userData?.settings?.completionNotifications ? "default" : "outline"}
                         className={userData?.settings?.completionNotifications ? "" : "text-neutral-500"}
                         onClick={() => {
-                          // Implement toggle notification setting
+                          apiRequest("PATCH", "/api/users/settings/notifications", {
+                            completionNotifications: !userData?.settings?.completionNotifications
+                          })
+                            .then(() => {
+                              queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+                              toast({
+                                title: "Settings updated",
+                                description: `Completion notifications ${userData?.settings?.completionNotifications ? "disabled" : "enabled"}`
+                              });
+                            })
+                            .catch(error => {
+                              toast({
+                                title: "Error",
+                                description: error.message || "Failed to update settings", 
+                                variant: "destructive"
+                              });
+                            });
                         }}
                       >
                         {userData?.settings?.completionNotifications ? "Enabled" : "Disabled"}

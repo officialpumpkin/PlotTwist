@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   username: varchar("username").unique(),
+  authProvider: varchar("auth_provider").default('local'),
+  passwordLastChanged: timestamp("password_last_changed"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

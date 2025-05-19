@@ -6,6 +6,8 @@ import {
   storyTurns,
   storyImages,
   printOrders,
+  userSettings,
+  storyInvitations,
   type User,
   type UpsertUser,
   type Story,
@@ -19,7 +21,11 @@ import {
   type StoryImage,
   type InsertStoryImage,
   type PrintOrder,
-  type InsertPrintOrder
+  type InsertPrintOrder,
+  type UserSettings,
+  type InsertUserSettings,
+  type StoryInvitation,
+  type InsertStoryInvitation
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, inArray, not, or, isNull } from "drizzle-orm";

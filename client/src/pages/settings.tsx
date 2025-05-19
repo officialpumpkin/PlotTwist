@@ -286,7 +286,22 @@ export default function SettingsPage() {
                             <AlertDialogAction 
                               className="bg-destructive text-white hover:bg-destructive/90"
                               onClick={() => {
-                                // Implement delete account logic
+                                apiRequest("DELETE", "/api/users/account")
+                                  .then(() => {
+                                    toast({
+                                      title: "Account deleted",
+                                      description: "Your account has been permanently deleted."
+                                    });
+                                    // Redirect to home page after successful deletion
+                                    window.location.href = "/";
+                                  })
+                                  .catch(error => {
+                                    toast({
+                                      title: "Error deleting account",
+                                      description: error.message,
+                                      variant: "destructive"
+                                    });
+                                  });
                               }}
                             >
                               Delete Account

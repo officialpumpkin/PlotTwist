@@ -104,8 +104,17 @@
 
 /* Extend border in writing modal */
 .writing-modal-content .border-t {
-  @apply mx-[-16px];
+  @apply mx-[-16px] px-4;
   width: calc(100% + 32px);
+  margin-top: 0;
+}
+
+/* Fix editor container and border alignment */
+.editor-container {
+  @apply mb-0 pb-6;
+  border-bottom: 1px solid rgb(243 244 246);
+  width: calc(100% + 32px);
+  margin-left: -16px;
   padding-left: 16px;
   padding-right: 16px;
 }

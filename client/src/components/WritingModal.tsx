@@ -434,7 +434,7 @@ export default function WritingModal({
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center mt-12 pt-2 border-t border-neutral-100 w-full">
+                  <div className="flex justify-between items-center pt-4 mt-2 border-t border-neutral-100 w-full">
                     <div className="flex gap-1">
                       {/* Removed custom formatting buttons since React Quill has its own toolbar */}
                       <Button 

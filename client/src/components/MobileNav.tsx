@@ -5,7 +5,8 @@ import {
   BookOpenIcon, 
   CompassIcon, 
   AddCircleIcon,
-  UserIcon
+  UserIcon,
+  HomeIcon
 } from "./assets/icons";
 import { useState } from "react";
 import NewStoryModal from "./NewStoryModal";
@@ -19,11 +20,20 @@ export default function MobileNav() {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const { isAuthenticated } = useAuth();
 
-  const navItems = [
+  // Navigation items based on authentication status
+  const authenticatedNavItems = [
     { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon className="text-xl" /> },
     { label: "My Stories", path: "/my-stories", icon: <BookOpenIcon className="text-xl" /> },
     { label: "Explore", path: "/explore", icon: <CompassIcon className="text-xl" /> },
   ];
+
+  const unauthenticatedNavItems = [
+    { label: "Home", path: "/", icon: <HomeIcon className="text-xl" /> },
+    { label: "Explore", path: "/explore", icon: <CompassIcon className="text-xl" /> },
+    { label: "Log in", path: "/login", icon: <UserIcon className="text-xl" /> },
+  ];
+
+  const navItems = isAuthenticated ? authenticatedNavItems : unauthenticatedNavItems;
 
   return (
     <>
@@ -44,7 +54,7 @@ export default function MobileNav() {
               </a>
             </Link>
           ))}
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <button 
               onClick={() => setNewStoryModal(true)} 
               className={cn(
@@ -54,14 +64,6 @@ export default function MobileNav() {
             >
               <AddCircleIcon className="text-xl" />
               <span className="text-xs mt-1">New Story</span>
-            </button>
-          ) : (
-            <button 
-              onClick={() => setShowLoginOptions(true)} 
-              className="flex flex-col items-center py-1 text-muted-foreground"
-            >
-              <UserIcon className="text-xl" />
-              <span className="text-xs mt-1">Log in</span>
             </button>
           )}
         </div>

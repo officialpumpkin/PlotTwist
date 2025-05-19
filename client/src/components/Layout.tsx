@@ -8,13 +8,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="font-sans min-h-screen flex flex-col bg-background text-foreground">
-      {/* Only show navigation when authenticated */}
-      {isAuthenticated && (
-        <>
-          <Navbar />
-          <MobileNav />
-        </>
-      )}
+      {/* Always show navigation, content will adjust based on auth state */}
+      <Navbar />
+      <MobileNav />
       <main className="flex-grow">
         {children}
       </main>

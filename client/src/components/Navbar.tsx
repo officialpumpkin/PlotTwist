@@ -4,23 +4,30 @@ import UserMenu from "./UserMenu";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { cn } from "@/lib/utils";
 import { QuillPenIcon } from "./assets/icons";
+import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const [location] = useLocation();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
-  const navItems = [
-    { label: "Dashboard", path: "/dashboard" },
-    { label: "My Stories", path: "/my-stories" },
-    { label: "Explore", path: "/explore" },
-  ];
+  // Navigation items based on authentication status
+  const navItems = isAuthenticated 
+    ? [
+        { label: "Dashboard", path: "/dashboard" },
+        { label: "My Stories", path: "/my-stories" },
+        { label: "Explore", path: "/explore" },
+      ]
+    : [
+        { label: "Home", path: "/" },
+        { label: "Explore", path: "/explore" },
+      ];
 
   return (
     <nav className="bg-background shadow-sm border-b border-border py-4 px-4 sm:px-6 lg:px-8 hidden md:block">
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
-          <Link href="/dashboard">
+          <Link href={isAuthenticated ? "/dashboard" : "/"}>
             <a className="text-xl font-bold text-primary">PlotTwist</a>
           </Link>
         </div>
@@ -43,10 +50,22 @@ export default function Navbar() {
           ))}
         </div>
         
-        {/* Theme Switcher and User Menu */}
-        <div className="flex items-center gap-2">
+        {/* Theme Switcher and User Menu/Auth Buttons */}
+        <div className="flex items-center gap-3">
           <ThemeSwitcher />
-          <UserMenu />
+          
+          {isAuthenticated ? (
+            <UserMenu />
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="ghost" size="sm">Log in</Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Sign up</Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </nav>

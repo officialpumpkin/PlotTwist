@@ -104,8 +104,9 @@ body.theme-fade::before {
 }
 
 .editor-container .ql-container {
-  @apply rounded-b-lg border border-neutral-300 font-serif text-neutral-700;
-  font-size: inherit;
+  @apply rounded-b-lg border border-neutral-300 text-neutral-700;
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
   min-height: 140px;
   border-bottom-width: 2px;
   border-bottom-right-radius: 8px;
@@ -114,12 +115,22 @@ body.theme-fade::before {
 
 .editor-container .ql-editor {
   @apply min-h-[140px] max-h-[200px] overflow-y-auto;
+  font-family: 'Courier', monospace;
+  font-size: 12pt;
 }
 
 /* Fix focus outline alignment */
 .editor-container .ql-container {
   outline: none;
   box-shadow: none;
+}
+
+/* Apply Courier 12pt to story text display areas */
+.story-content, 
+.story-segment,
+.font-serif {
+  font-family: 'Courier', monospace !important;
+  font-size: 12pt !important;
 }
 
 .editor-container .ql-container:focus-within {

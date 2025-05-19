@@ -77,25 +77,25 @@ export default function Dashboard() {
                 </p>
               </div>
               <div className="mt-4 sm:mt-0 grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
-                <div className="bg-neutral-50 rounded-lg p-4">
+                <div className="bg-card text-card-foreground rounded-lg p-4 border border-border">
                   <p className="text-2xl font-bold text-primary">
                     {(myTurnStories?.length || 0) + (waitingStories?.length || 0)}
                   </p>
-                  <p className="text-neutral-600 text-sm">Active Stories</p>
+                  <p className="text-muted-foreground text-sm">Active Stories</p>
                 </div>
-                <div className="bg-neutral-50 rounded-lg p-4">
+                <div className="bg-card text-card-foreground rounded-lg p-4 border border-border">
                   <p className="text-2xl font-bold text-accent">
                     {/* This would typically be fetched from the API */}
                     0
                   </p>
-                  <p className="text-neutral-600 text-sm">Completed</p>
+                  <p className="text-muted-foreground text-sm">Completed</p>
                 </div>
-                <div className="bg-neutral-50 rounded-lg p-4 col-span-2 sm:col-span-1">
+                <div className="bg-card text-card-foreground rounded-lg p-4 col-span-2 sm:col-span-1 border border-border">
                   <p className="text-2xl font-bold text-secondary">
                     {/* This would typically be fetched from the API */}
                     0
                   </p>
-                  <p className="text-neutral-600 text-sm">Contributors</p>
+                  <p className="text-muted-foreground text-sm">Contributors</p>
                 </div>
               </div>
             </div>
@@ -144,8 +144,8 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+          <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -156,14 +156,14 @@ export default function Dashboard() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-neutral-500"
+                className="text-muted-foreground"
               >
                 <path d="M17 7 7.11 15.81"></path>
                 <path d="M17 7v10H7V7"></path>
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-neutral-800 mb-2">No stories to continue</h3>
-            <p className="text-neutral-600 mb-6">It's not your turn in any stories at the moment.</p>
+            <h3 className="text-lg font-medium mb-2">No stories to continue</h3>
+            <p className="text-muted-foreground mb-6">It's not your turn in any stories at the moment.</p>
             <Button onClick={() => setNewStoryModal(true)}>
               Create a New Story
             </Button>
@@ -212,8 +212,8 @@ export default function Dashboard() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+          <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -224,14 +224,14 @@ export default function Dashboard() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-neutral-500"
+                className="text-muted-foreground"
               >
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-neutral-800 mb-2">No stories waiting for others</h3>
-            <p className="text-neutral-600 mb-6">Join more stories or invite friends to collaborate!</p>
+            <h3 className="text-lg font-medium mb-2">No stories waiting for others</h3>
+            <p className="text-muted-foreground mb-6">Join more stories or invite friends to collaborate!</p>
             <Button variant="outline" onClick={() => setNewStoryModal(true)}>
               Create a New Story
             </Button>

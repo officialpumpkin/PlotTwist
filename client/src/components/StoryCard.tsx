@@ -83,7 +83,7 @@ export default function StoryCard({
   });
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border overflow-hidden hover:shadow-md transition-shadow">
       <div className={cn(
         "h-2",
         status === "Your Turn" && "bg-primary",
@@ -97,7 +97,7 @@ export default function StoryCard({
           <span className={cn(
             "text-xs px-2 py-1 rounded-full",
             status === "Your Turn" && "bg-primary/10 text-primary",
-            status === "Waiting" && "bg-neutral-100 text-neutral-600",
+            status === "Waiting" && "bg-muted text-muted-foreground",
             status === "Active" && variant === "explore" && "bg-secondary/10 text-secondary",
             status === "Completed" && "bg-accent/10 text-accent",
           )}>
@@ -105,7 +105,7 @@ export default function StoryCard({
           </span>
         </div>
         
-        <p className="text-neutral-600 text-sm line-clamp-3">{story.description}</p>
+        <p className="text-muted-foreground text-sm line-clamp-3">{story.description}</p>
         
         <div className="flex items-center mt-4 text-sm text-neutral-500">
           <UserIcon className="mr-1" />

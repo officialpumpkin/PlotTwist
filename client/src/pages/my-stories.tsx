@@ -124,14 +124,14 @@ export default function MyStories() {
         </div>
         
         {/* Story Filtering & Sorting */}
-        <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-4 mb-6">
+        <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-4 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-neutral-600">Filter by:</span>
+              <span className="text-sm text-muted-foreground">Filter by:</span>
               <Button 
                 variant={filter === "all" ? "default" : "outline"}
                 size="sm"
-                className={filter === "all" ? "rounded-full" : "bg-neutral-100 text-neutral-600 rounded-full hover:bg-neutral-200"}
+                className={filter === "all" ? "rounded-full" : "bg-muted text-muted-foreground rounded-full hover:bg-muted/80"}
                 onClick={() => setFilter("all")}
               >
                 All Stories
@@ -139,7 +139,7 @@ export default function MyStories() {
               <Button 
                 variant={filter === "active" ? "default" : "outline"}
                 size="sm"
-                className={filter === "active" ? "rounded-full" : "bg-neutral-100 text-neutral-600 rounded-full hover:bg-neutral-200"}
+                className={filter === "active" ? "rounded-full" : "bg-muted text-muted-foreground rounded-full hover:bg-muted/80"}
                 onClick={() => setFilter("active")}
               >
                 Active
@@ -147,7 +147,7 @@ export default function MyStories() {
               <Button 
                 variant={filter === "completed" ? "default" : "outline"}
                 size="sm"
-                className={filter === "completed" ? "rounded-full" : "bg-neutral-100 text-neutral-600 rounded-full hover:bg-neutral-200"}
+                className={filter === "completed" ? "rounded-full" : "bg-muted text-muted-foreground rounded-full hover:bg-muted/80"}
                 onClick={() => setFilter("completed")}
               >
                 Completed
@@ -155,15 +155,15 @@ export default function MyStories() {
               <Button 
                 variant={filter === "my-turn" ? "default" : "outline"}
                 size="sm"
-                className={filter === "my-turn" ? "rounded-full" : "bg-neutral-100 text-neutral-600 rounded-full hover:bg-neutral-200"}
+                className={filter === "my-turn" ? "rounded-full" : "bg-muted text-muted-foreground rounded-full hover:bg-muted/80"}
                 onClick={() => setFilter("my-turn")}
               >
                 My Turn
               </Button>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-neutral-600">Sort by:</span>
-              <select className="text-sm border border-neutral-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
+              <span className="text-sm text-muted-foreground">Sort by:</span>
+              <select className="text-sm bg-muted text-muted-foreground border border-border rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary">
                 <option>Recently Updated</option>
                 <option>Date Created</option>
                 <option>Alphabetical</option>
@@ -230,8 +230,8 @@ export default function MyStories() {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+          <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-muted rounded-full mb-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -242,14 +242,14 @@ export default function MyStories() {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-neutral-500"
+                className="text-muted-foreground"
               >
                 <path d="M17 7 7.11 15.81"></path>
                 <path d="M17 7v10H7V7"></path>
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-neutral-800 mb-2">No stories found</h3>
-            <p className="text-neutral-600 mb-6">
+            <h3 className="text-lg font-medium mb-2">No stories found</h3>
+            <p className="text-muted-foreground mb-6">
               {searchQuery 
                 ? "No stories match your search criteria."
                 : "It looks like you haven't created or joined any stories yet."}

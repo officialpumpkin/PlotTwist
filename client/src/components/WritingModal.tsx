@@ -374,8 +374,8 @@ export default function WritingModal({
           
           {/* Fixed input area at the bottom */}
           {turn?.currentUserId === user?.id && (
-            <div className="border-t border-neutral-200 bg-white shrink-0 p-3 pb-8 h-[240px]">
-              <div className="bg-white rounded-lg shadow-sm p-3 border-2 border-neutral-200 h-full flex flex-col">
+            <div className="border-t border-neutral-200 bg-white shrink-0 p-3 pb-8 h-[260px]">
+              <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-7 w-7">
                     {user?.profileImageUrl ? (

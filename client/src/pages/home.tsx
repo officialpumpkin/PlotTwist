@@ -222,10 +222,10 @@ export default function Home() {
                 <path d="M12 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3"></path>
                 <path d="M12 21H3a2 2 0 0 1-2-2V5"></path>
               </svg>
-              <span className="text-lg font-bold">StoryWeave</span>
+              <span className="text-lg font-bold">PlotTwist</span>
             </div>
             <div className="text-sm">
-              © {new Date().getFullYear()} StoryWeave. All rights reserved.
+              © {new Date().getFullYear()} PlotTwist. All rights reserved.
             </div>
           </div>
         </div>

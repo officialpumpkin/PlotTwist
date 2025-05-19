@@ -294,15 +294,15 @@ export default function ProfilePage() {
                   {userData?.invitations?.length > 0 ? (
                     <div className="space-y-4">
                       {userData.invitations.map((invitation: any) => (
-                        <div key={invitation.id} className="bg-white border border-neutral-200 rounded-lg p-4 shadow-sm">
+                        <div key={invitation.id} className="bg-card text-card-foreground border border-border rounded-lg p-4 shadow-sm">
                           <div className="flex justify-between items-start">
                             <div>
                               <h4 className="font-medium">{invitation.storyTitle}</h4>
-                              <p className="text-sm text-neutral-600 mt-1">
+                              <p className="text-sm text-card-foreground mt-1">
                                 Invited by {invitation.inviterName} 
                                 on {new Date(invitation.createdAt).toLocaleDateString()}
                               </p>
-                              <p className="text-sm text-neutral-500 mt-2">
+                              <p className="text-sm text-muted-foreground mt-2">
                                 {invitation.storyDescription}
                               </p>
                             </div>
@@ -372,7 +372,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Story Turn Notifications</h4>
-                        <p className="text-sm text-neutral-500">Get notified when it's your turn to write</p>
+                        <p className="text-sm text-muted-foreground">Get notified when it's your turn to write</p>
                       </div>
                       <Button 
                         variant={userData?.settings?.turnNotifications ? "default" : "outline"}
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Story Invitations</h4>
-                        <p className="text-sm text-neutral-500">Get notified when you're invited to a story</p>
+                        <p className="text-sm text-muted-foreground">Get notified when you're invited to a story</p>
                       </div>
                       <Button 
                         variant={userData?.settings?.invitationNotifications ? "default" : "outline"}
@@ -436,7 +436,7 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Story Completions</h4>
-                        <p className="text-sm text-neutral-500">Get notified when a story you contributed to is completed</p>
+                        <p className="text-sm text-muted-foreground">Get notified when a story you contributed to is completed</p>
                       </div>
                       <Button 
                         variant={userData?.settings?.completionNotifications ? "default" : "outline"}

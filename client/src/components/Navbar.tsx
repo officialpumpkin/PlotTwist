@@ -1,6 +1,7 @@
 import { useLocation, Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import UserMenu from "./UserMenu";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import { cn } from "@/lib/utils";
 import { QuillPenIcon } from "./assets/icons";
 
@@ -42,8 +43,11 @@ export default function Navbar() {
           ))}
         </div>
         
-        {/* User Menu */}
-        <UserMenu />
+        {/* Theme Switcher and User Menu */}
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
+          <UserMenu />
+        </div>
       </div>
     </nav>
   );

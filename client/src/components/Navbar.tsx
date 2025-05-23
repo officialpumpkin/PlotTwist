@@ -54,10 +54,14 @@ export default function Navbar() {
         {/* User Controls */}
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-muted/30">
-              <ThemeSwitcher />
-              <NotificationBell />
-              <UserMenu />
+            <div className="flex items-center px-2 py-1 rounded-lg bg-muted/30">
+              <div className="flex items-center">
+                <ThemeSwitcher />
+                <NotificationBell />
+              </div>
+              <div className="ml-1">
+                <UserMenu />
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">

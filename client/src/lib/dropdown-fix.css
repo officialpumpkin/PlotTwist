@@ -1,20 +1,44 @@
-/* Fix for dropdown positioning issues */
-[data-radix-dropdown-menu-content] {
+/* Comprehensive fix for dropdown positioning issues */
+
+/* Force all Radix dropdowns to use proper positioning */
+[data-radix-dropdown-menu-content],
+[data-radix-popover-content],
+[data-radix-select-content],
+[data-radix-context-menu-content] {
   z-index: 9999 !important;
-  /* Let Radix handle positioning naturally */
+  position: fixed !important;
 }
 
-/* Ensure parent containers don't interfere with positioning */
-[data-radix-dropdown-menu-trigger] {
-  position: relative;
+/* Ensure triggers maintain proper positioning context */
+[data-radix-dropdown-menu-trigger],
+[data-radix-popover-trigger],
+[data-radix-select-trigger],
+[data-radix-context-menu-trigger] {
+  position: relative !important;
 }
 
-/* Prevent transform inheritance that breaks positioning */
-.dropdown-container {
+/* Target the Radix portal containers specifically */
+[data-radix-popper-content-wrapper],
+[data-radix-dropdown-menu-portal],
+[data-radix-popover-portal] {
+  z-index: 9999 !important;
+  position: fixed !important;
+}
+
+/* Override any container styles that might interfere */
+.dropdown-container,
+.dropdown-container * {
   transform: none !important;
+  position: static !important;
 }
 
-/* Better collision detection */
-[data-radix-dropdown-menu-content] {
-  --radix-dropdown-menu-content-margin: 4px;
+/* Specific fix for user menu and other dropdown triggers */
+.dropdown-container[data-radix-dropdown-menu-trigger] {
+  position: relative !important;
+}
+
+/* Ensure dropdown content appears in the correct location */
+[data-state="open"][data-radix-dropdown-menu-content] {
+  animation: none !important;
+  transform: none !important;
 }

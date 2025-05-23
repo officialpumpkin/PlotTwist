@@ -54,10 +54,16 @@ export default function Navbar() {
         {/* User Controls */}
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <div className="flex items-center px-2 py-1 rounded-lg bg-muted/30 -space-x-1">
-              <ThemeSwitcher />
-              <NotificationBell />
-              <UserMenu />
+            <div className="flex items-center px-1 py-1 rounded-lg bg-muted/30" style={{ gap: '0px' }}>
+              <div style={{ marginRight: '-12px' }}>
+                <ThemeSwitcher />
+              </div>
+              <div style={{ margin: '0 -12px' }}>
+                <NotificationBell />
+              </div>
+              <div style={{ marginLeft: '-12px' }}>
+                <UserMenu />
+              </div>
             </div>
           ) : (
             <div className="flex items-center gap-2">

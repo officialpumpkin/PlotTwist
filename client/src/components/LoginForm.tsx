@@ -26,6 +26,7 @@ export default function LoginForm() {
   const [_, navigate] = useLocation();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [emailVerificationRequired, setEmailVerificationRequired] = useState<string | null>(null);
   
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -48,23 +49,48 @@ export default function LoginForm() {
       navigate("/");
     },
     onError: (error: any) => {
+      // If email verification is required, show special UI
+      if (error.emailVerificationRequired) {
+        setEmailVerificationRequired(error.email);
+        setError(null);
+        return;
+      }
+      
       const errorMessage = error.message || "Invalid email or password.";
       setError(errorMessage);
-      
-      // If email verification is required, show special message
-      if (error.emailVerificationRequired) {
-        toast({
-          title: "Email verification required",
-          description: "Please check your email and click the verification link before logging in.",
-          variant: "default",
-        });
-      }
+      setEmailVerificationRequired(null);
+    },
+  });
+  
+  const resendVerificationMutation = useMutation({
+    mutationFn: async (email: string) => {
+      return await apiRequest("POST", "/api/auth/resend-verification", { email });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Verification email sent!",
+        description: "Please check your email for the verification link.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to send email",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
     },
   });
   
   function onSubmit(data: LoginInput) {
     setError(null);
+    setEmailVerificationRequired(null);
     loginMutation.mutate(data);
+  }
+  
+  function handleResendVerification() {
+    if (emailVerificationRequired) {
+      resendVerificationMutation.mutate(emailVerificationRequired);
+    }
   }
   
   return (
@@ -79,6 +105,32 @@ export default function LoginForm() {
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {emailVerificationRequired && (
+        <Alert className="mb-4 border-amber-200 bg-amber-50">
+          <AlertDescription className="text-amber-800">
+            <div className="space-y-3">
+              <p className="font-medium">Email verification required</p>
+              <p className="text-sm">
+                Please verify your email address before logging in. Check your inbox for a verification link.
+              </p>
+              <p className="text-sm">
+                Didn't receive the email? Check your spam folder or click below to send a new one.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleResendVerification}
+                disabled={resendVerificationMutation.isPending}
+                className="mt-2"
+              >
+                {resendVerificationMutation.isPending ? "Sending..." : "Resend verification email"}
+              </Button>
+            </div>
+          </AlertDescription>
         </Alert>
       )}
       

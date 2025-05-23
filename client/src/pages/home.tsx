@@ -15,7 +15,7 @@ export default function Home() {
     <div className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
       <section className="py-12 md:py-20">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="flex flex-col items-center text-center space-y-4">
             <div className="inline-flex items-center space-x-2 mb-2">
               <svg
@@ -66,7 +66,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="py-12 bg-white">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-neutral-900">How It Works</h2>
             <p className="text-lg text-neutral-600 mt-2">Collaborative storytelling made simple</p>
@@ -148,7 +148,7 @@ export default function Home() {
 
       {/* Showcase Section */}
       <section className="py-12">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-neutral-900">Creative Collaboration</h2>
             <p className="text-lg text-neutral-600 mt-2">
@@ -182,7 +182,7 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-12 bg-primary text-white">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="flex flex-col items-center text-center space-y-4">
             <h2 className="text-3xl font-bold">Ready to weave your story?</h2>
             <p className="text-xl max-w-prose">
@@ -202,7 +202,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-6 bg-neutral-800 text-neutral-300">
-        <div className="container px-4 md:px-6">
+        <div className="container mx-auto px-4 md:px-6 max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <svg

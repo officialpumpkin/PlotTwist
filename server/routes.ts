@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { sendWelcomeEmail, sendStoryInvitationEmail } from "./emailService";
+import { sendWelcomeEmail, sendStoryInvitationEmail, sendEmailVerification } from "./emailService";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
@@ -96,22 +96,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       
-      // Create user
+      // Generate email verification token
+      const verificationToken = nanoid(32);
+      
+      // Create user with unverified email
       const newUser = await storage.upsertUser({
         id: nanoid(),
         email,
         username,
         password: hashedPassword,
+        emailVerified: false,
+        emailVerificationToken: verificationToken,
       });
       
-      // Send welcome email (async, don't wait for it)
-      sendWelcomeEmail(email, username).catch(error => {
-        console.error('Failed to send welcome email:', error);
+      // Send verification email (async, don't wait for it)
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      sendEmailVerification(email, username, verificationToken, baseUrl).catch(error => {
+        console.error('Failed to send verification email:', error);
       });
       
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = newUser;
-      res.status(201).json(userWithoutPassword);
+      // Return user without password and verification token
+      const { password: _, emailVerificationToken: __, ...userWithoutPassword } = newUser;
+      res.status(201).json({
+        ...userWithoutPassword,
+        message: "Account created! Please check your email to verify your account before logging in."
+      });
     } catch (error) {
       console.error("Error registering user:", error);
       res.status(500).json({ message: "Failed to register user" });

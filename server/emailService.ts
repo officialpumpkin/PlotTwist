@@ -157,6 +157,59 @@ The PlotTwist Team`;
   });
 }
 
+export async function sendEmailVerification(userEmail: string, userName: string, verificationToken: string, baseUrl: string): Promise<boolean> {
+  const subject = "Verify Your PlotTwist Account";
+  const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
+  
+  const text = `Hello ${userName},
+
+Welcome to PlotTwist! Please verify your email address to complete your account setup.
+
+Click the link below to verify your email:
+${verificationUrl}
+
+This link will expire in 24 hours for security purposes.
+
+If you didn't create an account with PlotTwist, you can safely ignore this email.
+
+Best regards,
+The PlotTwist Team`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <h2 style="color: #2563eb; text-align: center;">Verify Your PlotTwist Account</h2>
+      
+      <p>Hello ${userName},</p>
+      
+      <p>Welcome to <strong>PlotTwist</strong>! Please verify your email address to complete your account setup.</p>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${verificationUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          Verify Email Address
+        </a>
+      </div>
+      
+      <p>Or copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${verificationUrl}</p>
+      
+      <p style="color: #6b7280; font-size: 14px;">This link will expire in 24 hours for security purposes.</p>
+      
+      <p style="color: #6b7280; font-size: 14px;">If you didn't create an account with PlotTwist, you can safely ignore this email.</p>
+      
+      <p style="margin-top: 30px;">Best regards,<br>
+      <strong>The PlotTwist Team</strong></p>
+    </div>
+  `;
+
+  return await sendEmail({
+    to: userEmail,
+    from: 'officialpumpkininspector@gmail.com',
+    subject,
+    text,
+    html
+  });
+}
+
 export async function sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string): Promise<boolean> {
   const subject = "Reset Your PlotTwist Password";
   

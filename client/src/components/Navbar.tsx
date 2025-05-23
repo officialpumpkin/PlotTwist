@@ -55,13 +55,13 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center px-1 py-1 rounded-lg bg-muted/30" style={{ gap: '0px' }}>
-              <div style={{ marginRight: '-12px' }}>
+              <div style={{ marginRight: '-16px' }}>
                 <ThemeSwitcher />
               </div>
-              <div style={{ margin: '0 -12px' }}>
+              <div style={{ margin: '0 -16px' }}>
                 <NotificationBell />
               </div>
-              <div style={{ marginLeft: '-12px' }}>
+              <div style={{ marginLeft: '-16px' }}>
                 <UserMenu />
               </div>
             </div>

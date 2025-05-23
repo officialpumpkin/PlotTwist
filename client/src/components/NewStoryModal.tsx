@@ -140,7 +140,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
           <DialogDescription>
@@ -149,7 +149,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 pb-4">
             <FormField
               control={form.control}
               name="title"
@@ -183,7 +183,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="genre"
@@ -290,7 +290,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="characterLimit"

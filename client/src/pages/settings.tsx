@@ -271,6 +271,25 @@ export default function SettingsPage() {
                   <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
+                        <p className="font-medium">Sign Out</p>
+                        <p className="text-sm text-muted-foreground">
+                          Sign out of your PlotTwist account
+                        </p>
+                      </div>
+                      <Button 
+                        variant="outline"
+                        onClick={() => {
+                          window.location.href = '/api/logout';
+                        }}
+                      >
+                        Sign Out
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <div>
                         <p className="font-medium">Delete Account</p>
                         <p className="text-sm text-muted-foreground">
                           Permanently delete your account and all your data

@@ -73,7 +73,7 @@ export default function NotificationBell() {
                 <Button 
                   variant="ghost" 
                   size="icon"
-                  className="relative h-9 w-9 rounded-full"
+                  className="relative h-9 w-9 rounded-full -mx-1"
                 >
                   <Bell className="h-[1.2rem] w-[1.2rem]" />
                   {pendingCount > 0 && (

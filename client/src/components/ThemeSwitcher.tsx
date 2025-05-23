@@ -13,7 +13,7 @@ export function ThemeSwitcher() {
     <Button 
       variant="ghost" 
       size="icon" 
-      className="relative h-9 w-9 rounded-full"
+      className="relative h-9 w-9 rounded-full -mx-1"
       onClick={toggleTheme}
     >
       <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

@@ -118,20 +118,20 @@ export default function StoryCard({
         </div>
         
         {showProgress && (
-          <div className="mt-4 bg-neutral-50 rounded-md p-3">
+          <div className="mt-4 bg-neutral-50 dark:bg-neutral-800 rounded-md p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <div className={cn(
                   "w-2 h-2 rounded-full mr-2",
                   story.isComplete ? "bg-accent" : "bg-secondary"
                 )}></div>
-                <span className="text-sm text-neutral-600">{story.isComplete ? "Final:" : "Progress:"}</span>
+                <span className="text-sm text-neutral-600 dark:text-neutral-400">{story.isComplete ? "Final:" : "Progress:"}</span>
               </div>
               <span className="text-sm font-medium">
                 {segments ? `${segments.length}/${story.maxSegments || 30} segments` : '0/0 segments'}
               </span>
             </div>
-            <div className="w-full bg-neutral-200 rounded-full h-2 mt-2">
+            <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mt-2">
               <div 
                 className={cn(
                   "h-2 rounded-full",

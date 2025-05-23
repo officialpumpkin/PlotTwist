@@ -41,12 +41,7 @@ export default function RegisterForm() {
       return await apiRequest("POST", "/api/auth/register", data);
     },
     onSuccess: (data: any) => {
-      toast({
-        title: "Account created!",
-        description: data.message || "Please check your email to verify your account.",
-      });
-      // Don't invalidate queries or navigate - user needs to verify email first
-      setError(null);
+      setLocation("/check-email");
     },
     onError: (error: any) => {
       setError(error.message || "Registration failed. Please try again.");

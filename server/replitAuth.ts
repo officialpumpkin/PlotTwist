@@ -223,62 +223,7 @@ export async function setupAuth(app: Express) {
     })
   );
   
-  // Local auth routes
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const { email, username, password } = req.body;
-      
-      // Check if email already exists
-      const existingUserByEmail = await storage.getUserByEmail(email);
-      if (existingUserByEmail) {
-        return res.status(400).json({ message: "Email already registered" });
-      }
-      
-      // Check if username already exists
-      const existingUserByUsername = await storage.getUserByUsername(username);
-      if (existingUserByUsername) {
-        return res.status(400).json({ message: "Username already taken" });
-      }
-      
-      // Hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      
-      // Create user with unique ID
-      const userId = `local:${nanoid()}`;
-      const newUser = await storage.upsertUser({
-        id: userId,
-        email,
-        username,
-        password: hashedPassword,
-      });
-      
-      // Log user in automatically
-      req.login({
-        claims: {
-          sub: newUser.id,
-          email: newUser.email,
-          username: newUser.username,
-        },
-        expires_at: Math.floor(Date.now() / 1000) + 3600 * 24 * 7 // 1 week
-      }, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Error logging in after registration" });
-        }
-        return res.status(201).json({ 
-          message: "Registration successful",
-          user: {
-            id: newUser.id,
-            email: newUser.email,
-            username: newUser.username
-          }
-        });
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
-    }
-  });
+  // Note: Local auth registration is handled in routes.ts to support email verification
   
   app.post("/api/auth/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {

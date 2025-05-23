@@ -48,6 +48,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   const { toast } = useToast();
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
+  const [customGenre, setCustomGenre] = useState("");
+  const [showCustomGenre, setShowCustomGenre] = useState(false);
 
   const form = useForm<z.infer<typeof storyFormSchema>>({
     resolver: zodResolver(storyFormSchema),
@@ -97,6 +99,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       form.reset();
       setInvites([]);
       setInviteEmail("");
+      setCustomGenre("");
+      setShowCustomGenre(false);
       queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
       queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
       onOpenChange(false);
@@ -186,26 +190,72 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Genre</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a genre" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Fantasy">Fantasy</SelectItem>
-                        <SelectItem value="Science Fiction">Science Fiction</SelectItem>
-                        <SelectItem value="Mystery">Mystery</SelectItem>
-                        <SelectItem value="Romance">Romance</SelectItem>
-                        <SelectItem value="Adventure">Adventure</SelectItem>
-                        <SelectItem value="Horror/Thriller">Horror/Thriller</SelectItem>
-                        <SelectItem value="Historical">Historical</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {!showCustomGenre ? (
+                      <Select 
+                        onValueChange={(value) => {
+                          if (value === "Custom") {
+                            setShowCustomGenre(true);
+                            field.onChange("");
+                          } else {
+                            field.onChange(value);
+                          }
+                        }} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a genre" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Fantasy">Fantasy</SelectItem>
+                          <SelectItem value="Science Fiction">Science Fiction</SelectItem>
+                          <SelectItem value="Mystery">Mystery</SelectItem>
+                          <SelectItem value="Romance">Romance</SelectItem>
+                          <SelectItem value="Adventure">Adventure</SelectItem>
+                          <SelectItem value="Horror/Thriller">Horror/Thriller</SelectItem>
+                          <SelectItem value="Historical">Historical</SelectItem>
+                          <SelectItem value="Comedy">Comedy</SelectItem>
+                          <SelectItem value="Drama">Drama</SelectItem>
+                          <SelectItem value="Western">Western</SelectItem>
+                          <SelectItem value="Post-Apocalyptic">Post-Apocalyptic</SelectItem>
+                          <SelectItem value="Slice of Life">Slice of Life</SelectItem>
+                          <SelectItem value="Custom">+ Create Custom Genre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input
+                            placeholder="Enter custom genre"
+                            value={customGenre}
+                            onChange={(e) => {
+                              setCustomGenre(e.target.value);
+                              field.onChange(e.target.value);
+                            }}
+                            onBlur={() => {
+                              if (!customGenre.trim()) {
+                                setShowCustomGenre(false);
+                                field.onChange("");
+                              }
+                            }}
+                            autoFocus
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setShowCustomGenre(false);
+                            setCustomGenre("");
+                            field.onChange("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}

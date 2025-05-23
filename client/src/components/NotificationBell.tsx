@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function NotificationBell() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
+
 
   // Fetch pending invitations
   const { data: invitations, refetch, isLoading } = useQuery({

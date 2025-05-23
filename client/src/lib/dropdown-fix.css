@@ -1,0 +1,26 @@
+/* Fix for dropdown positioning issues */
+[data-radix-dropdown-menu-content] {
+  position: fixed !important;
+  z-index: 9999 !important;
+  will-change: transform, opacity;
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin);
+}
+
+/* Ensure dropdowns don't inherit transform from parent elements */
+[data-radix-dropdown-menu-content] * {
+  position: relative;
+}
+
+/* Better positioning for right-aligned dropdowns */
+[data-radix-dropdown-menu-content][data-align="end"] {
+  right: 0;
+}
+
+/* Prevent layout shifts during animations */
+[data-radix-dropdown-menu-content][data-state="open"] {
+  animation-fill-mode: forwards;
+}
+
+[data-radix-dropdown-menu-content][data-state="closed"] {
+  animation-fill-mode: forwards;
+}

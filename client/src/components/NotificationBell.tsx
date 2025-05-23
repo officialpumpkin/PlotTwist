@@ -103,10 +103,8 @@ export default function NotificationBell() {
               <DropdownMenuContent 
                 align="end" 
                 className="w-72"
-                sideOffset={8}
-                avoidCollisions={false}
-                side="bottom"
-                alignOffset={0}
+                sideOffset={5}
+                collisionPadding={10}
               >
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />

@@ -69,8 +69,8 @@ export default function UserMenu() {
         <NotificationIcon className="text-xl" />
       </button>
       
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger className="flex items-center space-x-2 outline-none">
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+        <DropdownMenuTrigger className="flex items-center space-x-2 outline-none dropdown-container">
           <Avatar className="h-8 w-8">
             {user?.profileImageUrl ? (
               <AvatarImage 
@@ -90,9 +90,8 @@ export default function UserMenu() {
           align="end" 
           className="w-48" 
           sideOffset={8}
-          avoidCollisions={false}
           side="bottom"
-          alignOffset={0}
+          alignOffset={-4}
         >
           <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
             <Link href="/profile">Your Profile</Link>

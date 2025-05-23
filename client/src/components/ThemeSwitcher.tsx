@@ -22,10 +22,8 @@ export function ThemeSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        sideOffset={8}
-        alignOffset={0}
-        avoidCollisions={false}
-        side="bottom"
+        sideOffset={5}
+        collisionPadding={10}
         className="w-40"
       >
         <DropdownMenuItem onClick={() => setTheme("light")}>

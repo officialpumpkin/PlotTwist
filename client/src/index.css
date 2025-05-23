@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix dropdown positioning issues */
+[data-radix-dropdown-menu-content] {
+  position: fixed !important;
+  z-index: 9999 !important;
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
+}
+
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+  transform: none !important;
+}
+
+/* Prevent dropdowns from inheriting transforms that break positioning */
+.dropdown-container {
+  transform: none !important;
+  will-change: auto !important;
+}
+
 :root {
       --background: 0 0% 100%;
 --foreground: 20 14.3% 4.1%;

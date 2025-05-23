@@ -13,6 +13,9 @@ export default function VerifyEmail() {
     const searchParams = new URLSearchParams(location.split('?')[1]);
     const token = searchParams.get('token');
 
+    console.log('Current location:', location);
+    console.log('Extracted token:', token);
+
     if (!token) {
       setStatus('error');
       setMessage('No verification token provided');

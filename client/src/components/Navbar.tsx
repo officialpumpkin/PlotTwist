@@ -28,25 +28,25 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
-          <Link href={isAuthenticated ? "/dashboard" : "/"}>
-            <a className="text-xl font-bold text-primary">PlotTwist</a>
+          <Link href={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
+            PlotTwist
           </Link>
         </div>
         
         {/* Navigation for Desktop */}
         <div className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => (
-            <Link key={item.path} href={item.path}>
-              <a 
-                className={cn(
-                  "transition-colors",
-                  location === item.path 
-                    ? "text-primary font-medium" 
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {item.label}
-              </a>
+            <Link 
+              key={item.path} 
+              href={item.path}
+              className={cn(
+                "transition-colors",
+                location === item.path 
+                  ? "text-primary font-medium" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {item.label}
             </Link>
           ))}
         </div>
@@ -63,12 +63,12 @@ export default function Navbar() {
             <UserMenu />
           ) : (
             <div className="flex items-center gap-2">
-              <Link href="/login">
-                <Button variant="ghost" size="sm">Log in</Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm">Sign up</Button>
-              </Link>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/login">Log in</Link>
+              </Button>
+              <Button size="sm" asChild>
+                <Link href="/register">Sign up</Link>
+              </Button>
             </div>
           )}
         </div>

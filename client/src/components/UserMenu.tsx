@@ -86,16 +86,12 @@ export default function UserMenu() {
           <ArrowDownIcon className="text-neutral-500" />
         </DropdownMenuTrigger>
         
-        <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuContent align="end" className="w-48" sideOffset={8}>
           <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
-            <Link href="/profile">
-              <a>Your Profile</a>
-            </Link>
+            <Link href="/profile">Your Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
-            <Link href="/settings">
-              <a>Settings</a>
-            </Link>
+            <Link href="/settings">Settings</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer" asChild>

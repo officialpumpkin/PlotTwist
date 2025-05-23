@@ -25,9 +25,12 @@ export default function CheckEmailPage() {
             </p>
             
             <div className="space-y-4">
-              <div className="bg-muted rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">
-                  Don't see the email? Check your spam folder or wait a few minutes for it to arrive.
+              <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+                <p className="text-sm text-amber-800 dark:text-amber-200 font-medium mb-2">
+                  📧 Important: Check Your Spam Folder
+                </p>
+                <p className="text-sm text-amber-700 dark:text-amber-300">
+                  Verification emails sometimes end up in spam or junk mail folders. If you don't see the email in your inbox within a few minutes, please check your spam folder.
                 </p>
               </div>
               

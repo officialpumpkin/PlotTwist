@@ -10,10 +10,12 @@ export default function VerifyEmail() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(location.split('?')[1]);
+    // Use window.location.search to get query parameters
+    const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get('token');
 
     console.log('Current location:', location);
+    console.log('Window search:', window.location.search);
     console.log('Extracted token:', token);
 
     if (!token) {

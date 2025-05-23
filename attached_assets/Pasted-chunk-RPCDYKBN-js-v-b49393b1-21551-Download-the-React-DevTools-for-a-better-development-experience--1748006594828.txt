@@ -1,0 +1,60 @@
+chunk-RPCDYKBN.js?v=b49393b1:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+verify-email.tsx?t=1747991857677:31 Current location: /verify-email
+verify-email.tsx?t=1747991857677:32 Extracted token: null
+user:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+/api/users/settings:1 
+            
+            
+           Failed to load resource: the server responded with a status of 401 (Unauthorized)
+useAuth.ts:9 
+            
+            
+           GET https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/api/auth/user 401 (Unauthorized)
+queryFn @ useAuth.ts:9
+fetchFn @ @tanstack_react-query.js?v=b49393b1:840
+run @ @tanstack_react-query.js?v=b49393b1:494
+start @ @tanstack_react-query.js?v=b49393b1:536
+fetch @ @tanstack_react-query.js?v=b49393b1:926
+executeFetch_fn @ @tanstack_react-query.js?v=b49393b1:2211
+fetch @ @tanstack_react-query.js?v=b49393b1:2011
+refetch @ @tanstack_react-query.js?v=b49393b1:2001
+onFocus @ @tanstack_react-query.js?v=b49393b1:749
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:1112
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:1111
+batch @ @tanstack_react-query.js?v=b49393b1:583
+onFocus @ @tanstack_react-query.js?v=b49393b1:1110
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:313
+onFocus @ @tanstack_react-query.js?v=b49393b1:312
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:299
+listener @ @tanstack_react-query.js?v=b49393b1:270
+useAuth.ts:9 
+            
+            
+           GET https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/api/auth/user 401 (Unauthorized)
+queryFn @ useAuth.ts:9
+fetchFn @ @tanstack_react-query.js?v=b49393b1:840
+run @ @tanstack_react-query.js?v=b49393b1:494
+start @ @tanstack_react-query.js?v=b49393b1:536
+fetch @ @tanstack_react-query.js?v=b49393b1:926
+executeFetch_fn @ @tanstack_react-query.js?v=b49393b1:2211
+fetch @ @tanstack_react-query.js?v=b49393b1:2011
+refetch @ @tanstack_react-query.js?v=b49393b1:2001
+onFocus @ @tanstack_react-query.js?v=b49393b1:749
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:1112
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:1111
+batch @ @tanstack_react-query.js?v=b49393b1:583
+onFocus @ @tanstack_react-query.js?v=b49393b1:1110
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:313
+onFocus @ @tanstack_react-query.js?v=b49393b1:312
+(anonymous) @ @tanstack_react-query.js?v=b49393b1:299
+listener @ @tanstack_react-query.js?v=b49393b1:270
+verify-email.tsx:17 Current location: /verify-email
+verify-email.tsx:18 Window search: ?token=JeJg4CFSxD_exUixafwScRvh5FYdbjoD
+verify-email.tsx:19 Extracted token: JeJg4CFSxD_exUixafwScRvh5FYdbjoD

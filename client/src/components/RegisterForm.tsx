@@ -41,7 +41,8 @@ export default function RegisterForm() {
       return await apiRequest("POST", "/api/auth/register", data);
     },
     onSuccess: (data: any) => {
-      navigate("/check-email");
+      const email = form.getValues('email');
+      navigate(`/check-email?email=${encodeURIComponent(email)}`);
     },
     onError: (error: any) => {
       setError(error.message || "Registration failed. Please try again.");

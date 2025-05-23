@@ -6,6 +6,10 @@ import { Mail, ArrowLeft } from "lucide-react";
 
 export default function CheckEmailPage() {
   const [, setLocation] = useLocation();
+  
+  // Extract email from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const userEmail = urlParams.get('email');
 
   return (
     <Layout>
@@ -20,9 +24,19 @@ export default function CheckEmailPage() {
               Check Your Email
             </h1>
             
-            <p className="text-muted-foreground mb-6">
-              We've sent a verification link to your email address. Please check your inbox and click the link to verify your account.
-            </p>
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-3">
+                We've sent a verification link to:
+              </p>
+              {userEmail && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-3">
+                  <p className="font-medium text-foreground">{userEmail}</p>
+                </div>
+              )}
+              <p className="text-muted-foreground text-sm">
+                Please check your inbox and click the link to verify your account.
+              </p>
+            </div>
             
             <div className="space-y-4">
               <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">

@@ -52,23 +52,22 @@ export default function Navbar() {
         </div>
         
         {/* User Controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
           {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <ThemeSwitcher />
+            <>
               <NotificationBell />
               <UserMenu />
-            </div>
+            </>
           ) : (
-            <div className="flex items-center gap-2">
-              <ThemeSwitcher />
+            <>
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/login">Log in</Link>
               </Button>
               <Button size="sm" asChild>
                 <Link href="/register">Sign up</Link>
               </Button>
-            </div>
+            </>
           )}
         </div>
       </div>

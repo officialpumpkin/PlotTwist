@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { LoginInput, loginSchema } from "@shared/schema";
+import { Eye, EyeOff } from "lucide-react";
 
 import {
   Form,

@@ -40,13 +40,13 @@ export default function RegisterForm() {
     mutationFn: async (data: RegisterInput) => {
       return await apiRequest("POST", "/api/auth/register", data);
     },
-    onSuccess: () => {
+    onSuccess: (data: any) => {
       toast({
-        title: "Registration successful!",
-        description: "Your account has been created.",
+        title: "Account created!",
+        description: data.message || "Please check your email to verify your account.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/");
+      // Don't invalidate queries or navigate - user needs to verify email first
+      setError(null);
     },
     onError: (error: any) => {
       setError(error.message || "Registration failed. Please try again.");

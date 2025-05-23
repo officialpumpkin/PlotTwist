@@ -46,7 +46,17 @@ export default function LoginForm() {
       navigate("/");
     },
     onError: (error: any) => {
-      setError(error.message || "Invalid email or password.");
+      const errorMessage = error.message || "Invalid email or password.";
+      setError(errorMessage);
+      
+      // If email verification is required, show special message
+      if (error.emailVerificationRequired) {
+        toast({
+          title: "Email verification required",
+          description: "Please check your email and click the verification link before logging in.",
+          variant: "default",
+        });
+      }
     },
   });
   

@@ -37,6 +37,8 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByVerificationToken(token: string): Promise<User | undefined>;
+  verifyUserEmail(id: string): Promise<void>;
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Story operations
@@ -98,6 +100,20 @@ export class DatabaseStorage implements IStorage {
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
+  }
+
+  async getUserByVerificationToken(token: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
+    return user;
+  }
+
+  async verifyUserEmail(id: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        emailVerified: true, 
+        emailVerificationToken: null 
+      })
+      .where(eq(users.id, id));
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {

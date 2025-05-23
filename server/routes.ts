@@ -147,6 +147,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
       
+      // Check if email is verified (only for local auth)
+      if (user.authProvider === 'local' && !user.emailVerified) {
+        return res.status(400).json({ 
+          message: "Please verify your email address before logging in. Check your inbox for a verification link.",
+          emailVerificationRequired: true 
+        });
+      }
+      
       // Verify password
       const isMatch = await bcrypt.compare(password, user.password || "");
       if (!isMatch) {
@@ -167,6 +175,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error logging in user:", error);
       res.status(500).json({ message: "Failed to log in" });
+    }
+  });
+
+  // Email verification endpoint
+  app.get('/api/auth/verify-email', async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+      
+      // Find user by verification token
+      const user = await storage.getUserByVerificationToken(token);
+      if (!user) {
+        return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+      
+      // Update user to be verified
+      await storage.verifyUserEmail(user.id);
+      
+      res.json({ message: "Email verified successfully! You can now log in." });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ message: "Failed to verify email" });
     }
   });
 

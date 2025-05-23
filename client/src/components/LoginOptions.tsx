@@ -56,11 +56,15 @@ export default function LoginOptions() {
           className="w-full flex items-center justify-center"
           variant="outline"
         >
-          <img
-            src="https://replit.com/cdn-cgi/image/width=32,quality=80,format=auto/https://storage.googleapis.com/replit/images/1690813884496_e32a1f8ef400a94e6c8f6a57ff8d998f.svg"
-            alt="Replit logo"
+          <svg
+            viewBox="0 0 24 24"
             className="w-4 h-4 mr-2"
-          />
+            fill="currentColor"
+          >
+            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+            <path d="M2 17L12 22L22 17"/>
+            <path d="M2 12L12 17L22 12"/>
+          </svg>
           Continue with Replit
         </Button>
         

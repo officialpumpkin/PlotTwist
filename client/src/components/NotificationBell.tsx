@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 export default function NotificationBell() {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
-
 
   // Fetch pending invitations
   const { data: invitations, refetch, isLoading } = useQuery({
@@ -59,13 +57,6 @@ export default function NotificationBell() {
     }
   };
 
-  // Auto-close dropdown when there are no more invitations
-  useEffect(() => {
-    if (isOpen && Array.isArray(invitations) && invitations.length === 0) {
-      setIsOpen(false);
-    }
-  }, [invitations, isOpen]);
-
   if (!isAuthenticated) return null;
 
   const pendingCount = Array.isArray(invitations) ? invitations.length : 0;
@@ -110,7 +101,7 @@ export default function NotificationBell() {
                 </div>
               ) : (
                 <>
-                  {invitations.map((invitation: any) => (
+                  {(invitations as any[]).map((invitation: any) => (
                     <div key={invitation.id} className="p-3 border-b last:border-b-0">
                       <div className="text-sm mb-2">
                         <span className="font-medium">

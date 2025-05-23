@@ -51,18 +51,17 @@ export default function Navbar() {
           ))}
         </div>
         
-        {/* Notifications, Theme Switcher and User Menu/Auth Buttons */}
+        {/* User Controls */}
         <div className="flex items-center gap-3">
-          {isAuthenticated && (
-            <NotificationBell />
-          )}
-          
-          <ThemeSwitcher />
-          
           {isAuthenticated ? (
-            <UserMenu />
+            <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-muted/30">
+              <NotificationBell />
+              <ThemeSwitcher />
+              <UserMenu />
+            </div>
           ) : (
             <div className="flex items-center gap-2">
+              <ThemeSwitcher />
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/login">Log in</Link>
               </Button>

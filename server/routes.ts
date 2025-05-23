@@ -179,6 +179,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to resend verification email" });
     }
   });
+
+  // Forgot password
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      const result = z.object({
+        email: z.string().email(),
+      }).safeParse(req.body);
+
+      if (!result.success) {
+        return res.status(400).json({
+          message: "Invalid email address",
+          errors: result.error.errors,
+        });
+      }
+
+      const { email } = result.data;
+      
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        // For security, return success even if user doesn't exist
+        return res.json({ message: "If an account with that email exists, we've sent a password reset link" });
+      }
+
+      // Generate password reset token
+      const resetToken = nanoid(32);
+      
+      // Update user with reset token
+      await storage.upsertUser({
+        ...user,
+        passwordResetToken: resetToken,
+        passwordResetExpires: new Date(Date.now() + 3600000), // 1 hour expiry
+      });
+
+      // Send password reset email
+      const emailSent = await sendPasswordResetEmail(email, user.username || 'User', resetToken);
+      
+      if (emailSent) {
+        res.json({ message: "If an account with that email exists, we've sent a password reset link" });
+      } else {
+        res.status(500).json({ message: "Failed to send password reset email" });
+      }
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      res.status(500).json({ message: "Failed to send password reset email" });
+    }
+  });
   
   // Email-based login
   app.post('/api/auth/login', async (req, res) => {

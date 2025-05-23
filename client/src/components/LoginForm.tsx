@@ -144,6 +144,29 @@ export default function LoginForm() {
         </Alert>
       )}
 
+      {showForgotPassword && (
+        <Alert className="mb-4 border-blue-200 bg-blue-50">
+          <AlertDescription className="text-blue-800">
+            <div className="space-y-3">
+              <p className="font-medium">Forgot your password?</p>
+              <p className="text-sm">
+                We can send you a link to reset your password. Make sure to enter your email address above first.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleForgotPassword}
+                disabled={forgotPasswordMutation.isPending}
+                className="mt-2 border-blue-300 text-blue-700 hover:bg-blue-100"
+              >
+                {forgotPasswordMutation.isPending ? "Sending..." : "Send password reset email"}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {emailVerificationRequired && (
         <Alert className="mb-4 border-amber-200 bg-amber-50">
           <AlertDescription className="text-amber-800">

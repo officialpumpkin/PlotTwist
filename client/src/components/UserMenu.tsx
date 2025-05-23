@@ -57,7 +57,7 @@ export default function UserMenu() {
   if (!isAuthenticated) {
     return (
       <>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center">
           <Button
             onClick={() => setShowLoginOptions(true)}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
@@ -81,7 +81,7 @@ export default function UserMenu() {
       <CustomDropdown
         align="right"
         trigger={
-          <div className="flex items-center space-x-2 cursor-pointer">
+          <div className="flex items-center gap-2 cursor-pointer">
             <Avatar className="h-8 w-8">
               <AvatarImage
                 src={user?.profileImageUrl || ''}

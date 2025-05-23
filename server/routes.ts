@@ -441,14 +441,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt: expirationDate
           });
           
+          // Send invitation email
+          const inviter = await storage.getUser(inviterId);
+          if (inviter && inviteeUser.email) {
+            sendStoryInvitationEmail(
+              inviteeUser.email,
+              inviteeUser.username || 'there',
+              inviter.username || 'A collaborator',
+              story.title,
+              story.description || ''
+            ).catch(error => {
+              console.error('Failed to send invitation email:', error);
+            });
+          }
+          
           res.status(201).json({ 
             message: `Invitation sent to ${email}`,
             invitation
           });
         } else {
-          // In a real app, we would send an email invitation here
-          // For now, just return success
-          return res.status(201).json({ message: `Invitation would be sent to ${email} by email` });
+          // Create invitation with email only for non-users
+          const invitation = await storage.createStoryInvitation({
+            storyId,
+            inviterId,
+            inviteeEmail: email,
+            status: "pending",
+            token,
+            expiresAt: expirationDate
+          });
+          
+          // Send invitation email to non-user
+          const inviter = await storage.getUser(inviterId);
+          if (inviter) {
+            sendStoryInvitationEmail(
+              email,
+              'there',
+              inviter.username || 'A collaborator',
+              story.title,
+              story.description || ''
+            ).catch(error => {
+              console.error('Failed to send invitation email:', error);
+            });
+          }
+          
+          res.status(201).json({ 
+            message: `Invitation sent to ${email}`,
+            invitation
+          });
         }
       } else if (inviteType === 'username') {
         if (!username) {

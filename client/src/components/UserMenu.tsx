@@ -1,110 +1,136 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "wouter";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger, 
-} from "@/components/ui/dropdown-menu";
+import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import CustomDropdown, { DropdownItem, DropdownSeparator } from "@/components/CustomDropdown";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { NotificationIcon, ArrowDownIcon, UserIcon } from "./assets/icons";
+import { ChevronDown, User, Settings, LogOut, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LoginOptions from "./LoginOptions";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 
 export default function UserMenu() {
-  const [open, setOpen] = useState(false);
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [, navigate] = useLocation();
+  const { toast } = useToast();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      window.location.href = '/api/logout';
+    },
+  });
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", "/api/users/account");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account deleted",
+        description: "Your account has been successfully deleted.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      navigate("/");
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`;
     }
-    if (user?.username) {
-      return user.username[0].toUpperCase();
-    }
-    return "U";
+    return user?.username?.[0]?.toUpperCase() || "U";
   };
 
-  const displayName = user?.firstName 
-    ? `${user.firstName} ${user.lastName || ''}`
-    : user?.username || 'User';
-    
-  if (isLoading) {
-    return (
-      <div className="flex items-center space-x-4">
-        <div className="h-8 w-8 rounded-full bg-neutral-200 animate-pulse"></div>
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center space-x-4">
-        <Button 
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          onClick={() => setShowLoginOptions(true)}
-        >
-          <UserIcon className="h-4 w-4" />
-          <span>Log in</span>
-        </Button>
-        
+      <>
+        <div className="flex items-center space-x-3">
+          <Button
+            onClick={() => setShowLoginOptions(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+          >
+            <User className="h-4 w-4 mr-2" />
+            Login
+          </Button>
+        </div>
+
         <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="w-full max-w-md">
             <LoginOptions />
           </DialogContent>
         </Dialog>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="flex items-center space-x-4">
-      <button className="text-neutral-500 hover:text-neutral-700">
-        <NotificationIcon className="text-xl" />
-      </button>
-      
-      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-        <DropdownMenuTrigger className="flex items-center space-x-2 outline-none dropdown-container">
-          <Avatar className="h-8 w-8">
-            {user?.profileImageUrl ? (
-              <AvatarImage 
-                src={user.profileImageUrl} 
-                alt={displayName} 
-                className="object-cover"
+    <div className="flex items-center space-x-3">
+      <CustomDropdown
+        align="right"
+        trigger={
+          <div className="flex items-center space-x-2 cursor-pointer">
+            <Avatar className="h-8 w-8">
+              <AvatarImage
+                src={user?.profileImageUrl || ''}
+                alt={user?.username || 'User'}
               />
-            ) : (
-              <AvatarFallback>{getInitials()}</AvatarFallback>
-            )}
-          </Avatar>
-          <span className="hidden md:inline text-sm font-medium text-neutral-700">{displayName}</span>
-          <ArrowDownIcon className="text-neutral-500" />
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuContent 
-          align="end" 
-          className="w-48" 
-          sideOffset={8}
-          side="bottom"
-          alignOffset={-4}
+              <AvatarFallback>
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="hidden md:inline text-sm font-medium text-neutral-700 dark:text-neutral-200">
+              {user?.username || 'User'}
+            </span>
+            <ChevronDown className="h-4 w-4 text-neutral-500" />
+          </div>
+        }
+      >
+        <DropdownItem onClick={() => navigate("/profile")}>
+          <div className="flex items-center">
+            <User className="h-4 w-4 mr-2" />
+            Profile
+          </div>
+        </DropdownItem>
+        <DropdownItem onClick={() => navigate("/settings")}>
+          <div className="flex items-center">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </div>
+        </DropdownItem>
+        <DropdownSeparator />
+        <div className="px-4 py-2">
+          <ThemeSwitcher />
+        </div>
+        <DropdownSeparator />
+        <DropdownItem onClick={() => logoutMutation.mutate()}>
+          <div className="flex items-center">
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </div>
+        </DropdownItem>
+        <DropdownItem 
+          onClick={() => deleteAccountMutation.mutate()}
+          variant="destructive"
         >
-          <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
-            <Link href="/profile">Your Profile</Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer" asChild onClick={() => setOpen(false)}>
-            <Link href="/settings">Settings</Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="cursor-pointer" asChild>
-            <a href="/api/logout">Sign out</a>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <div className="flex items-center">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Account
+          </div>
+        </DropdownItem>
+      </CustomDropdown>
     </div>
   );
 }

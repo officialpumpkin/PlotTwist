@@ -2,14 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import CustomDropdown from '@/components/CustomDropdown';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -82,8 +75,10 @@ export default function NotificationBell() {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="relative">
-            <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-              <DropdownMenuTrigger asChild>
+            <CustomDropdown
+              align="right"
+              className="w-72"
+              trigger={
                 <Button 
                   variant="ghost" 
                   size="icon"
@@ -99,60 +94,55 @@ export default function NotificationBell() {
                     </Badge>
                   )}
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent 
-                align="end" 
-                className="w-72"
-                sideOffset={5}
-                collisionPadding={10}
-              >
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                
-                {isLoading ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
-                    Loading notifications...
-                  </div>
-                ) : pendingCount === 0 ? (
-                  <div className="p-4 text-center text-sm text-muted-foreground">
-                    No notifications
-                  </div>
-                ) : (
-                  <>
-                    {invitations.map((invitation: any) => (
-                      <div key={invitation.id} className="p-3 border-b">
-                        <div className="text-sm mb-2">
-                          <span className="font-medium">
-                            {invitation.inviter?.username || 'Someone'}
-                          </span>{' '}
-                          invited you to join a story:
-                          <div className="font-medium text-primary mt-1">
-                            {invitation.story?.title || 'Untitled Story'}
-                          </div>
-                        </div>
-                        <div className="flex justify-between gap-2 mt-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => handleDecline(invitation.id)}
-                          >
-                            Decline
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="w-full"
-                            onClick={() => handleAccept(invitation.id)}
-                          >
-                            Accept
-                          </Button>
+              }
+            >
+              <div className="px-4 py-3 font-medium text-sm border-b">
+                Notifications
+              </div>
+              
+              {isLoading ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  Loading notifications...
+                </div>
+              ) : pendingCount === 0 ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  No notifications
+                </div>
+              ) : (
+                <>
+                  {invitations.map((invitation: any) => (
+                    <div key={invitation.id} className="p-3 border-b last:border-b-0">
+                      <div className="text-sm mb-2">
+                        <span className="font-medium">
+                          {invitation.inviter?.username || 'Someone'}
+                        </span>{' '}
+                        invited you to join a story:
+                        <div className="font-medium text-primary mt-1">
+                          {invitation.story?.title || 'Untitled Story'}
                         </div>
                       </div>
-                    ))}
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      <div className="flex justify-between gap-2 mt-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleDecline(invitation.id)}
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          onClick={() => handleAccept(invitation.id)}
+                        >
+                          Accept
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </CustomDropdown>
           </div>
         </TooltipTrigger>
         <TooltipContent>

@@ -127,6 +127,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to register user" });
     }
   });
+
+  // Resend verification email
+  app.post("/api/auth/resend-verification", async (req: Request, res: Response) => {
+    try {
+      const result = z.object({ email: z.string().email() }).safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({
+          message: "Invalid request",
+          errors: result.error.errors,
+        });
+      }
+
+      const { email } = result.data;
+      
+      // Find user
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "No account found with this email address" });
+      }
+
+      // Check if already verified
+      if (user.emailVerified) {
+        return res.status(400).json({ message: "Email is already verified" });
+      }
+
+      // Generate new verification token
+      const verificationToken = nanoid(32);
+      
+      // Update user with new token
+      await storage.upsertUser({
+        ...user,
+        emailVerificationToken: verificationToken,
+      });
+
+      // Send verification email
+      const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || req.get('host');
+      const baseUrl = `https://${domain}`;
+      
+      const emailSent = await sendEmailVerification(email, user.username || 'User', verificationToken, baseUrl);
+      
+      if (emailSent) {
+        res.json({ message: "Verification email sent successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to send verification email" });
+      }
+    } catch (error) {
+      console.error("Error resending verification email:", error);
+      res.status(500).json({ message: "Failed to resend verification email" });
+    }
+  });
   
   // Email-based login
   app.post('/api/auth/login', async (req, res) => {
@@ -149,10 +199,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if email is verified (only for local auth)
-      if (user.authProvider === 'local' && !user.emailVerified) {
+      if (!user.emailVerified) {
         return res.status(400).json({ 
           message: "Please verify your email address before logging in. Check your inbox for a verification link.",
-          emailVerificationRequired: true 
+          emailVerificationRequired: true,
+          email: user.email
         });
       }
       

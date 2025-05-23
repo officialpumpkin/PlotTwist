@@ -5,10 +5,7 @@ import { MailIcon } from 'lucide-react';
 export default function LoginOptions() {
   const [_, navigate] = useLocation();
 
-  // Handle Replit login
-  const handleReplitLogin = () => {
-    window.location.href = '/api/login';
-  };
+
 
   // Handle Google login
   const handleGoogleLogin = () => {
@@ -51,23 +48,7 @@ export default function LoginOptions() {
           </div>
         </div>
         
-        <Button 
-          onClick={handleReplitLogin}
-          className="w-full flex items-center justify-center"
-          variant="outline"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            className="w-4 h-4 mr-2"
-            fill="currentColor"
-          >
-            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
-            <path d="M2 17L12 22L22 17"/>
-            <path d="M2 12L12 17L22 12"/>
-          </svg>
-          Continue with Replit
-        </Button>
-        
+
         <Button 
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center"

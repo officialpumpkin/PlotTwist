@@ -83,7 +83,7 @@ The PlotTwist Team`;
 
   return await sendEmail({
     to: userEmail,
-    from: 'noreply@plottwist.app', // You'll need to verify this domain in SendGrid
+    from: 'officialpumpkininspector@gmail.com',
     subject,
     text,
     html
@@ -150,7 +150,7 @@ The PlotTwist Team`;
 
   return await sendEmail({
     to: recipientEmail,
-    from: 'noreply@plottwist.app',
+    from: 'officialpumpkininspector@gmail.com',
     subject,
     text,
     html
@@ -200,7 +200,7 @@ The PlotTwist Team`;
 
   return await sendEmail({
     to: userEmail,
-    from: 'noreply@plottwist.app',
+    from: 'officialpumpkininspector@gmail.com',
     subject,
     text,
     html

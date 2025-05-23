@@ -68,7 +68,7 @@ export default function NotificationBell() {
           <div className="relative">
             <CustomDropdown
               align="right"
-              className="w-72"
+              className="w-64"
               trigger={
                 <Button 
                   variant="ghost" 

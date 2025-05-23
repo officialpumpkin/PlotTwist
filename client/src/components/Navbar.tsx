@@ -54,7 +54,7 @@ export default function Navbar() {
         {/* User Controls */}
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <div className="flex items-center px-2 py-1 rounded-lg bg-muted/30">
+            <div className="flex items-center px-2 py-1 rounded-lg bg-muted/30 -space-x-1">
               <ThemeSwitcher />
               <NotificationBell />
               <UserMenu />

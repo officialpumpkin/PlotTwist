@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { sendWelcomeEmail, sendStoryInvitationEmail, sendEmailVerification } from "./emailService";
+import { sendWelcomeEmail, sendStoryInvitationEmail, sendEmailVerification, sendPasswordResetEmail } from "./emailService";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";

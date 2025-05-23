@@ -365,13 +365,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
-      // Get all stories
-      const userStories = await storage.getStoriesByUser(userId);
+      // Get all stories where user is a participant
+      const allStories = await storage.getStories();
+      const participantStories = [];
       
-      // Get turns for these stories
+      for (const story of allStories) {
+        const isParticipant = await storage.isParticipant(story.id, userId);
+        if (isParticipant) {
+          participantStories.push(story);
+        }
+      }
+      
+      // Get turns for these stories where it's the user's turn
       const myTurnStories = [];
       
-      for (const story of userStories) {
+      for (const story of participantStories) {
         const turn = await storage.getStoryTurn(story.id);
         if (turn && turn.currentUserId === userId && !story.isComplete) {
           myTurnStories.push(story);
@@ -390,13 +398,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
-      // Get all stories
-      const userStories = await storage.getStoriesByUser(userId);
+      // Get all stories where user is a participant
+      const allStories = await storage.getStories();
+      const participantStories = [];
       
-      // Get turns for these stories
+      for (const story of allStories) {
+        const isParticipant = await storage.isParticipant(story.id, userId);
+        if (isParticipant) {
+          participantStories.push(story);
+        }
+      }
+      
+      // Get turns for these stories where it's NOT the user's turn
       const waitingStories = [];
       
-      for (const story of userStories) {
+      for (const story of participantStories) {
         const turn = await storage.getStoryTurn(story.id);
         if (turn && turn.currentUserId !== userId && !story.isComplete) {
           waitingStories.push({

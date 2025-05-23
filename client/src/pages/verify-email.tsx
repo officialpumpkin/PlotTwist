@@ -21,14 +21,17 @@ export default function VerifyEmail() {
 
     // Verify the email
     fetch(`/api/auth/verify-email?token=${token}`)
-      .then(response => response.json())
-      .then(data => {
-        if (data.message) {
-          setStatus('success');
-          setMessage(data.message);
+      .then(response => {
+        if (response.ok) {
+          return response.json().then(data => {
+            setStatus('success');
+            setMessage(data.message || 'Email verified successfully!');
+          });
         } else {
-          setStatus('error');
-          setMessage(data.message || 'Verification failed');
+          return response.json().then(data => {
+            setStatus('error');
+            setMessage(data.message || 'Verification failed');
+          });
         }
       })
       .catch(() => {

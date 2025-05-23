@@ -51,13 +51,13 @@ export default function Navbar() {
           ))}
         </div>
         
-        {/* Theme Switcher, Notifications and User Menu/Auth Buttons */}
+        {/* Notifications, Theme Switcher and User Menu/Auth Buttons */}
         <div className="flex items-center gap-3">
-          <ThemeSwitcher />
-          
           {isAuthenticated && (
             <NotificationBell />
           )}
+          
+          <ThemeSwitcher />
           
           {isAuthenticated ? (
             <UserMenu />

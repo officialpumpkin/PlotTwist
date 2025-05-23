@@ -111,10 +111,6 @@ export default function UserMenu() {
           </div>
         </DropdownItem>
         <DropdownSeparator />
-        <div className="px-4 py-2">
-          <ThemeSwitcher />
-        </div>
-        <DropdownSeparator />
         <DropdownItem onClick={() => logoutMutation.mutate()}>
           <div className="flex items-center">
             <LogOut className="h-4 w-4 mr-2" />

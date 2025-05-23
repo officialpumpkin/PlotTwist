@@ -10,7 +10,7 @@ import { ChevronDown, User, Settings, LogOut, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import LoginOptions from "./LoginOptions";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+
 
 export default function UserMenu() {
   const [showLoginOptions, setShowLoginOptions] = useState(false);

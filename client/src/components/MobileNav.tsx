@@ -8,6 +8,7 @@ import {
   UserIcon,
   HomeIcon
 } from "./assets/icons";
+import { Settings } from "lucide-react";
 import { Bell } from "lucide-react";
 import { useState } from "react";
 import NewStoryModal from "./NewStoryModal";
@@ -37,6 +38,7 @@ export default function MobileNav() {
     { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon className="text-xl" /> },
     { label: "My Stories", path: "/my-stories", icon: <BookOpenIcon className="text-xl" /> },
     { label: "Explore", path: "/explore", icon: <CompassIcon className="text-xl" /> },
+    { label: "Settings", path: "/settings", icon: <Settings className="text-xl" /> },
   ];
 
   const unauthenticatedNavItems = [

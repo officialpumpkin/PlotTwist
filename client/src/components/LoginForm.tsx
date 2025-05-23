@@ -27,6 +27,7 @@ export default function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [emailVerificationRequired, setEmailVerificationRequired] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -58,6 +59,7 @@ export default function LoginForm() {
       
       const errorMessage = error.message || "Invalid email or password.";
       setError(errorMessage);
+      setShowForgotPassword(true);
       setEmailVerificationRequired(null);
     },
   });
@@ -80,6 +82,27 @@ export default function LoginForm() {
       });
     },
   });
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: async (email: string) => {
+      return await apiRequest("POST", "/api/auth/forgot-password", { email });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password reset email sent!",
+        description: "Check your email for instructions to reset your password.",
+      });
+      setShowForgotPassword(false);
+      setError(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send password reset email.",
+        variant: "destructive",
+      });
+    },
+  });
   
   function onSubmit(data: LoginInput) {
     setError(null);
@@ -90,6 +113,19 @@ export default function LoginForm() {
   function handleResendVerification() {
     if (emailVerificationRequired) {
       resendVerificationMutation.mutate(emailVerificationRequired);
+    }
+  }
+
+  function handleForgotPassword() {
+    const email = form.getValues("email");
+    if (email) {
+      forgotPasswordMutation.mutate(email);
+    } else {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address first.",
+        variant: "destructive",
+      });
     }
   }
   

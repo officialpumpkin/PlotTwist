@@ -100,7 +100,14 @@ export default function NotificationBell() {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72">
+              <DropdownMenuContent 
+                align="end" 
+                className="w-72"
+                sideOffset={8}
+                avoidCollisions={false}
+                side="bottom"
+                alignOffset={0}
+              >
                 <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 

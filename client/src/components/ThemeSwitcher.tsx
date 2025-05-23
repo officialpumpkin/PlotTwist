@@ -24,8 +24,9 @@ export function ThemeSwitcher() {
         align="end" 
         sideOffset={8}
         alignOffset={0}
-        avoidCollisions={true}
-        className="animate-in slide-in-from-top-1 duration-300 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out"
+        avoidCollisions={false}
+        side="bottom"
+        className="w-40"
       >
         <DropdownMenuItem onClick={() => setTheme("light")}>
           <Sun className="mr-2 h-4 w-4" />

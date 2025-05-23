@@ -486,7 +486,7 @@ export default function WritingModal({
             <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center">
                 <span className="text-xs text-neutral-600 mr-2">Progress:</span>
-                <div className="w-24 sm:w-32 bg-neutral-200 rounded-full h-2">
+                <div className="w-24 sm:w-32 bg-muted rounded-full h-2">
                   <div 
                     className="bg-primary h-2 rounded-full" 
                     style={{ width: `${progress}%` }}

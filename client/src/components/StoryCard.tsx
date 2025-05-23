@@ -131,11 +131,11 @@ export default function StoryCard({
                 {segments ? `${segments.length}/${story.maxSegments || 30} segments` : '0/0 segments'}
               </span>
             </div>
-            <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mt-2">
+            <div className="w-full bg-muted rounded-full h-2 mt-2">
               <div 
                 className={cn(
                   "h-2 rounded-full",
-                  story.isComplete ? "bg-accent" : "bg-secondary"
+                  story.isComplete ? "bg-accent" : "bg-primary"
                 )} 
                 style={{ width: `${progress}%` }}
               ></div>

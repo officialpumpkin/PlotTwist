@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-background shadow-sm border-b border-border py-4 px-4 sm:px-6 lg:px-8 hidden md:block">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto flex items-center">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
           <Link href={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
@@ -34,7 +34,7 @@ export default function Navbar() {
         </div>
         
         {/* Navigation for Desktop */}
-        <div className="hidden md:flex items-center space-x-6">
+        <div className="hidden md:flex items-center space-x-6 ml-8">
           {navItems.map((item) => (
             <Link 
               key={item.path} 
@@ -50,6 +50,9 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
+        
+        {/* Spacer to push user controls to the right */}
+        <div className="flex-1"></div>
         
         {/* User Controls */}
         <div className="flex items-center gap-2">

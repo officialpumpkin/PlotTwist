@@ -110,8 +110,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Send verification email (async, don't wait for it)
-      const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || req.get('host');
-      const baseUrl = `https://${domain}`;
+      // Use the request's host as it's what the user is actually using
+      const host = req.get('host');
+      const baseUrl = `${req.protocol}://${host}`;
+      console.log(`Using baseUrl for verification: ${baseUrl}`);
       sendEmailVerification(email, username, verificationToken, baseUrl).catch(error => {
         console.error('Failed to send verification email:', error);
       });

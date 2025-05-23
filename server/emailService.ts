@@ -159,8 +159,10 @@ The PlotTwist Team`;
 
 export async function sendEmailVerification(userEmail: string, userName: string, verificationToken: string, baseUrl: string): Promise<boolean> {
   console.log(`Attempting to send verification email to: ${userEmail}`);
+  console.log(`Base URL being used: ${baseUrl}`);
   const subject = "Verify Your PlotTwist Account";
   const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
+  console.log(`Generated verification URL: ${verificationUrl}`);
   
   const text = `Hello ${userName},
 

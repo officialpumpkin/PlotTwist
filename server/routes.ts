@@ -214,11 +214,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send password reset email
+      console.log(`Attempting to send password reset email to: ${email}`);
       const emailSent = await sendPasswordResetEmail(email, user.username || 'User', resetToken);
+      console.log(`Password reset email sent result: ${emailSent}`);
       
       if (emailSent) {
         res.json({ message: "If an account with that email exists, we've sent a password reset link" });
       } else {
+        console.error("Failed to send password reset email - emailSent was false");
         res.status(500).json({ message: "Failed to send password reset email" });
       }
     } catch (error) {

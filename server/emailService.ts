@@ -214,6 +214,7 @@ The PlotTwist Team`;
 }
 
 export async function sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string): Promise<boolean> {
+  console.log(`Attempting to send password reset email to: ${userEmail}`);
   const subject = "Reset Your PlotTwist Password";
   
   const text = `Hello ${userName},

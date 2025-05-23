@@ -150,7 +150,7 @@ export default function LoginForm() {
             <div className="space-y-3">
               <p className="font-medium">Forgot your password?</p>
               <p className="text-sm">
-                We can send you a link to reset your password. Make sure to enter your email address above first.
+                We can send you a link to reset your password. Make sure to enter your email address below first.
               </p>
               <Button
                 type="button"

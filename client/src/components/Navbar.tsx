@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-background shadow-sm border-b border-border py-4 px-4 sm:px-6 lg:px-8 hidden md:block">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
           <Link href={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">

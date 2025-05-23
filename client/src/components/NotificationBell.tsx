@@ -96,8 +96,14 @@ export default function NotificationBell() {
                   Loading notifications...
                 </div>
               ) : pendingCount === 0 ? (
-                <div className="p-4 text-center text-sm text-muted-foreground">
-                  No notifications
+                <div className="p-6 text-center">
+                  <div className="text-muted-foreground mb-2">
+                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  </div>
+                  <div className="text-sm font-medium mb-1">All caught up!</div>
+                  <div className="text-xs text-muted-foreground">
+                    You'll see story invitations and updates here
+                  </div>
                 </div>
               ) : (
                 <>

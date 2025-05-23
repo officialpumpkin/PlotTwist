@@ -38,7 +38,7 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Dashboard Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-neutral-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <Button 
             onClick={() => setNewStoryModal(true)} 
             className="hidden md:flex items-center"
@@ -67,7 +67,7 @@ export default function Dashboard() {
           <CardContent className="p-6">
             <div className="sm:flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold text-neutral-800">
+                <h2 className="text-xl font-bold text-foreground">
                   Welcome back, {user?.firstName || user?.username || "Storyteller"}!
                 </h2>
                 <p className="text-neutral-600 mt-1">
@@ -103,7 +103,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Your Turn */}
-        <h2 className="text-xl font-bold text-neutral-800 mb-4">Your Turn</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Your Turn</h2>
         {myTurnLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {[1, 2, 3].map((i) => (
@@ -171,7 +171,7 @@ export default function Dashboard() {
         )}
 
         {/* Waiting for Others */}
-        <h2 className="text-xl font-bold text-neutral-800 mb-4">Waiting for Others</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Waiting for Others</h2>
         {waitingLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2].map((i) => (

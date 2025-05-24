@@ -8,12 +8,14 @@ import CustomDropdown, { DropdownItem, DropdownSeparator } from "@/components/Cu
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ChevronDown, User, Settings, LogOut, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import LoginOptions from "./LoginOptions";
 
 
 export default function UserMenu() {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
   const { toast } = useToast();
@@ -26,20 +28,22 @@ export default function UserMenu() {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("DELETE", "/api/users/account");
+      const response = await apiRequest("DELETE", "/api/users/account");
+      return response;
     },
     onSuccess: () => {
       toast({
         title: "Account deleted",
         description: "Your account has been successfully deleted.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/");
+      // Redirect to home page
+      window.location.href = "/";
     },
     onError: (error: any) => {
+      console.error("Delete account error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete account.",
+        title: "Error deleting account",
+        description: error.message || "Failed to delete account. Please try again.",
         variant: "destructive",
       });
     },
@@ -118,7 +122,7 @@ export default function UserMenu() {
           </div>
         </DropdownItem>
         <DropdownItem 
-          onClick={() => deleteAccountMutation.mutate()}
+          onClick={() => setShowDeleteConfirm(true)}
           variant="destructive"
         >
           <div className="flex items-center">
@@ -127,6 +131,33 @@ export default function UserMenu() {
           </div>
         </DropdownItem>
       </CustomDropdown>
+
+      {/* Delete Account Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account
+              and remove all your data from our servers. All your stories will be transferred
+              to other participants or made anonymous.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={() => {
+                setShowDeleteConfirm(false);
+                deleteAccountMutation.mutate();
+              }}
+              disabled={deleteAccountMutation.isPending}
+            >
+              {deleteAccountMutation.isPending ? "Deleting..." : "Delete Account"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -170,7 +170,7 @@ export default function ReadStoryModal({
                       {/* Word count */}
                       <div className="mt-3 pt-3 border-t border-border/50">
                         <p className="text-xs text-muted-foreground">
-                          {segment.content.split(/\s+/).filter(word => word.length > 0).length} words
+                          {segment.content?.split(/\s+/).filter((word: string) => word.length > 0).length || 0} words
                         </p>
                       </div>
                     </div>
@@ -178,7 +178,7 @@ export default function ReadStoryModal({
                 ))}
 
                 {/* Story Status */}
-                {story.isCompleted ? (
+                {story?.isComplete ? (
                   <div className="text-center py-8 border-t border-border">
                     <div className="bg-accent/10 text-accent px-4 py-2 rounded-full inline-flex items-center gap-2">
                       <Book className="h-4 w-4" />

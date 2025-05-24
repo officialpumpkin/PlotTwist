@@ -41,8 +41,7 @@ async function migrateProductionData() {
     prodStories.forEach(story => {
       console.log(`  - "${story.title}" by ${story.creatorId}`);
     });
-    
-    await prodPool.end();
+
     
     console.log('\n✅ Production data analysis completed!');
     console.log('📋 This data can now be migrated to your development environment.');

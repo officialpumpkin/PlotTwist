@@ -11,6 +11,8 @@ import {
   TimeIcon,
   ArrowRightIcon
 } from "./assets/icons";
+import ReadStoryModal from "./ReadStoryModal";
+import { useState } from "react";
 
 interface StoryCardProps {
   story: any;
@@ -37,6 +39,7 @@ export default function StoryCard({
 }: StoryCardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [showReadModal, setShowReadModal] = useState(false);
   
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -173,14 +176,19 @@ export default function StoryCard({
             )}
             
             {status === "Waiting" && (
-              <Button size="sm" variant="outline" className="bg-neutral-100 text-neutral-500 cursor-not-allowed">
-                {waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : 'Waiting'}
-              </Button>
+              <>
+                <Button size="sm" variant="outline" onClick={() => setShowReadModal(true)}>
+                  Read Story
+                </Button>
+                <Button size="sm" variant="outline" className="bg-neutral-100 text-neutral-500 cursor-not-allowed">
+                  {waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : 'Waiting'}
+                </Button>
+              </>
             )}
             
             {status === "Completed" && onPrint && (
               <>
-                <Button size="sm" variant="outline">Read</Button>
+                <Button size="sm" variant="outline" onClick={() => setShowReadModal(true)}>Read</Button>
                 <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={onPrint}>Print</Button>
               </>
             )}

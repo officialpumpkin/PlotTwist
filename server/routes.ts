@@ -6,6 +6,9 @@ import { sendWelcomeEmail, sendStoryInvitationEmail, sendEmailVerification, send
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
+import { db } from "./db";
+import { users } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import {
   storyFormSchema,
   serverStorySchema,
@@ -1453,16 +1456,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Anonymize the user rather than delete
       // This preserves story structure while removing personal data
-      await storage.upsertUser({
-        id: userId,
-        username: `deleted_user_${Date.now()}`,
-        email: `deleted_${Date.now()}@example.com`,
-        firstName: null,
-        lastName: null,
-        password: null,
-        profileImageUrl: null,
-        authProvider: null
-      });
+      await db
+        .update(users)
+        .set({
+          username: `deleted_user_${Date.now()}`,
+          email: `deleted_${Date.now()}@example.com`,
+          firstName: null,
+          lastName: null,
+          password: null,
+          profileImageUrl: null,
+          authProvider: null,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
       
       // Log the user out (destroy session)
       req.session.destroy((err) => {

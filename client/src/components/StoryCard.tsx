@@ -218,6 +218,13 @@ export default function StoryCard({
           </div>
         </div>
       </div>
+      
+      {/* Read Story Modal */}
+      <ReadStoryModal 
+        open={showReadModal}
+        onOpenChange={setShowReadModal}
+        storyId={story.id}
+      />
     </div>
   );
 }

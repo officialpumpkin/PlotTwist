@@ -33,6 +33,10 @@ export default function ReadStoryModal({
     enabled: open
   });
 
+  // Type-safe data with fallbacks
+  const safeSegments = Array.isArray(segments) ? segments : [];
+  const safeParticipants = Array.isArray(participants) ? participants : [];
+
   if (!story) return null;
 
   return (
@@ -46,20 +50,20 @@ export default function ReadStoryModal({
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
                 <Book className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-bold">{story.title}</h2>
+                <h2 className="text-xl font-bold">{story?.title || 'Untitled Story'}</h2>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">{story.description}</p>
+              <p className="text-sm text-muted-foreground mb-3">{story?.description || 'No description available'}</p>
               
               {/* Story Stats */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span>{participants?.length || 0} writers</span>
+                  <span>{safeParticipants.length} writers</span>
                 </div>
                 <div>
-                  {segments?.length || 0} segments
+                  {safeSegments.length} segments
                 </div>
-                {story.isCompleted && (
+                {story?.isComplete && (
                   <span className="bg-accent/10 text-accent px-2 py-1 rounded-full text-xs">
                     Completed
                   </span>
@@ -86,7 +90,7 @@ export default function ReadStoryModal({
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                 <p className="text-sm text-muted-foreground mt-2">Loading story...</p>
               </div>
-            ) : !segments || segments.length === 0 ? (
+            ) : safeSegments.length === 0 ? (
               <div className="text-center py-12">
                 <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">Story Just Started</h3>
@@ -115,10 +119,10 @@ export default function ReadStoryModal({
                 </div>
 
                 {/* Story Segments */}
-                {segments.map((segment, index) => (
+                {safeSegments.map((segment: any, index: number) => (
                   <div key={segment.id} className="relative">
                     {/* Connecting line */}
-                    {index < segments.length - 1 && (
+                    {index < safeSegments.length - 1 && (
                       <div className="absolute left-5 top-16 w-0.5 bg-border h-6 z-0"></div>
                     )}
                     

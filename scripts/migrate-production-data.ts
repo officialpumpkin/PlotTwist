@@ -1,7 +1,6 @@
-import { Pool } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '../shared/schema';
-import ws from "ws";
 
 // We'll need the production DATABASE_URL to connect to your deployed version
 const PRODUCTION_DB_URL = process.env.PRODUCTION_DATABASE_URL || process.env.DATABASE_URL;
@@ -16,11 +15,8 @@ async function migrateProductionData() {
     }
     
     // Connect to production database (your deployed app's database)
-    const prodPool = new Pool({ 
-      connectionString: PRODUCTION_DB_URL,
-      webSocketConstructor: ws 
-    });
-    const prodDb = drizzle({ client: prodPool, schema });
+    const prodSql = neon(PRODUCTION_DB_URL);
+    const prodDb = drizzle(prodSql, { schema });
     
     console.log('📡 Connected to production database');
     

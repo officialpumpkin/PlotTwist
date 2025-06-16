@@ -19,17 +19,17 @@ export default function ReadStoryModal({
   const { user } = useAuth();
 
   const { data: story } = useQuery({
-    queryKey: ['/api/stories', storyId],
+    queryKey: [`/api/stories/${storyId}`],
     enabled: open
   });
 
   const { data: segments, isLoading } = useQuery({
-    queryKey: ['/api/stories', storyId, 'segments'],
+    queryKey: [`/api/stories/${storyId}/segments`],
     enabled: open
   });
 
   const { data: participants } = useQuery({
-    queryKey: ['/api/stories', storyId, 'participants'],
+    queryKey: [`/api/stories/${storyId}/participants`],
     enabled: open
   });
 

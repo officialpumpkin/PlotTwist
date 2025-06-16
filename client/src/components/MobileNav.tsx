@@ -1,26 +1,19 @@
-import { useLocation, Link } from "wouter";
-import { cn } from "@/lib/utils";
-import { 
-  DashboardIcon, 
-  BookOpenIcon, 
-  CompassIcon, 
-  AddCircleIcon,
-  UserIcon,
-  HomeIcon
-} from "./assets/icons";
-import { Settings } from "lucide-react";
-import { Bell } from "lucide-react";
+
 import { useState } from "react";
-import NewStoryModal from "./NewStoryModal";
-import LoginOptions from "./LoginOptions";
-import MobileNotificationsDialog from "./MobileNotificationsDialog";
+import { Link } from "wouter";
+import { Menu, Bell, Plus, LogIn, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { Badge } from "@/components/ui/badge";
+import UserMenu from "./UserMenu";
+import LoginOptions from "./LoginOptions";
+import NewStoryModal from "./NewStoryModal";
+import MobileNotificationsDialog from "./MobileNotificationsDialog";
+import { QuillPenIcon } from "./assets/icons";
 
 export default function MobileNav() {
-  const [location] = useLocation();
   const [newStoryModal, setNewStoryModal] = useState(false);
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -30,74 +23,119 @@ export default function MobileNav() {
   const { data: invitations } = useQuery({
     queryKey: ['/api/invitations/pending'],
     enabled: isAuthenticated,
-    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Navigation items based on authentication status
-  const authenticatedNavItems = [
-    { label: "Dashboard", path: "/dashboard", icon: <DashboardIcon className="text-xl" /> },
-    { label: "My Stories", path: "/my-stories", icon: <BookOpenIcon className="text-xl" /> },
-    { label: "Explore", path: "/explore", icon: <CompassIcon className="text-xl" /> },
-    { label: "Settings", path: "/settings", icon: <Settings className="text-xl" /> },
-  ];
-
-  const unauthenticatedNavItems = [
-    { label: "Home", path: "/", icon: <HomeIcon className="text-xl" /> },
-    { label: "Explore", path: "/explore", icon: <CompassIcon className="text-xl" /> },
-    { label: "Log in", path: "/login", icon: <UserIcon className="text-xl" /> },
-  ];
-
-  const navItems = isAuthenticated ? authenticatedNavItems : unauthenticatedNavItems;
+  const pendingCount = invitations?.length || 0;
 
   return (
-    <>
-      <div className="md:hidden bg-background border-b border-border px-4 py-2">
-        <div className="flex justify-between">
-          {navItems.map((item) => (
-            <Link key={item.path} href={item.path}>
-              <a 
-                className={cn(
-                  "flex flex-col items-center py-1",
-                  location === item.path 
-                    ? "text-primary" 
-                    : "text-muted-foreground"
-                )}
-              >
-                {item.icon}
-                <span className="text-xs mt-1">{item.label}</span>
-              </a>
-            </Link>
-          ))}
-          {isAuthenticated && (
+    <div className="md:hidden">
+      <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center space-x-2">
+          <QuillPenIcon className="text-2xl text-primary" />
+          <Link href={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
+            PlotTwist
+          </Link>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isAuthenticated ? (
             <>
-              <button 
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setNewStoryModal(true)}
+                className="flex items-center gap-1"
+              >
+                <Plus className="h-4 w-4" />
+                New Story
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowNotifications(true)}
-                className={cn(
-                  "flex flex-col items-center py-1 relative",
-                  showNotifications ? "text-secondary" : "text-muted-foreground"
-                )}
+                className="relative"
               >
-                <Bell className="h-5 w-5" />
-                {Array.isArray(invitations) && invitations.length > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-4 w-4 flex items-center justify-center p-0 text-xs"
-                  >
-                    {invitations.length}
-                  </Badge>
+                <Bell className="h-4 w-4" />
+                {pendingCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {pendingCount}
+                  </span>
                 )}
-                <span className="text-xs mt-1">Invites</span>
-              </button>
-              <button 
-                onClick={() => setNewStoryModal(true)} 
-                className={cn(
-                  "flex flex-col items-center py-1",
-                  newStoryModal ? "text-secondary" : "text-muted-foreground"
-                )}
+              </Button>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80">
+                  <div className="flex flex-col space-y-4 pt-4">
+                    <Link href="/dashboard" className="text-lg font-medium hover:text-primary transition-colors">
+                      Dashboard
+                    </Link>
+                    <Link href="/my-stories" className="text-lg font-medium hover:text-primary transition-colors">
+                      My Stories
+                    </Link>
+                    <Link href="/explore" className="text-lg font-medium hover:text-primary transition-colors">
+                      Explore
+                    </Link>
+                    <Link href="/settings" className="text-lg font-medium hover:text-primary transition-colors">
+                      Settings
+                    </Link>
+                    <div className="pt-4 border-t">
+                      <UserMenu />
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowLoginOptions(true)}
+                className="flex items-center gap-1"
               >
-                <AddCircleIcon className="text-xl" />
-                <span className="text-xs mt-1">New Story</span>
-              </button>
+                <LogIn className="h-4 w-4" />
+                Log in
+              </Button>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80">
+                  <div className="flex flex-col space-y-4 pt-4">
+                    <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
+                      Home
+                    </Link>
+                    <Link href="/explore" className="text-lg font-medium hover:text-primary transition-colors">
+                      Explore
+                    </Link>
+                    <div className="pt-4 border-t space-y-2">
+                      <Button
+                        onClick={() => setShowLoginOptions(true)}
+                        variant="ghost"
+                        className="w-full justify-start"
+                      >
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Log in
+                      </Button>
+                      <Button asChild className="w-full">
+                        <Link href="/register">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Sign up
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </>
           )}
         </div>
@@ -115,6 +153,6 @@ export default function MobileNav() {
         open={showNotifications} 
         onOpenChange={setShowNotifications} 
       />
-    </>
+    </div>
   );
 }

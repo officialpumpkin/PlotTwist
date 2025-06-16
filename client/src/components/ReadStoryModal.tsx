@@ -119,7 +119,9 @@ export default function ReadStoryModal({
                 </div>
 
                 {/* Story Segments */}
-                {safeSegments.map((segment: any, index: number) => (
+                {safeSegments
+                  .sort((a: any, b: any) => a.turn - b.turn)
+                  .map((segment: any, index: number) => (
                   <div key={segment.id} className="relative">
                     {/* Connecting line */}
                     {index < safeSegments.length - 1 && (
@@ -140,7 +142,7 @@ export default function ReadStoryModal({
                             />
                           ) : (
                             <AvatarFallback className="bg-secondary text-secondary-foreground">
-                              {segment.user?.username?.charAt(0)?.toUpperCase() || "?"}
+                              {segment.user?.username?.charAt(0)?.toUpperCase() || segment.user?.firstName?.charAt(0)?.toUpperCase() || "?"}
                             </AvatarFallback>
                           )}
                         </Avatar>
@@ -162,15 +164,16 @@ export default function ReadStoryModal({
                       </div>
                       
                       <div className="prose prose-sm max-w-none">
-                        <p className="text-foreground leading-relaxed whitespace-pre-wrap mb-0">
-                          {segment.content}
-                        </p>
+                        <div 
+                          className="text-foreground leading-relaxed whitespace-pre-wrap mb-0"
+                          dangerouslySetInnerHTML={{ __html: segment.content || '' }}
+                        />
                       </div>
                       
                       {/* Word count */}
                       <div className="mt-3 pt-3 border-t border-border/50">
                         <p className="text-xs text-muted-foreground">
-                          {segment.content?.split(/\s+/).filter((word: string) => word.length > 0).length || 0} words
+                          {segment.wordCount || segment.content?.split(/\s+/).filter((word: string) => word.length > 0).length || 0} words
                         </p>
                       </div>
                     </div>

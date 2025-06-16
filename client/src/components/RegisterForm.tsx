@@ -25,7 +25,7 @@ export default function RegisterForm() {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
   const [error, setError] = useState<string | null>(null);
-  
+
   const form = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -35,7 +35,7 @@ export default function RegisterForm() {
       confirmPassword: "",
     },
   });
-  
+
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterInput) => {
       return await apiRequest("POST", "/api/auth/register", data);
@@ -48,12 +48,14 @@ export default function RegisterForm() {
       setError(error.message || "Registration failed. Please try again.");
     },
   });
-  
+
   function onSubmit(data: RegisterInput) {
     setError(null);
     registerMutation.mutate(data);
   }
-  
+
+  const isLoading = registerMutation.isPending;
+
   return (
     <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-sm border border-neutral-200">
       <div className="mb-6 text-center">
@@ -62,13 +64,13 @@ export default function RegisterForm() {
           Join PlotTwist to start collaborating on stories
         </p>
       </div>
-      
+
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -90,7 +92,7 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="username"
@@ -109,7 +111,7 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -129,7 +131,7 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -149,17 +151,17 @@ export default function RegisterForm() {
               </FormItem>
             )}
           />
-          
+
           <Button
             type="submit"
-            className="w-full mt-6"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold mt-6"
             disabled={registerMutation.isPending}
           >
             {registerMutation.isPending ? "Creating Account..." : "Create Account"}
           </Button>
         </form>
       </Form>
-      
+
       <div className="mt-6 text-center text-sm">
         <p className="text-neutral-600">
           Already have an account?{" "}

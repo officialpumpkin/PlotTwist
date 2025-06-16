@@ -181,7 +181,7 @@ export default function StoryCard({
             
             {status === "Waiting" && (
               <>
-                <Button size="sm" variant="outline" onClick={() => setShowReadModal(true)}>
+                <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
                   Read Story
                 </Button>
                 <Button size="sm" variant="outline" className="bg-neutral-100 text-neutral-500 cursor-not-allowed">
@@ -192,15 +192,15 @@ export default function StoryCard({
             
             {status === "Completed" && onPrint && (
               <>
-                <Button size="sm" variant="outline" onClick={() => setShowReadModal(true)}>Read</Button>
-                <Button size="sm" className="bg-accent hover:bg-accent/90" onClick={onPrint}>Print</Button>
+                <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>Read</Button>
+                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onPrint}>Print</Button>
               </>
             )}
             
             {variant === "explore" && onJoin && (
               <Button 
                 size="sm" 
-                className={status === "Completed" ? "bg-accent hover:bg-accent/90" : "bg-secondary hover:bg-secondary/90"}
+                className={status === "Completed" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-primary text-primary-foreground hover:bg-primary/90"}
                 onClick={onJoin}
               >
                 Join Story

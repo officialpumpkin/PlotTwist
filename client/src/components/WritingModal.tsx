@@ -47,7 +47,7 @@ export default function WritingModal({
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
-  
+
   // Rich text editor reference
   const quillRef = useRef<ReactQuill>(null);
 
@@ -127,7 +127,7 @@ export default function WritingModal({
       setCharacterCount(textContent.length);
     }
   }, [content]);
-  
+
   // Quill editor modules and formats
   const modules = {
     toolbar: [
@@ -138,7 +138,7 @@ export default function WritingModal({
       matchVisual: false,
     }
   };
-  
+
   const formats = [
     'bold', 'italic', 'underline',
     'list', 'bullet'
@@ -147,15 +147,15 @@ export default function WritingModal({
   // Check if the word and character counts are valid
   const isValidWordCount = wordCount > 0 && 
     story && wordCount <= (story.wordLimit || 100);
-    
+
   const isValidCharacterCount = characterCount > 0 && 
     (!story?.characterLimit || characterCount <= story.characterLimit);
-    
+
   const isValidContribution = isValidWordCount && isValidCharacterCount;
 
   // Sort segments by turn number
   const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
-  
+
   // Get recent segments (up to 5 most recent)
   const recentSegments = sortedSegments?.slice(-5);
 
@@ -195,7 +195,7 @@ export default function WritingModal({
       <DialogContent className="sm:max-w-3xl p-0 h-[95vh] flex flex-col writing-modal-content" aria-describedby="writing-modal-description">
         <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
         <h2 className="sr-only">Story Writing Interface</h2>
-        
+
         {/* Split into 3 fixed-height sections: header, scrollable content, footer */}
         <div className="flex flex-col h-full">
           {/* Fixed Story Header - absolute height */}
@@ -221,7 +221,7 @@ export default function WritingModal({
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <div className="flex items-center text-xs text-neutral-600">
                 <svg
@@ -279,7 +279,7 @@ export default function WritingModal({
               )}
             </div>
           </div>
-          
+
           {/* Scrollable Story Content - takes remaining space minus header and input form */}
           <div className="overflow-y-auto bg-muted/30 flex-grow">
             <div className="p-4 max-w-3xl mx-auto space-y-4">
@@ -311,7 +311,7 @@ export default function WritingModal({
                 <div className="font-serif text-foreground leading-relaxed">
                   <h3 className="text-lg font-semibold mb-2">{story?.title}</h3>
                   <p className="italic">{story?.description}</p>
-                  
+
                   {recentSegments?.length === 0 && (
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-sm text-muted-foreground">It's time to begin the story! You're the first contributor.</p>
@@ -319,7 +319,7 @@ export default function WritingModal({
                   )}
                 </div>
               </div>
-              
+
               {/* Previous Content with connecting lines to show the story flow */}
               <div className="relative">
                 {recentSegments?.map((segment, index) => (
@@ -328,7 +328,7 @@ export default function WritingModal({
                     {index < (recentSegments?.length || 0) - 1 && (
                       <div className="absolute left-4 top-16 w-0.5 bg-border h-6 z-0"></div>
                     )}
-                    
+
                     <div className={`bg-background rounded-lg shadow-sm p-4 border mb-5 relative z-10 ${
                       segment.userId === user?.id 
                         ? "border-primary/30 bg-primary/5" 
@@ -377,7 +377,7 @@ export default function WritingModal({
               </div>
             </div>
           </div>
-          
+
           {/* Fixed input area at the bottom */}
           {turn?.currentUserId === user?.id && (
             <div className="border-t border-border bg-background shrink-0 p-4 h-[280px]">
@@ -400,7 +400,7 @@ export default function WritingModal({
                     <p className="text-xs text-muted-foreground">Turn {turn.currentTurn} • Now</p>
                   </div>
                 </div>
-                
+
                 <div className="flex-grow flex flex-col">
                   {/* React Quill Editor */}
                   <div className="flex-grow mb-3">
@@ -416,7 +416,7 @@ export default function WritingModal({
                       style={{ height: '120px' }}
                     />
                   </div>
-                  
+
                   {/* Word/Character Count */}
                   <div className="flex justify-end mb-3">
                     <div className="bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border text-right">
@@ -427,7 +427,7 @@ export default function WritingModal({
                         </span>
                         <span className="text-xs text-muted-foreground">/{story?.wordLimit}</span>
                       </div>
-                      
+
                       {story?.characterLimit > 0 && (
                         <div className="flex items-center space-x-1 mt-1">
                           <span className="text-xs text-muted-foreground">Chars:</span>
@@ -439,7 +439,7 @@ export default function WritingModal({
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Action Buttons */}
                   <div className="flex justify-between items-center pt-3 border-t border-border">
                     <div className="flex gap-1">
@@ -454,7 +454,7 @@ export default function WritingModal({
                         <span>Invite</span>
                       </Button>
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <Button 
                         size="sm" 
@@ -486,7 +486,7 @@ export default function WritingModal({
               </div>
             </div>
           )}
-          
+
           {/* Story Progress - Fixed height footer */}
           <div className="p-3 border-t border-border bg-background shrink-0 h-[70px]">
             <div className="flex flex-wrap items-center justify-between">
@@ -502,7 +502,7 @@ export default function WritingModal({
                   {segments?.length || 0}/{story?.maxSegments || 30}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {story?.creatorId === user?.id && !story?.isComplete && (
                   <Button 
@@ -515,7 +515,7 @@ export default function WritingModal({
                     Invite
                   </Button>
                 )}
-                
+
                 {story?.creatorId === user?.id && progress >= 80 && onComplete && (
                   <Button 
                     variant="outline" 
@@ -532,7 +532,7 @@ export default function WritingModal({
           </div>
         </div>
       </DialogContent>
-      
+
       {/* Invite collaborator modal */}
       <InviteCollaboratorModal 
         open={showInviteModal} 

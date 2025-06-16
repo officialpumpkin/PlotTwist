@@ -28,7 +28,7 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailVerificationRequired, setEmailVerificationRequired] = useState<string | null>(null);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  
+
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -36,7 +36,7 @@ export default function LoginForm() {
       password: "",
     },
   });
-  
+
   const loginMutation = useMutation({
     mutationFn: async (data: LoginInput) => {
       return await apiRequest("POST", "/api/auth/login", data);
@@ -56,14 +56,14 @@ export default function LoginForm() {
         setError(null);
         return;
       }
-      
+
       const errorMessage = error.message || "Invalid email or password.";
       setError(errorMessage);
       setShowForgotPassword(true);
       setEmailVerificationRequired(null);
     },
   });
-  
+
   const resendVerificationMutation = useMutation({
     mutationFn: async (email: string) => {
       return await apiRequest("POST", "/api/auth/resend-verification", { email });
@@ -103,13 +103,13 @@ export default function LoginForm() {
       });
     },
   });
-  
+
   function onSubmit(data: LoginInput) {
     setError(null);
     setEmailVerificationRequired(null);
     loginMutation.mutate(data);
   }
-  
+
   function handleResendVerification() {
     if (emailVerificationRequired) {
       resendVerificationMutation.mutate(emailVerificationRequired);
@@ -128,7 +128,7 @@ export default function LoginForm() {
       });
     }
   }
-  
+
   return (
     <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-sm border border-neutral-200">
       <div className="mb-6 text-center">
@@ -137,7 +137,7 @@ export default function LoginForm() {
           Log in to your PlotTwist account
         </p>
       </div>
-      
+
       {error && (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>{error}</AlertDescription>
@@ -192,7 +192,7 @@ export default function LoginForm() {
           </AlertDescription>
         </Alert>
       )}
-      
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -214,7 +214,7 @@ export default function LoginForm() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -251,17 +251,17 @@ export default function LoginForm() {
               </FormItem>
             )}
           />
-          
+
           <Button
             type="submit"
-            className="w-full mt-6"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
             disabled={loginMutation.isPending}
           >
             {loginMutation.isPending ? "Logging in..." : "Log in"}
           </Button>
         </form>
       </Form>
-      
+
       <div className="mt-6 text-center text-sm">
         <p className="text-neutral-600">
           Don't have an account?{" "}

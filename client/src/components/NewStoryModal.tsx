@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -68,7 +68,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
     mutationFn: async (values: z.infer<typeof storyFormSchema>) => {
       // Create the story first
       const story = await apiRequest<Story>("POST", "/api/stories", values);
-      
+
       // If we have invites, send them after creating the story
       if (invites.length > 0 && story && story.id) {
         try {
@@ -86,7 +86,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
           // We'll continue even if some invites fail
         }
       }
-      
+
       return story;
     },
     onSuccess: () => {
@@ -113,10 +113,10 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       });
     },
   });
-  
+
   const addInvite = () => {
     if (!inviteEmail.trim()) return;
-    
+
     // Simple validation for email or username
     if (!invites.includes(inviteEmail)) {
       setInvites([...invites, inviteEmail.trim()]);
@@ -129,7 +129,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       });
     }
   };
-  
+
   const removeInvite = (invite: string) => {
     setInvites(invites.filter(i => i !== invite));
   };
@@ -398,7 +398,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                   Add
                 </Button>
               </div>
-              
+
               {invites.length > 0 && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-500 mb-2">Invitees:</p>
@@ -434,6 +434,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
               <Button 
                 type="submit"
                 disabled={createStoryMutation.isPending}
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
               >
                 {createStoryMutation.isPending ? "Creating..." : "Create Story"}
               </Button>

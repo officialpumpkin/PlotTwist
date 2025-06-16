@@ -140,8 +140,7 @@ export default function Explore() {
                 <h3 className="text-2xl font-bold text-white mb-2">{featuredStories[0].title}</h3>
                 <p className="text-neutral-100 mb-4 max-w-3xl">{featuredStories[0].description}</p>
                 <Button 
-                  variant="secondary" 
-                  className="w-max"
+                  className="w-max bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" 
                   onClick={() => handleJoinStory(featuredStories[0].id)}
                 >
                   Join Story
@@ -267,11 +266,11 @@ export default function Explore() {
                 : "Be the first to create a story!"}
             </p>
             {isAuthenticated ? (
-              <Button asChild>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" asChild>
                 <a href="/dashboard">Create Your First Story</a>
               </Button>
             ) : (
-              <Button asChild>
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" asChild>
                 <a href="/api/login">Sign in to Create Stories</a>
               </Button>
             )}

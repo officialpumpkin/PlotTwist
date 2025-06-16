@@ -25,7 +25,7 @@ export default function MobileNav() {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const { isAuthenticated } = useAuth();
-  
+
   // Fetch pending invitations
   const { data: invitations } = useQuery({
     queryKey: ['/api/invitations/pending'],
@@ -104,13 +104,13 @@ export default function MobileNav() {
       </div>
 
       <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
-      
+
       <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
         <DialogContent className="sm:max-w-md">
           <LoginOptions />
         </DialogContent>
       </Dialog>
-      
+
       <MobileNotificationsDialog 
         open={showNotifications} 
         onOpenChange={setShowNotifications} 

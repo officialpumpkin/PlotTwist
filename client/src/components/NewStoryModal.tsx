@@ -5,7 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { NewStoryInput, newStorySchema } from "@shared/schema";
+import { storyFormSchema, Story } from "@shared/schema";
+import { z } from "zod";
 
 import {
   Dialog,

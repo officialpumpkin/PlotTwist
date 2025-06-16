@@ -34,6 +34,8 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   username: varchar("username").unique(),
+  originalUsername: varchar("original_username"), // Stores original username for deleted users
+  isDeleted: boolean("is_deleted").default(false),
   authProvider: varchar("auth_provider").default('local'),
   emailVerified: boolean("email_verified").default(false),
   emailVerificationToken: varchar("email_verification_token"),

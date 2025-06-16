@@ -142,14 +142,20 @@ export default function ReadStoryModal({
                             />
                           ) : (
                             <AvatarFallback className="bg-secondary text-secondary-foreground">
-                              {segment.user?.username?.charAt(0)?.toUpperCase() || segment.user?.firstName?.charAt(0)?.toUpperCase() || "?"}
+                              {segment.user?.isDeleted 
+                                ? (segment.user?.originalUsername?.charAt(0)?.toUpperCase() || "?")
+                                : (segment.user?.username?.charAt(0)?.toUpperCase() || segment.user?.firstName?.charAt(0)?.toUpperCase() || "?")
+                              }
                             </AvatarFallback>
                           )}
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium">
-                              {segment.user?.firstName || segment.user?.username || "Anonymous"}
+                              {segment.user?.isDeleted 
+                                ? `${segment.user?.originalUsername || segment.user?.username || "Unknown User"} (deleted)`
+                                : (segment.user?.firstName || segment.user?.username || "Anonymous")
+                              }
                             </h4>
                             {segment.userId === user?.id && (
                               <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">

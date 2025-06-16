@@ -1459,6 +1459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db
         .update(users)
         .set({
+          originalUsername: user.username, // Preserve original username
           username: `deleted_user_${Date.now()}`,
           email: `deleted_${Date.now()}@example.com`,
           firstName: null,
@@ -1466,6 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           password: null,
           profileImageUrl: null,
           authProvider: null,
+          isDeleted: true,
           updatedAt: new Date()
         })
         .where(eq(users.id, userId));

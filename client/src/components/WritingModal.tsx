@@ -343,7 +343,10 @@ export default function WritingModal({
                             />
                           ) : (
                             <AvatarFallback className={segment.userId === user?.id ? "bg-primary text-white" : ""}>
-                              {segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U"}
+                              {segment.user?.isDeleted 
+                                ? (segment.user?.originalUsername?.[0] || "U")
+                                : (segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U")
+                              }
                             </AvatarFallback>
                           )}
                         </Avatar>
@@ -351,7 +354,10 @@ export default function WritingModal({
                           <p className="font-medium text-neutral-800">
                             {segment.userId === user?.id 
                               ? "You" 
-                              : (segment.user?.firstName || segment.user?.username || "Unknown User")}
+                              : segment.user?.isDeleted 
+                                ? `${segment.user?.originalUsername || segment.user?.username || "Unknown User"} (deleted)`
+                                : (segment.user?.firstName || segment.user?.username || "Unknown User")
+                            }
                           </p>
                           <div className="flex items-center gap-2 text-xs text-neutral-500">
                             <span className="bg-neutral-100 px-2 py-0.5 rounded-full">Turn {segment.turn}</span>

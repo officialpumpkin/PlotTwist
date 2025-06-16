@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useForm } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
-import { apiRequest } from "@/lib/queryClient";
-import { z } from "zod";
-import { storyFormSchema, Story } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { NewStoryInput, newStorySchema } from "@shared/schema";
 
 import {
   Dialog,

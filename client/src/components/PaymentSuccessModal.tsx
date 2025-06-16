@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckIcon } from "./assets/icons";

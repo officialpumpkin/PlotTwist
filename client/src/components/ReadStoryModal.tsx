@@ -1,4 +1,8 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
@@ -43,7 +47,7 @@ export default function ReadStoryModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl p-0 h-[90vh] flex flex-col" aria-describedby="read-story-description">
         <div className="sr-only" id="read-story-description">Reading story content</div>
-        
+
         {/* Header */}
         <div className="p-6 border-b border-border shrink-0 bg-background">
           <div className="flex justify-between items-start">
@@ -53,7 +57,7 @@ export default function ReadStoryModal({
                 <h2 className="text-xl font-bold">{story?.title || 'Untitled Story'}</h2>
               </div>
               <p className="text-sm text-muted-foreground mb-3">{story?.description || 'No description available'}</p>
-              
+
               {/* Story Stats */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
@@ -70,8 +74,8 @@ export default function ReadStoryModal({
                 )}
               </div>
             </div>
-            
-            
+
+
           </div>
         </div>
 
@@ -120,7 +124,7 @@ export default function ReadStoryModal({
                     {index < safeSegments.length - 1 && (
                       <div className="absolute left-5 top-16 w-0.5 bg-border h-6 z-0"></div>
                     )}
-                    
+
                     <div className={`bg-background rounded-lg border p-6 relative z-10 ${
                       segment.userId === user?.id 
                         ? "border-primary/30 bg-primary/5" 
@@ -161,14 +165,14 @@ export default function ReadStoryModal({
                           </p>
                         </div>
                       </div>
-                      
+
                       <div className="prose prose-sm max-w-none">
                         <div 
                           className="text-foreground leading-relaxed whitespace-pre-wrap mb-0"
                           dangerouslySetInnerHTML={{ __html: segment.content || '' }}
                         />
                       </div>
-                      
+
                       {/* Word count */}
                       <div className="mt-3 pt-3 border-t border-border/50">
                         <p className="text-xs text-muted-foreground">
@@ -202,7 +206,7 @@ export default function ReadStoryModal({
           </div>
         </div>
 
-        
+
       </DialogContent>
     </Dialog>
   );

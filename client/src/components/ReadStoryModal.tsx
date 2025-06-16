@@ -58,7 +58,7 @@ export default function ReadStoryModal({
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Users className="h-4 w-4" />
-                  <span>{safeParticipants.length} writers</span>
+                  <span>{safeParticipants.length} participants</span>
                 </div>
                 <div>
                   {safeSegments.length} segments

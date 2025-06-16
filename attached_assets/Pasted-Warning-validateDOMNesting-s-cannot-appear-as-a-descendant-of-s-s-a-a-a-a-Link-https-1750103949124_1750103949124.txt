@@ -1,0 +1,21 @@
+Warning: validateDOMNesting(...): %s cannot appear as a descendant of <%s>.%s <a> a 
+a
+a
+Link<@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ec32501d:220:18
+div
+div
+MobileNav@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/src/components/MobileNav.tsx:40:22
+div
+Layout@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/src/components/Layout.tsx:21:31
+LoginPage@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/src/pages/login.tsx:24:31
+Route@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ec32501d:206:13
+Switch@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=ec32501d:262:14
+Router@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/src/App.tsx?v=eG8E7wR8yyAy6oujvXsfF:38:42
+Provider@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-U27FYV5Z.js?v=ec32501d:38:47
+TooltipProvider@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=ec32501d:69:7
+ThemeContextProvider@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/src/components/ThemeProvider.tsx:22:30
+V@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/next-themes.js?v=ec32501d:44:9
+J@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/next-themes.js?v=ec32501d:42:18
+ThemeProvider@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/src/components/ThemeProvider.tsx:59:30
+QueryClientProvider@https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=ec32501d:2931:27
+App

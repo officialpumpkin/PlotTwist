@@ -281,12 +281,12 @@ export default function WritingModal({
           </div>
           
           {/* Scrollable Story Content - takes remaining space minus header and input form */}
-          <div className="overflow-y-auto bg-neutral-50 flex-grow">
+          <div className="overflow-y-auto bg-muted/30 flex-grow">
             <div className="p-4 max-w-3xl mx-auto space-y-4">
               {/* Original Story Prompt - Always show this */}
-              <div className="bg-white rounded-lg shadow-sm p-4 border border-neutral-200 mb-5">
+              <div className="bg-background rounded-lg shadow-sm p-4 border border-primary/20 mb-5">
                 <div className="flex items-start space-x-3 mb-2">
-                  <div className="h-8 w-8 flex items-center justify-center bg-primary text-white rounded-full ring-2 ring-white">
+                  <div className="h-8 w-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full ring-2 ring-background">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                       <circle cx="12" cy="12" r="10"></circle>
                       <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -294,9 +294,9 @@ export default function WritingModal({
                     </svg>
                   </div>
                   <div>
-                    <p className="font-medium text-neutral-800">Story Prompt</p>
-                    <div className="flex items-center gap-2 text-xs text-neutral-500">
-                      <span className="bg-neutral-100 px-2 py-0.5 rounded-full">
+                    <p className="font-medium text-foreground">Story Prompt</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="bg-secondary px-2 py-0.5 rounded-full">
                         Original
                       </span>
                       <span>
@@ -308,13 +308,13 @@ export default function WritingModal({
                     </div>
                   </div>
                 </div>
-                <div className="font-serif text-neutral-700 leading-relaxed">
+                <div className="font-serif text-foreground leading-relaxed">
                   <h3 className="text-lg font-semibold mb-2">{story?.title}</h3>
                   <p className="italic">{story?.description}</p>
                   
                   {recentSegments?.length === 0 && (
-                    <div className="mt-3 pt-3 border-t border-neutral-100">
-                      <p className="text-sm text-neutral-500">It's time to begin the story! You're the first contributor.</p>
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <p className="text-sm text-muted-foreground">It's time to begin the story! You're the first contributor.</p>
                     </div>
                   )}
                 </div>
@@ -326,23 +326,23 @@ export default function WritingModal({
                   <div key={segment.id} className="relative">
                     {/* Vertical connecting line between segments */}
                     {index < (recentSegments?.length || 0) - 1 && (
-                      <div className="absolute left-4 top-16 w-0.5 bg-neutral-200 h-6 z-0"></div>
+                      <div className="absolute left-4 top-16 w-0.5 bg-border h-6 z-0"></div>
                     )}
                     
-                    <div className={`bg-white rounded-lg shadow-sm p-4 border mb-5 relative z-10 ${
+                    <div className={`bg-background rounded-lg shadow-sm p-4 border mb-5 relative z-10 ${
                       segment.userId === user?.id 
                         ? "border-primary/30 bg-primary/5" 
-                        : "border-neutral-200"
+                        : "border-border"
                     }`}>
                       <div className="flex items-start space-x-3 mb-2">
-                        <Avatar className="h-8 w-8 ring-2 ring-white">
+                        <Avatar className="h-8 w-8 ring-2 ring-background">
                           {segment.user?.profileImageUrl ? (
                             <AvatarImage 
                               src={segment.user.profileImageUrl} 
                               alt={segment.user?.username || "User"} 
                             />
                           ) : (
-                            <AvatarFallback className={segment.userId === user?.id ? "bg-primary text-white" : ""}>
+                            <AvatarFallback className={segment.userId === user?.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}>
                               {segment.user?.isDeleted 
                                 ? (segment.user?.originalUsername?.[0] || "U")
                                 : (segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U")
@@ -351,7 +351,7 @@ export default function WritingModal({
                           )}
                         </Avatar>
                         <div>
-                          <p className="font-medium text-neutral-800">
+                          <p className="font-medium text-foreground">
                             {segment.userId === user?.id 
                               ? "You" 
                               : segment.user?.isDeleted 
@@ -359,8 +359,8 @@ export default function WritingModal({
                                 : (segment.user?.firstName || segment.user?.username || "Unknown User")
                             }
                           </p>
-                          <div className="flex items-center gap-2 text-xs text-neutral-500">
-                            <span className="bg-neutral-100 px-2 py-0.5 rounded-full">Turn {segment.turn}</span>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="bg-secondary px-2 py-0.5 rounded-full">Turn {segment.turn}</span>
                             <span>{new Date(segment.createdAt).toLocaleDateString(undefined, {
                               month: 'short',
                               day: 'numeric'
@@ -368,7 +368,7 @@ export default function WritingModal({
                           </div>
                         </div>
                       </div>
-                      <div className="font-serif text-neutral-700 leading-relaxed">
+                      <div className="font-serif text-foreground leading-relaxed">
                         <div dangerouslySetInnerHTML={{ __html: segment.content }} />
                       </div>
                     </div>
@@ -380,8 +380,8 @@ export default function WritingModal({
           
           {/* Fixed input area at the bottom */}
           {turn?.currentUserId === user?.id && (
-            <div className="border-t border-neutral-200 bg-white shrink-0 p-3 pb-8 h-[260px]">
-              <div className="bg-white rounded-lg shadow-sm p-4 h-full flex flex-col">
+            <div className="border-t border-border bg-background shrink-0 p-3 pb-8 h-[260px]">
+              <div className="bg-background rounded-lg shadow-sm p-4 h-full flex flex-col">
                 <div className="flex items-start space-x-3">
                   <Avatar className="h-7 w-7">
                     {user?.profileImageUrl ? (
@@ -390,14 +390,14 @@ export default function WritingModal({
                         alt={user.username || "User"} 
                       />
                     ) : (
-                      <AvatarFallback className="bg-primary text-white">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
                         {user?.firstName?.[0] || user?.username?.[0] || "U"}
                       </AvatarFallback>
                     )}
                   </Avatar>
                   <div>
-                    <p className="font-medium text-neutral-800 text-sm">Your Turn</p>
-                    <p className="text-xs text-neutral-500">Turn {turn.currentTurn} • Now</p>
+                    <p className="font-medium text-foreground text-sm">Your Turn</p>
+                    <p className="text-xs text-muted-foreground">Turn {turn.currentTurn} • Now</p>
                   </div>
                 </div>
                 
@@ -419,35 +419,35 @@ export default function WritingModal({
                       />
                     </div>
                     
-                    <div className="absolute top-[calc(100%+10px)] left-2 bg-white/90 rounded-md px-2 py-1 shadow-sm border border-neutral-100 space-y-1 text-left">
+                    <div className="absolute top-[calc(100%+10px)] left-2 bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border space-y-1 text-left">
                       <div className="flex items-center justify-end space-x-1">
-                        <span className="text-xs text-neutral-500">Words:</span>
-                        <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-error" : "text-primary"}`}>
+                        <span className="text-xs text-muted-foreground">Words:</span>
+                        <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-destructive" : "text-primary"}`}>
                           {wordCount}
                         </span>
-                        <span className="text-xs text-neutral-500">/{story?.wordLimit}</span>
+                        <span className="text-xs text-muted-foreground">/{story?.wordLimit}</span>
                       </div>
                       
                       {story?.characterLimit > 0 && (
                         <div className="flex items-center justify-end space-x-1">
-                          <span className="text-xs text-neutral-500">Chars:</span>
-                          <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-error" : "text-primary"}`}>
+                          <span className="text-xs text-muted-foreground">Chars:</span>
+                          <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-destructive" : "text-primary"}`}>
                             {characterCount}
                           </span>
-                          <span className="text-xs text-neutral-500">/{story?.characterLimit}</span>
+                          <span className="text-xs text-muted-foreground">/{story?.characterLimit}</span>
                         </div>
                       )}
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center pt-4 mt-2 border-t border-neutral-100 w-full">
+                  <div className="flex justify-between items-center pt-4 mt-2 border-t border-border w-full">
                     <div className="flex gap-1">
                       {/* Removed custom formatting buttons since React Quill has its own toolbar */}
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => setShowInviteModal(true)}
-                        className="text-neutral-700 h-8 flex items-center gap-1 text-xs"
+                        className="h-8 flex items-center gap-1 text-xs"
                         title="Invite collaborator"
                       >
                         <UserIcon className="h-3.5 w-3.5" />
@@ -488,17 +488,17 @@ export default function WritingModal({
           )}
           
           {/* Story Progress - Fixed height footer */}
-          <div className="p-3 border-t border-neutral-200 bg-white shrink-0 h-[60px]">
+          <div className="p-3 border-t border-border bg-background shrink-0 h-[60px]">
             <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center">
-                <span className="text-xs text-neutral-600 mr-2">Progress:</span>
+                <span className="text-xs text-muted-foreground mr-2">Progress:</span>
                 <div className="w-24 sm:w-32 bg-muted rounded-full h-2">
                   <div 
                     className="bg-primary h-2 rounded-full" 
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
-                <span className="ml-2 text-xs font-medium text-neutral-700">
+                <span className="ml-2 text-xs font-medium text-foreground">
                   {segments?.length || 0}/{story?.maxSegments || 30}
                 </span>
               </div>

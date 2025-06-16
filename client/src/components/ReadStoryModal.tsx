@@ -209,14 +209,7 @@ export default function ReadStoryModal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-border shrink-0 bg-background">
-          <div className="flex justify-center">
-            <Button onClick={() => onOpenChange(false)} variant="outline">
-              Close
-            </Button>
-          </div>
-        </div>
+        
       </DialogContent>
     </Dialog>
   );

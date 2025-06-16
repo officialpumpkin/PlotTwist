@@ -195,31 +195,31 @@ export default function WritingModal({
       <DialogContent className="sm:max-w-3xl p-0 h-[95vh] flex flex-col writing-modal-content" aria-describedby="writing-modal-description">
         <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
         <h2 className="sr-only">Story Writing Interface</h2>
-        <div className="absolute top-4 right-4 z-10">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => onOpenChange(false)}
-            className="h-6 w-6 text-neutral-400 hover:text-neutral-500"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </Button>
-        </div>
         
         {/* Split into 3 fixed-height sections: header, scrollable content, footer */}
         <div className="flex flex-col h-full">
           {/* Fixed Story Header - absolute height */}
-          <div className="p-3 border-b border-neutral-200 shrink-0 bg-white z-10 h-[100px]">
+          <div className="p-3 border-b border-border shrink-0 bg-background z-10 h-[100px]">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-lg font-bold text-neutral-900">{story?.title}</h2>
-                <p className="text-sm text-neutral-500 mt-1">
+                <h2 className="text-lg font-bold text-foreground">{story?.title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">
                   Turn {turn?.currentTurn} of {story?.maxSegments} • {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
                 </p>
               </div>
-              <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
-                {story?.genre}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+                  {story?.genre}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => onOpenChange(false)}
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                >
+                  <CloseIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             
             <div className="flex flex-wrap items-center gap-2 mt-1">
@@ -380,9 +380,9 @@ export default function WritingModal({
           
           {/* Fixed input area at the bottom */}
           {turn?.currentUserId === user?.id && (
-            <div className="border-t border-border bg-background shrink-0 p-3 pb-8 h-[260px]">
-              <div className="bg-background rounded-lg shadow-sm p-4 h-full flex flex-col">
-                <div className="flex items-start space-x-3">
+            <div className="border-t border-border bg-background shrink-0 p-4 h-[280px]">
+              <div className="h-full flex flex-col">
+                <div className="flex items-start space-x-3 mb-3">
                   <Avatar className="h-7 w-7">
                     {user?.profileImageUrl ? (
                       <AvatarImage 
@@ -401,26 +401,26 @@ export default function WritingModal({
                   </div>
                 </div>
                 
-                <div className="flex-grow flex flex-col justify-between mt-2">
-
-
-                  <div className="relative flex-grow mb-20">
-                    {/* React Quill Editor */}
-                    <div className="editor-container mb-10">
-                      <ReactQuill
-                        ref={quillRef}
-                        theme="snow"
-                        value={content}
-                        onChange={setContent}
-                        modules={modules}
-                        formats={formats}
-                        placeholder="Continue the story... Let your imagination flow!"
-                        className="font-serif text-neutral-700"
-                      />
-                    </div>
-                    
-                    <div className="absolute top-[calc(100%+10px)] left-2 bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border space-y-1 text-left">
-                      <div className="flex items-center justify-end space-x-1">
+                <div className="flex-grow flex flex-col">
+                  {/* React Quill Editor */}
+                  <div className="flex-grow mb-3">
+                    <ReactQuill
+                      ref={quillRef}
+                      theme="snow"
+                      value={content}
+                      onChange={setContent}
+                      modules={modules}
+                      formats={formats}
+                      placeholder="Continue the story... Let your imagination flow!"
+                      className="font-serif text-foreground h-24"
+                      style={{ height: '120px' }}
+                    />
+                  </div>
+                  
+                  {/* Word/Character Count */}
+                  <div className="flex justify-end mb-3">
+                    <div className="bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border text-right">
+                      <div className="flex items-center space-x-1">
                         <span className="text-xs text-muted-foreground">Words:</span>
                         <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-destructive" : "text-primary"}`}>
                           {wordCount}
@@ -429,7 +429,7 @@ export default function WritingModal({
                       </div>
                       
                       {story?.characterLimit > 0 && (
-                        <div className="flex items-center justify-end space-x-1">
+                        <div className="flex items-center space-x-1 mt-1">
                           <span className="text-xs text-muted-foreground">Chars:</span>
                           <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-destructive" : "text-primary"}`}>
                             {characterCount}
@@ -440,9 +440,9 @@ export default function WritingModal({
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center pt-4 mt-2 border-t border-border w-full">
+                  {/* Action Buttons */}
+                  <div className="flex justify-between items-center pt-3 border-t border-border">
                     <div className="flex gap-1">
-                      {/* Removed custom formatting buttons since React Quill has its own toolbar */}
                       <Button 
                         variant="outline" 
                         size="sm" 
@@ -488,7 +488,7 @@ export default function WritingModal({
           )}
           
           {/* Story Progress - Fixed height footer */}
-          <div className="p-3 border-t border-border bg-background shrink-0 h-[60px]">
+          <div className="p-3 border-t border-border bg-background shrink-0 h-[70px]">
             <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center">
                 <span className="text-xs text-muted-foreground mr-2">Progress:</span>

@@ -1,0 +1,59 @@
+> rest-express@1.0.0 dev
+11:52:08 AM [express] serving on port 5000
+✘ [ERROR] Missing "./v4/core" specifier in "zod" package [plugin vite:dep-pre-bundle]
+
+    node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46042:24:
+      46042 │ function e(e,n,r){throw new Error(r?`No known conditions for "${n}" specifier in "${e}" package`:`Missing "${n}" spec...
+            ╵                         ^
+
+    at e (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46042:25)
+    at n (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46042:627)
+    at o (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46042:1297)
+    at resolveExportsOrImports (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46663:18)
+    at resolveDeepImport (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46686:25)
+    at tryNodeResolve (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46451:16)
+    at ResolveIdContext.resolveId (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46201:19)
+    at PluginContainer.resolveId (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:49017:17)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async <anonymous> (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:66433:15)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46935:12:
+      46935 │       build.onResolve(
+            ╵             ~~~~~~~~~
+
+    at setup (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46935:13)
+    at handlePlugins (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1150:21)
+    at buildOrContextImpl (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:873:5)
+    at Object.buildOrContext (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:699:5)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:2032:68
+    at new Promise (<anonymous>)
+    at Object.context (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:2032:27)
+    at Object.context (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1874:58)
+    at prepareEsbuildOptimizerRun (/home/runner/workspace/node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:50926:33)
+
+  The plugin "vite:dep-pre-bundle" was triggered by this import
+
+    node_modules/@hookform/resolvers/zod/dist/zod.mjs:1:142:
+      1 │ ...endErrors as o}from"react-hook-form";import*as n from"zod/v4/core";function t(r,e){try{var o=r()}catch(r){return e(r)}...
+        ╵                                                         ~~~~~~~~~~~~~
+
+Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472
+  let error = new Error(text);
+              ^
+
+Error: Build failed with 1 error:
+node_modules/vite/dist/node/chunks/dep-CHZK6zbr.js:46042:24: ERROR: [plugin: vite:dep-pre-bundle] Missing "./v4/core" specifier in "zod" package
+    at failureErrorWithLog (/home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15)
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:945:25
+    at /home/runner/workspace/node_modules/vite/node_modules/esbuild/lib/main.js:1353:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+  errors: [Getter/Setter],
+  warnings: [Getter/Setter]
+}
+
+Node.js v20.18.1

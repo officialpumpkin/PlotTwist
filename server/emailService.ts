@@ -44,12 +44,12 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       subject: params.subject,
       text: params.text,
       html: params.html,
+      replyTo: 'support@plottwist.com',
       headers: {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'PlotTwist Email Service',
-        'List-Unsubscribe': '<mailto:unsubscribe@plottwist.com>',
-        'Reply-To': 'support@plottwist.com'
+        'List-Unsubscribe': '<mailto:unsubscribe@plottwist.com>'
       },
       categories: ['transactional', 'plottwist'],
       customArgs: {

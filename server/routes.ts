@@ -61,12 +61,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', async (req: any, res) => {
     try {
+      console.log("Session data:", req.session);
+      console.log("User from session:", req.session?.user);
+      console.log("UserId from session:", req.session?.userId);
+      
       // Check session-based auth first (email login)
       if (req.session?.userId) {
         const user = await storage.getUser(req.session.userId);
         if (user) {
-          return res.json(user);
+          return res.json({
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImageUrl: user.profileImageUrl
+          });
         }
+      }
+
+      // Check if we have user data directly in session
+      if (req.session?.user) {
+        return res.json(req.session.user);
       }
 
       // Check OAuth auth (Replit login) as fallback
@@ -297,6 +313,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: user.profileImageUrl,
       };
 
+      console.log("Setting session data:", req.session);
+
       // Save session
       req.session.save((err) => {
         if (err) {
@@ -304,6 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: "Login failed" });
         }
 
+        console.log("Session saved successfully");
         res.json({ 
           message: "Login successful", 
           user: req.session.user 

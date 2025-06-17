@@ -57,7 +57,7 @@ export const stories = pgTable("stories", {
   maxSegments: integer("max_segments").notNull().default(30),
   isComplete: boolean("is_complete").notNull().default(false),
   isPublic: boolean("is_public").notNull().default(true),
-  authorId: varchar("author_id").notNull().references(() => users.id), // Renamed from creatorId for clarity
+  creatorId: varchar("creator_id").notNull().references(() => users.id), // Keep as creatorId to match existing DB
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -159,7 +159,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
 
 export const storiesRelations = relations(stories, ({ one, many }) => ({
   author: one(users, {
-    fields: [stories.authorId],
+    fields: [stories.creatorId],
     references: [users.id],
   }),
   segments: many(storySegments),
@@ -301,9 +301,9 @@ export const storyFormSchema = insertStorySchema
     ),
   });
 
-// Server-side only schema that includes authorId
+// Server-side only schema that includes creatorId
 export const serverStorySchema = storyFormSchema.extend({
-  authorId: z.string().min(1),
+  creatorId: z.string().min(1),
 });
 
 export const storySegmentFormSchema = z.object({

@@ -25,35 +25,27 @@ async function migrateToAuthorRole() {
     `);
     console.log('✅ Added role column to story_participants');
     
-    // 2. Check if we need to rename creatorId to authorId
-    const hasCreatorId = columnCheck.rows.some(row => row.column_name === 'creatorId');
-    const hasAuthorId = columnCheck.rows.some(row => row.column_name === 'authorId');
+    // 2. Keep the existing creator_id column - no need to rename
+    const hasCreatorId = columnCheck.rows.some(row => row.column_name === 'creator_id');
     
-    if (hasCreatorId && !hasAuthorId) {
-      console.log('🔄 Renaming creatorId to authorId...');
+    if (!hasCreatorId) {
+      console.log('⚠️  No creator_id column found, adding it...');
       await pool.query(`
         ALTER TABLE stories 
-        RENAME COLUMN "creatorId" TO "authorId"
+        ADD COLUMN creator_id VARCHAR NOT NULL DEFAULT 'unknown'
       `);
-      console.log('✅ Renamed creatorId to authorId');
-    } else if (hasAuthorId) {
-      console.log('✅ authorId column already exists');
     } else {
-      console.log('⚠️  No creator or author column found, adding authorId...');
-      await pool.query(`
-        ALTER TABLE stories 
-        ADD COLUMN "authorId" VARCHAR NOT NULL DEFAULT 'unknown'
-      `);
+      console.log('✅ creator_id column already exists');
     }
     
     // 3. Update existing story creators to have author role
     await pool.query(`
       INSERT INTO story_participants (story_id, user_id, role)
-      SELECT s.id, s."authorId", 'author'
+      SELECT s.id, s.creator_id, 'author'
       FROM stories s
       WHERE NOT EXISTS (
         SELECT 1 FROM story_participants sp 
-        WHERE sp.story_id = s.id AND sp.user_id = s."authorId"
+        WHERE sp.story_id = s.id AND sp.user_id = s.creator_id
       )
     `);
     console.log('✅ Added story authors as participants with author role');
@@ -63,9 +55,9 @@ async function migrateToAuthorRole() {
       UPDATE story_participants 
       SET role = 'author' 
       WHERE (story_id, user_id) IN (
-        SELECT s.id, s."authorId" 
+        SELECT s.id, s.creator_id 
         FROM stories s 
-        WHERE s."authorId" = story_participants.user_id 
+        WHERE s.creator_id = story_participants.user_id 
         AND s.id = story_participants.story_id
       )
     `);

@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { useAuth } from "@/hooks/useAuth";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
@@ -17,11 +18,10 @@ import Settings from "@/pages/settings";
 import VerifyEmail from "@/pages/verify-email";
 import ResetPassword from "@/pages/reset-password";
 import CheckEmail from "@/pages/check-email";
-import Layout from "@/components/Layout";
-
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
+  useRealTimeNotifications();
 
   // Instead of blocking the entire UI while loading, we'll handle loading states 
   // within protected routes individually
@@ -54,9 +54,6 @@ function LoadingScreen() {
 }
 
 function App() {
-  const { isLoading } = useAuth();
-  useRealTimeNotifications();
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">

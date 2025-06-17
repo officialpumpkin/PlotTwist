@@ -97,22 +97,22 @@ export async function setupAuth(app: Express) {
       try {
         // Find user by email
         const user = await storage.getUserByEmail(email);
-        
+
         if (!user) {
           return done(null, false, { message: 'Invalid email or password' });
         }
-        
+
         // Check if password field exists (for users who registered with OAuth)
         if (!user.password) {
           return done(null, false, { message: 'Please log in with the method you used to create your account' });
         }
-        
+
         // Verify password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
           return done(null, false, { message: 'Invalid email or password' });
         }
-        
+
         // Create user session similar to other auth methods
         const sessionUser = {
           claims: {
@@ -125,7 +125,7 @@ export async function setupAuth(app: Express) {
           // No tokens for local users
           expires_at: Math.floor(Date.now() / 1000) + 3600 * 24 * 7, // 1 week expiration
         };
-        
+
         return done(null, sessionUser);
       } catch (err) {
         return done(err);
@@ -163,7 +163,7 @@ export async function setupAuth(app: Express) {
   // Setup Google Auth
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     const googleCallbackURL = `https://${process.env.REPLIT_DOMAINS!.split(",")[0]}/api/auth/google/callback`;
-    
+
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -173,7 +173,7 @@ export async function setupAuth(app: Express) {
       async function(accessToken: string, refreshToken: string, profile: any, done: any) {
         try {
           await upsertGoogleUser(profile);
-          
+
           // Create a user object similar to the Replit Auth user
           const user = {
             claims: {
@@ -187,7 +187,7 @@ export async function setupAuth(app: Express) {
             refresh_token: refreshToken,
             expires_at: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiry
           };
-          
+
           return done(null, user);
         } catch (error) {
           return done(error);
@@ -196,8 +196,15 @@ export async function setupAuth(app: Express) {
     ));
   }
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  passport.serializeUser((user: any, done) => {
+    console.log("Serializing user:", user);
+    done(null, user);
+  });
+
+  passport.deserializeUser((user: any, done) => {
+    console.log("Deserializing user:", user);
+    done(null, user);
+  });
 
   // Replit Auth routes
   app.get("/api/login", (req, res, next) => {
@@ -213,19 +220,19 @@ export async function setupAuth(app: Express) {
       failureRedirect: "/api/login",
     })(req, res, next);
   });
-  
+
   // Google OAuth routes
   app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-  
+
   app.get('/api/auth/google/callback', 
     passport.authenticate('google', { 
       failureRedirect: '/login',
       successRedirect: '/'
     })
   );
-  
+
   // Note: Local auth registration is handled in routes.ts to support email verification
-  
+
   app.post("/api/auth/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) {
@@ -254,13 +261,13 @@ export async function setupAuth(app: Express) {
   app.get("/api/logout", (req, res) => {
     const user = req.user as any;
     let authType = "replit";
-    
+
     if (user?.claims?.sub?.startsWith("google:")) {
       authType = "google";
     } else if (user?.claims?.sub?.startsWith("local:")) {
       authType = "local";
     }
-    
+
     req.logout(() => {
       if (authType === "google" || authType === "local") {
         // For Google and local users, just redirect to home
@@ -284,15 +291,15 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  
+
   // Check if it's a Google user
   const isGoogleUser = user?.claims?.sub?.startsWith("google:");
-  
+
   if (isGoogleUser) {
     // Google auth doesn't need token refresh logic
     return next();
   }
-  
+
   // Replit Auth token validation and refresh
   if (!user.expires_at) {
     return res.status(401).json({ message: "Unauthorized" });

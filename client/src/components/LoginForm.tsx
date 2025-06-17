@@ -41,13 +41,14 @@ export default function LoginForm() {
     mutationFn: async (data: LoginInput) => {
       return await apiRequest("POST", "/api/auth/login", data);
     },
-    onSuccess: () => {
+    onSuccess: async (response) => {
+      const data = await response.json();
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate("/");
+      navigate(data.redirect || "/");
     },
     onError: (error: any) => {
       // If email verification is required, show special UI

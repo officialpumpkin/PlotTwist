@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from "next-themes";
 import { apiRequest } from "@/lib/queryClient";
@@ -13,22 +14,29 @@ interface ThemeContextValue {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   saveUserThemePreference: (theme: Theme) => Promise<void>;
+  isLoading: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-function ThemeContextProvider({ children, defaultTheme = "system" }: ThemeProviderProps) {
-  const { setTheme: setNextTheme } = useNextTheme();
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+function ThemeContextProvider({ children }: { children: React.ReactNode }) {
+  const { theme: nextTheme, setTheme: setNextTheme } = useNextTheme();
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Save user's theme preference to settings and update next-themes
+  // Wait for next-themes to be ready
+  useEffect(() => {
+    // next-themes sets theme to undefined initially, wait for it to be ready
+    if (nextTheme !== undefined) {
+      setIsLoading(false);
+    }
+  }, [nextTheme]);
+
+  // Save user's theme preference to settings
   const saveUserThemePreference = async (newTheme: Theme) => {
     try {
       await apiRequest("PATCH", "/api/users/settings/appearance", {
         theme: newTheme
       });
-      // Also update the next-themes provider
-      setNextTheme(newTheme);
     } catch (error) {
       console.error("Failed to save theme preference:", error);
     }
@@ -41,16 +49,20 @@ function ThemeContextProvider({ children, defaultTheme = "system" }: ThemeProvid
     // Schedule removal of the fade effect 
     setTimeout(() => {
       document.body.classList.remove('theme-fade');
-    }, 400); // Half the transition time to ensure it completes before the theme change
+    }, 400);
     
-    setThemeState(newTheme);
+    // Update next-themes (this will automatically update our theme state)
+    setNextTheme(newTheme);
+    
+    // Save to backend
     saveUserThemePreference(newTheme);
   };
 
   const contextValue: ThemeContextValue = {
-    theme,
+    theme: (nextTheme as Theme) || "system",
     setTheme,
-    saveUserThemePreference
+    saveUserThemePreference,
+    isLoading
   };
   
   return (
@@ -95,7 +107,7 @@ export function ThemeProvider({
       enableSystem
       {...props}
     >
-      <ThemeContextProvider defaultTheme={userTheme}>
+      <ThemeContextProvider>
         {children}
       </ThemeContextProvider>
     </NextThemesProvider>

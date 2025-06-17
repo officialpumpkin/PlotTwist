@@ -64,7 +64,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Session data:", req.session);
       console.log("User from session:", req.session?.user);
       console.log("UserId from session:", req.session?.userId);
-      
+
       // Check session-based auth first (email login)
       if (req.session?.userId) {
         const user = await storage.getUser(req.session.userId);
@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log("Session saved successfully");
         console.log("Final session data:", req.session);
-        
+
         // Return user data directly to frontend
         res.json({ 
           message: "Login successful", 
@@ -738,6 +738,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt: expirationDate
           });
 
+          // Send real-time notification to invitee
+          notifyUser(inviteeUser.id, {
+            type: 'invitation',
+            invitation: {
+              ...invitation,
+              story: { id: story.id, title: story.title },
+              inviter: { username: (await storage.getUser(inviterId))?.username }
+            }
+          });
+
           // Send invitation email
           const inviter = await storage.getUser(inviterId);
           if (inviter && inviteeUser.email) {
@@ -819,6 +829,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "pending",
           token,
           expiresAt: expirationDate
+        });
+
+        // Send real-time notification to invitee
+        notifyUser(inviteeUser.id, {
+          type: 'invitation',
+          invitation: {
+            ...invitation,
+            story: { id: story.id, title: story.title },
+            inviter: { username: (await storage.getUser(inviterId))?.username }
+          }
         });
 
         res.status(201).json({ 
@@ -1717,6 +1737,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt: expirationDate
           });
 
+        // Send real-time notification to invitee
+        notifyUser(inviteeUser.id, {
+          type: 'invitation',
+          invitation: {
+            ...invitation,
+            story: { id: story.id, title: story.title },
+            inviter: { username: (await storage.getUser(inviterId))?.username }
+          }
+        });
+
           res.status(201).json({ 
             message: `Invitation sent to ${email}`,
             invitation
@@ -1765,6 +1795,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: "pending",
           token,
           expiresAt: expirationDate
+        });
+
+        // Send real-time notification to invitee
+        notifyUser(inviteeUser.id, {
+          type: 'invitation',
+          invitation: {
+            ...invitation,
+            story: { id: story.id, title: story.title },
+            inviter: { username: (await storage.getUser(inviterId))?.username }
+          }
         });
 
         res.status(201).json({ 

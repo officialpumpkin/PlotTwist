@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth } from "./replitAuth";
 import { sendWelcomeEmail, sendStoryInvitationEmail, sendEmailVerification, sendPasswordResetEmail } from "./emailService";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -54,64 +54,38 @@ const upload = multer({
   }
 });
 
+// Middleware to check if user is authenticated
+const isAuthenticated = (req: any, res: any, next: any) => {
+  if (req.session?.userId && req.session?.user) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
+};
+
+const getCurrentUserId = (req: any): string | null => {
+    return req.session?.userId || null;
+  };
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', async (req: any, res) => {
-    try {
-      console.log("Session data:", req.session);
-      console.log("User from session:", req.session?.user);
-      console.log("UserId from session:", req.session?.userId);
+  // Get current user
+  app.get("/api/auth/user", (req: any, res) => {
+    console.log("Session data:", req.session);
+    console.log("User from session:", req.session?.user);
+    console.log("UserId from session:", req.session?.userId);
 
-      // Check session-based auth first (email login)
-      if (req.session?.userId) {
-        const user = await storage.getUser(req.session.userId);
-        if (user) {
-          return res.json({
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl
-          });
-        }
-      }
-
-      // Check if we have user data directly in session
-      if (req.session?.user) {
-        return res.json(req.session.user);
-      }
-
-      // Check passport user data
-      if (req.user && req.user.claims) {
-        const userData = {
-          id: req.user.claims.sub,
-          email: req.user.claims.email,
-          username: req.user.claims.username || req.user.claims.email?.split('@')[0],
-          firstName: req.user.claims.first_name,
-          lastName: req.user.claims.last_name,
-          profileImageUrl: req.user.claims.profile_image_url
-        };
-        return res.json(userData);
-      }
-
-      // Check OAuth auth (Replit login) as fallback
-      if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
-        const userId = req.user.claims.sub;
-        const user = await storage.getUser(userId);
-        if (user) {
-          return res.json(user);
-        }
-      }
-
-      res.status(401).json({ message: "Unauthorized" });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+    if (!req.session?.userId || !req.session?.user) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
+
+    res.json({
+      id: req.session.user.id,
+      email: req.session.user.email,
+      username: req.session.user.username,
+    });
   });
 
   // Email-based registration
@@ -280,85 +254,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Email-based login
-  app.post('/api/auth/login', async (req, res) => {
+  app.post("/api/auth/login", async (req: any, res) => {
     try {
-      // Validate with schema
-      const result = loginSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ 
-          message: "Invalid login data", 
-          errors: result.error.format() 
-        });
-      }
+      const { email, password } = req.body;
+      console.log("Login attempt for:", email);
 
-      const { email, password } = result.data;
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
 
-      // Find user
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
+      if (user.length === 0) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Check if email is verified (only for local auth)
-      if (!user.emailVerified) {
-        return res.status(400).json({ 
-          message: "Please verify your email address before logging in. Check your inbox for a verification link.",
+      const foundUser = user[0];
+
+      // Check if email is verified
+      if (!foundUser.emailVerified) {
+        return res.status(401).json({
+          message: "Please verify your email before logging in",
           emailVerificationRequired: true,
-          email: user.email
+          email: foundUser.email,
         });
       }
 
       // Verify password
-      const isMatch = await bcrypt.compare(password, user.password || "");
-      if (!isMatch) {
+      const isValid = await bcrypt.compare(password, foundUser.password || "");
+      if (!isValid) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Set session data directly
-      req.session.userId = user.id;
+      // Create user session - store user ID directly in session
+      req.session.userId = foundUser.id;
       req.session.user = {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profileImageUrl: user.profileImageUrl,
+        id: foundUser.id,
+        email: foundUser.email,
+        username: foundUser.username,
+        firstName: foundUser.firstName,
+        lastName: foundUser.lastName,
+        profileImageUrl: foundUser.profileImageUrl,
       };
 
-      console.log("Setting session data:", req.session);
-      console.log("Session ID:", req.sessionID);
-      console.log("Session cookie settings:", req.session.cookie);
-
-      // Save session and ensure it's committed before responding
-      req.session.save((err) => {
+      // Save session
+      req.session.save((err: any) => {
         if (err) {
           console.error("Session save error:", err);
-          return res.status(500).json({ message: "Login failed" });
+          return res.status(500).json({ message: "Session error" });
         }
 
-        console.log("Session saved successfully");
-        console.log("Final session data:", req.session);
+        console.log("Session saved successfully, userId:", req.session.userId);
+        const responseUser = {
+          id: foundUser.id,
+          email: foundUser.email,
+          username: foundUser.username,
+        };
 
-        // Return user data directly to frontend
-        res.json({ 
+        res.json({
           message: "Login successful",
-          success: true,
-          user: {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl,
-          },
-          redirect: "/dashboard"
+          user: responseUser,
         });
       });
     } catch (error) {
-      console.error("Error logging in user:", error);
-      res.status(500).json({ message: "Failed to log in" });
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
+  });
+
+  // Logout
+  app.post("/api/auth/logout", (req: any, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie('connect.sid'); // Clear the session cookie
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   // Email verification endpoint

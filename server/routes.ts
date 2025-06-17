@@ -1868,7 +1868,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Decline story invitation
-  ```text
   app.post('/api/invitations/:id/decline', isAuthenticated, async (req: any, res) => {
     try {
       const invitationId = parseInt(req.params.id);

@@ -329,7 +329,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Return user data directly to frontend
         res.json({ 
-          message: "Login successful", 
+          message: "Login successful",
+          success: true,
           user: {
             id: user.id,
             email: user.email,
@@ -337,7 +338,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             firstName: user.firstName,
             lastName: user.lastName,
             profileImageUrl: user.profileImageUrl,
-          }
+          },
+          redirect: "/dashboard"
         });
       });
     } catch (error) {

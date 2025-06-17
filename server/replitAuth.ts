@@ -45,6 +45,7 @@ export function getSession() {
       secure: process.env.NODE_ENV === 'production', // Only secure in production
       maxAge: sessionTtl,
       sameSite: 'lax', // Help with cross-site issues
+      domain: undefined, // Let browser determine domain
     },
   });
 }

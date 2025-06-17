@@ -39,16 +39,19 @@ export default function LoginForm() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginInput) => {
-      return await apiRequest("POST", "/api/auth/login", data);
+      const response = await apiRequest("POST", "/api/auth/login", data);
+      return await response.json();
     },
-    onSuccess: async (response) => {
-      const data = await response.json();
+    onSuccess: async (data) => {
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      navigate(data.redirect || "/");
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Wait a bit for the auth state to update
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
     },
     onError: (error: any) => {
       // If email verification is required, show special UI

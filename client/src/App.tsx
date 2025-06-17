@@ -57,13 +57,16 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+        <AuthenticatedApp />
+        <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+function AuthenticatedApp() {
+  useRealTimeNotifications(); // Move this here where QueryClient is available
+  return <Router />;
 }
 
 export default App;

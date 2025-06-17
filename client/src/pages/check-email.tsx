@@ -43,8 +43,11 @@ export default function CheckEmailPage() {
                 <p className="text-sm text-amber-800 dark:text-amber-200 font-medium mb-2">
                   📧 Important: Check Your Spam Folder
                 </p>
-                <p className="text-sm text-amber-700 dark:text-amber-300">
+                <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
                   Verification emails sometimes end up in spam or junk mail folders. If you don't see the email in your inbox within a few minutes, please check your spam folder.
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  <strong>Pro tip:</strong> Add officialpumpkininspector@gmail.com to your contacts to ensure future emails reach your inbox.
                 </p>
               </div>
               

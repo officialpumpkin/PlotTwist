@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { LoginInput, loginSchema } from "@shared/schema";
 import { Eye, EyeOff } from "lucide-react";
@@ -39,19 +38,21 @@ export default function LoginForm() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginInput) => {
-      try {
-        console.log("Making login request...");
-        const response = await apiRequest("POST", "/api/auth/login", data);
-        console.log("Login response received:", response);
-        
-        const responseData = await response.json();
-        console.log("Login response data:", responseData);
-        
-        return responseData;
-      } catch (error) {
-        console.error("Login mutation error:", error);
-        throw error;
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Network error' }));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
       }
+
+      return await response.json();
     },
     onSuccess: async (data) => {
       console.log("Login successful, data:", data);
@@ -83,7 +84,13 @@ export default function LoginForm() {
 
   const resendVerificationMutation = useMutation({
     mutationFn: async (email: string) => {
-      return await apiRequest("POST", "/api/auth/resend-verification", { email });
+      return await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email}),
+      });
     },
     onSuccess: () => {
       toast({
@@ -102,7 +109,13 @@ export default function LoginForm() {
 
   const forgotPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      return await apiRequest("POST", "/api/auth/forgot-password", { email });
+       return await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email}),
+      });
     },
     onSuccess: () => {
       toast({

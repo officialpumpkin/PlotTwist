@@ -72,20 +72,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth routes
   // Get current user
-  app.get("/api/auth/user", (req: any, res) => {
+  app.get("/api/auth/user", async (req: any, res) => {
     console.log("Session data:", req.session);
     console.log("User from session:", req.session?.user);
     console.log("UserId from session:", req.session?.userId);
+    console.log("Passport user:", req.user);
 
-    if (!req.session?.userId || !req.session?.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+    // Check for local auth session first
+    if (req.session?.userId && req.session?.user) {
+      return res.json({
+        id: req.session.user.id,
+        email: req.session.user.email,
+        username: req.session.user.username,
+        firstName: req.session.user.firstName,
+        lastName: req.session.user.lastName,
+        profileImageUrl: req.session.user.profileImageUrl,
+      });
     }
 
-    res.json({
-      id: req.session.user.id,
-      email: req.session.user.email,
-      username: req.session.user.username,
-    });
+    // Check for passport-based auth (Replit Auth)
+    if (req.user?.claims?.sub) {
+      try {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        if (user) {
+          return res.json({
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImageUrl: user.profileImageUrl,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    }
+
+    return res.status(401).json({ message: "Unauthorized" });
   });
 
   // Email-based registration
@@ -297,6 +322,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: foundUser.profileImageUrl,
       };
 
+      console.log("Setting session data:", {
+        userId: req.session.userId,
+        user: req.session.user
+      });
+
       // Save session and ensure it's properly stored
       await new Promise<void>((resolve, reject) => {
         req.session.save((err: any) => {
@@ -304,7 +334,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("Session save error:", err);
             reject(err);
           } else {
-            console.log("Session saved successfully, userId:", req.session.userId);
+            console.log("Session saved successfully");
+            console.log("Session ID:", req.sessionID);
+            console.log("Session after save:", {
+              userId: req.session.userId,
+              user: req.session.user
+            });
             resolve();
           }
         });

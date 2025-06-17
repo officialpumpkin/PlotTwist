@@ -60,11 +60,13 @@ export default function LoginForm() {
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
+      
+      // Invalidate and refetch user data
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      // Wait a bit for the auth state to update
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 100);
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      
+      // Navigate to dashboard
+      navigate("/dashboard");
     },
     onError: (error: any) => {
       console.error("Login error:", error);

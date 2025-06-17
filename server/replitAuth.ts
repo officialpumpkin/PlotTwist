@@ -246,6 +246,15 @@ export async function setupAuth(app: Express) {
         if (err) {
           return next(err);
         }
+        
+        // Set session data for consistent access
+        req.session.userId = user.claims.sub;
+        req.session.user = {
+          id: user.claims.sub,
+          email: user.claims.email,
+          username: user.claims.username || user.claims.email.split('@')[0]
+        };
+        
         return res.json({ 
           message: "Login successful",
           user: {

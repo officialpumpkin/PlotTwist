@@ -85,6 +85,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(req.session.user);
       }
 
+      // Check passport user data
+      if (req.user && req.user.claims) {
+        const userData = {
+          id: req.user.claims.sub,
+          email: req.user.claims.email,
+          username: req.user.claims.username || req.user.claims.email?.split('@')[0],
+          firstName: req.user.claims.first_name,
+          lastName: req.user.claims.last_name,
+          profileImageUrl: req.user.claims.profile_image_url
+        };
+        return res.json(userData);
+      }
+
       // Check OAuth auth (Replit login) as fallback
       if (req.isAuthenticated && req.isAuthenticated() && req.user?.claims?.sub) {
         const userId = req.user.claims.sub;

@@ -23,6 +23,20 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     return false;
   }
 
+  // Validate email parameters
+  if (!params.to || !params.from || !params.subject) {
+    console.error("Invalid email parameters:", { to: !!params.to, from: !!params.from, subject: !!params.subject });
+    return false;
+  }
+
+  console.log(`Attempting to send email via SendGrid:`, {
+    to: params.to,
+    from: params.from,
+    subject: params.subject,
+    hasText: !!params.text,
+    hasHtml: !!params.html
+  });
+
   try {
     await mailService.send({
       to: params.to,
@@ -48,6 +62,9 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('SendGrid email error:', error);
+    if (error.response && error.response.body && error.response.body.errors) {
+      console.error('SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
+    }
     return false;
   }
 }

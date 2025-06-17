@@ -1,6 +1,10 @@
 
 
-import { Pool } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
+
+// Configure WebSocket for serverless connection
+neonConfig.webSocketConstructor = ws;
 
 async function migrateToAuthorRole() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });

@@ -75,6 +75,11 @@ export default function WritingModal({
     enabled: open,
   });
 
+  // Check if current user is the author
+  const isAuthor = participants?.some(p => 
+    p.userId === user?.id && p.role === 'author'
+  );
+
   // Calculate the progress
   const progress = story && segments 
     ? Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) 
@@ -112,6 +117,30 @@ export default function WritingModal({
       });
     },
   });
+
+  const handleSkipTurn = async () => {
+    try {
+      await apiRequest({
+        endpoint: `/api/stories/${storyId}/skip-turn`,
+        method: 'POST',
+      });
+
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/turn`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/my-turn`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/waiting-turn`] });
+
+      toast({
+        title: "Success",
+        description: "Turn has been skipped to the next participant",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to skip turn",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Update word and character count when content changes
   useEffect(() => {
@@ -525,6 +554,16 @@ export default function WritingModal({
                   >
                     <FlagIcon className="h-3 w-3 mr-1" />
                     Complete
+                  </Button>
+                )}
+                 {isAuthor && (
+                  <Button
+                    onClick={handleSkipTurn}
+                    size="sm"
+                    variant="outline"
+                    className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
+                  >
+                    Skip Turn
                   </Button>
                 )}
               </div>

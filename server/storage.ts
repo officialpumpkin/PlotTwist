@@ -51,7 +51,7 @@ export interface IStorage {
   getPublicStories(): Promise<Story[]>;
 
   // Story participants
-  addParticipant(participant: InsertStoryParticipant): Promise<StoryParticipant>;
+  addParticipant(participant: InsertStoryParticipant & { role?: string }): Promise<StoryParticipant>;
   getStoryParticipants(storyId: number): Promise<StoryParticipant[]>;
   isParticipant(storyId: number, userId: string): Promise<boolean>;
   removeParticipant(storyId: number, userId: string): Promise<void>;
@@ -214,11 +214,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Story participants
-  async addParticipant(participantData: InsertStoryParticipant): Promise<StoryParticipant> {
+  async addParticipant(participantData: InsertStoryParticipant & { role?: string }): Promise<StoryParticipant> {
     const [participant] = await db
       .insert(storyParticipants)
-      .values(participantData)
-      .onConflictDoNothing()
+      .values({
+        ...participantData,
+        role: participantData.role || "participant"
+      })
       .returning();
 
     return participant;

@@ -1,72 +1,45 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { useAuth } from "@/hooks/useAuth";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Router from "./Router";
 import { useRealTimeNotifications } from "@/hooks/useRealTimeNotifications";
-import NotFound from "@/pages/not-found";
-import Home from "@/pages/home";
-import Dashboard from "@/pages/dashboard";
-import MyStories from "@/pages/my-stories";
-import Explore from "@/pages/explore";
-import Login from "@/pages/login";
-import Register from "@/pages/register";
-import Profile from "@/pages/profile";
-import Settings from "@/pages/settings";
-import VerifyEmail from "@/pages/verify-email";
-import ResetPassword from "@/pages/reset-password";
-import CheckEmail from "@/pages/check-email";
 
-function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        if (error?.message?.includes("401")) {
+          return false;
+        }
+        return failureCount < 2;
+      },
+      staleTime: 30 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+function AppWithNotifications() {
+  // Now this is safely inside the QueryClientProvider
   useRealTimeNotifications();
-
-  // Instead of blocking the entire UI while loading, we'll handle loading states 
-  // within protected routes individually
-  return (
-    <Switch>
-      <Route path="/" component={isLoading ? LoadingScreen : (isAuthenticated ? Dashboard : Home)} />
-      <Route path="/dashboard" component={isAuthenticated ? Dashboard : Login} />
-      <Route path="/my-stories" component={isAuthenticated ? MyStories : Login} />
-      <Route path="/profile" component={isAuthenticated ? Profile : Login} />
-      <Route path="/settings" component={isAuthenticated ? Settings : Login} />
-      <Route path="/explore" component={Explore} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-      <Route path="/verify-email" component={VerifyEmail} />
-      <Route path="/reset-password" component={ResetPassword} />
-      <Route path="/check-email" component={CheckEmail} />
-      {/* Fallback to 404 */}
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-// Simple loading component
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>
-  );
+  return <Router />;
 }
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system">
-        <AuthenticatedApp />
-        <Toaster />
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="system">
+          <TooltipProvider>
+            <AppWithNotifications />
+            <Toaster />
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
-}
-
-function AuthenticatedApp() {
-  useRealTimeNotifications(); // Move this here where QueryClient is available
-  return <Router />;
 }
 
 export default App;

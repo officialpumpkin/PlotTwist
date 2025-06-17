@@ -39,10 +39,22 @@ export default function LoginForm() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginInput) => {
-      const response = await apiRequest("POST", "/api/auth/login", data);
-      return await response.json();
+      try {
+        console.log("Making login request...");
+        const response = await apiRequest("POST", "/api/auth/login", data);
+        console.log("Login response received:", response);
+        
+        const responseData = await response.json();
+        console.log("Login response data:", responseData);
+        
+        return responseData;
+      } catch (error) {
+        console.error("Login mutation error:", error);
+        throw error;
+      }
     },
     onSuccess: async (data) => {
+      console.log("Login successful, data:", data);
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
@@ -54,6 +66,7 @@ export default function LoginForm() {
       }, 100);
     },
     onError: (error: any) => {
+      console.error("Login error:", error);
       // If email verification is required, show special UI
       if (error.emailVerificationRequired) {
         setEmailVerificationRequired(error.email);

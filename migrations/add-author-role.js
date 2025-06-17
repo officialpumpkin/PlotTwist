@@ -1,5 +1,5 @@
 
-const { Pool } = require('@neondatabase/serverless');
+import { Pool } from '@neondatabase/serverless';
 
 async function migrateToAuthorRole() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -42,10 +42,6 @@ async function migrateToAuthorRole() {
   }
 }
 
-if (require.main === module) {
-  migrateToAuthorRole()
-    .then(() => process.exit(0))
-    .catch(() => process.exit(1));
-}
-
-module.exports = { migrateToAuthorRole };
+migrateToAuthorRole()
+  .then(() => process.exit(0))
+  .catch(() => process.exit(1));

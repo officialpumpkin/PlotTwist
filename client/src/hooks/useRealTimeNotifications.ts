@@ -17,6 +17,7 @@ export function useRealTimeNotifications() {
     },
     enabled: isAuthenticated,
     refetchInterval: 30000, // Poll every 30 seconds
+    retry: false, // Don't retry on auth failures
   });
 
   // For now, we'll just log the invitations

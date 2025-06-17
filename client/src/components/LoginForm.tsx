@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { LoginInput, loginSchema } from "@shared/schema";
@@ -22,7 +23,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function LoginForm() {
   const { toast } = useToast();
-  const [_, navigate] = useLocation();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [emailVerificationRequired, setEmailVerificationRequired] = useState<string | null>(null);
@@ -63,10 +64,11 @@ export default function LoginForm() {
       
       // Invalidate and refetch user data
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       
-      // Navigate to dashboard
-      navigate("/dashboard");
+      // Small delay to ensure session is properly set
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
     },
     onError: (error: any) => {
       console.error("Login error:", error);

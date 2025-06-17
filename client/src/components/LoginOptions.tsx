@@ -1,11 +1,10 @@
+
 import { Button } from '@/components/ui/button';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
 import { MailIcon } from 'lucide-react';
 
 export default function LoginOptions() {
-  const [_, navigate] = useLocation();
-
-
+  const navigate = useNavigate();
 
   // Handle Google login
   const handleGoogleLogin = () => {

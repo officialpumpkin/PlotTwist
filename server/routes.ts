@@ -302,7 +302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Create session manually
+      // Set session data directly
       req.session.userId = user.id;
       req.session.user = {
         id: user.id,
@@ -317,7 +317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Session ID:", req.sessionID);
       console.log("Session cookie settings:", req.session.cookie);
 
-      // Save session
+      // Save session and ensure it's committed before responding
       req.session.save((err) => {
         if (err) {
           console.error("Session save error:", err);
@@ -326,9 +326,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         console.log("Session saved successfully");
         console.log("Final session data:", req.session);
+        
+        // Return user data directly to frontend
         res.json({ 
           message: "Login successful", 
-          user: req.session.user 
+          user: {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImageUrl: user.profileImageUrl,
+          }
         });
       });
     } catch (error) {

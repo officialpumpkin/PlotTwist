@@ -314,6 +314,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       console.log("Setting session data:", req.session);
+      console.log("Session ID:", req.sessionID);
+      console.log("Session cookie settings:", req.session.cookie);
 
       // Save session
       req.session.save((err) => {
@@ -323,6 +325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log("Session saved successfully");
+        console.log("Final session data:", req.session);
         res.json({ 
           message: "Login successful", 
           user: req.session.user 

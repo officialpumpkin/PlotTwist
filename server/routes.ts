@@ -297,24 +297,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: foundUser.profileImageUrl,
       };
 
-      // Save session
-      req.session.save((err: any) => {
-        if (err) {
-          console.error("Session save error:", err);
-          return res.status(500).json({ message: "Session error" });
-        }
-
-        console.log("Session saved successfully, userId:", req.session.userId);
-        const responseUser = {
-          id: foundUser.id,
-          email: foundUser.email,
-          username: foundUser.username,
-        };
-
-        res.json({
-          message: "Login successful",
-          user: responseUser,
+      // Save session and ensure it's properly stored
+      await new Promise<void>((resolve, reject) => {
+        req.session.save((err: any) => {
+          if (err) {
+            console.error("Session save error:", err);
+            reject(err);
+          } else {
+            console.log("Session saved successfully, userId:", req.session.userId);
+            resolve();
+          }
         });
+      });
+
+      const responseUser = {
+        id: foundUser.id,
+        email: foundUser.email,
+        username: foundUser.username,
+      };
+
+      res.json({
+        message: "Login successful",
+        user: responseUser,
       });
     } catch (error) {
       console.error("Login error:", error);

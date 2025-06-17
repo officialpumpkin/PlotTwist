@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,18 +56,17 @@ export default function LoginForm() {
     },
     onSuccess: async (data) => {
       console.log("Login successful, data:", data);
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully logged in.",
-      });
-      
-      // Invalidate and refetch user data
+
+      // Invalidate auth queries to refresh user state
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      
-      // Small delay to ensure session is properly set
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 100);
+
+      // Force a hard refresh to ensure session is properly recognized
+      window.location.href = "/dashboard";
+
+      toast({
+        title: "Success", 
+        description: "Successfully logged in!",
+      });
     },
     onError: (error: any) => {
       console.error("Login error:", error);

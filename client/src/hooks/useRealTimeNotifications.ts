@@ -4,10 +4,10 @@ import { useAuth } from "./useAuth";
 export function useRealTimeNotifications() {
   const { isAuthenticated } = useAuth();
 
-  const { data: invitations } = useQuery({
+  const { data: invitations, isLoading, error } = useQuery({
     queryKey: ["/api/invitations/pending"],
-    queryFn: async () => {
-      const response = await fetch("/api/invitations/pending", {
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(queryKey[0] as string, {
         credentials: "include",
       });
       if (!response.ok) {

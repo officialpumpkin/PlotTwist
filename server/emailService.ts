@@ -213,18 +213,20 @@ The PlotTwist Team`;
   });
 }
 
-export async function sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string): Promise<boolean> {
+export async function sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string, baseUrl: string): Promise<boolean> {
   console.log(`Attempting to send password reset email to: ${userEmail}`);
   const subject = "Reset Your PlotTwist Password";
+  const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+  console.log(`Generated password reset URL: ${resetUrl}`);
   
   const text = `Hello ${userName},
 
 You requested to reset your password for your PlotTwist account. If you didn't make this request, you can safely ignore this email.
 
 To reset your password, click the link below:
-[Password Reset Link - This would be implemented when you add password reset functionality]
+${resetUrl}
 
-This link will expire in 24 hours for security purposes.
+This link will expire in 1 hour for security purposes.
 
 If you have any questions, please contact our support team.
 
@@ -233,22 +235,24 @@ The PlotTwist Team`;
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2 style="color: #2563eb; text-align: center;">Password Reset Request</h2>
+      <h2 style="color: #2563eb; text-align: center;">Reset Your PlotTwist Password</h2>
       
       <p>Hello ${userName},</p>
       
       <p>You requested to reset your password for your PlotTwist account. If you didn't make this request, you can safely ignore this email.</p>
       
-      <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
-        <p style="margin: 0; color: #92400e;">
-          <strong>Password reset functionality will be available soon.</strong><br>
-          For now, please contact support if you need help with your account.
-        </p>
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+          Reset Your Password
+        </a>
       </div>
       
-      <p>This link will expire in 24 hours for security purposes.</p>
+      <p>Or copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; color: #6b7280; font-size: 14px;">${resetUrl}</p>
       
-      <p>If you have any questions, please contact our support team.</p>
+      <p style="color: #6b7280; font-size: 14px;">This link will expire in 1 hour for security purposes.</p>
+      
+      <p style="color: #6b7280; font-size: 14px;">If you have any questions, please contact our support team.</p>
       
       <p style="margin-top: 30px;">Best regards,<br>
       <strong>The PlotTwist Team</strong></p>

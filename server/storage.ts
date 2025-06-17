@@ -40,7 +40,8 @@ export interface IStorage {
   getUserByVerificationToken(token: string): Promise<User | undefined>;
   verifyUserEmail(id: string): Promise<void>;
   upsertUser(user: UpsertUser): Promise<User>;
-  
+  getUserByPasswordResetToken(token: string): Promise<User | undefined>;
+
   // Story operations
   createStory(story: InsertStory): Promise<Story>;
   getStoryById(id: number): Promise<Story | undefined>;
@@ -48,36 +49,36 @@ export interface IStorage {
   updateStory(id: number, story: Partial<Story>): Promise<Story | undefined>;
   getStoriesByUser(userId: string): Promise<Story[]>;
   getPublicStories(): Promise<Story[]>;
-  
+
   // Story participants
   addParticipant(participant: InsertStoryParticipant): Promise<StoryParticipant>;
   getStoryParticipants(storyId: number): Promise<StoryParticipant[]>;
   isParticipant(storyId: number, userId: string): Promise<boolean>;
   removeParticipant(storyId: number, userId: string): Promise<void>;
-  
+
   // Story segments
   addStorySegment(segment: InsertStorySegment): Promise<StorySegment>;
   getStorySegments(storyId: number): Promise<StorySegment[]>;
   getLatestSegments(storyId: number, limit: number): Promise<StorySegment[]>;
-  
+
   // Story turns
   getStoryTurn(storyId: number): Promise<StoryTurn | undefined>;
   updateStoryTurn(storyId: number, turn: Partial<InsertStoryTurn>): Promise<StoryTurn | undefined>;
   createStoryTurn(turn: InsertStoryTurn): Promise<StoryTurn>;
-  
+
   // Story images
   addStoryImage(image: InsertStoryImage): Promise<StoryImage>;
   getStoryImages(storyId: number): Promise<StoryImage[]>;
-  
+
   // Print orders
   createPrintOrder(order: InsertPrintOrder): Promise<PrintOrder>;
   getUserOrders(userId: string): Promise<PrintOrder[]>;
-  
+
   // User settings
   getUserSettings(userId: string): Promise<UserSettings | undefined>;
   createUserSettings(settings: InsertUserSettings): Promise<UserSettings>;
   updateUserSettings(userId: string, settings: Partial<UserSettings>): Promise<UserSettings>;
-  
+
   // Story invitations
   createStoryInvitation(invitation: InsertStoryInvitation): Promise<StoryInvitation>;
   getStoryInvitationById(id: number): Promise<StoryInvitation | undefined>;
@@ -91,20 +92,31 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
-  
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
     return user;
   }
-  
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
   }
 
   async getUserByVerificationToken(token: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.emailVerificationToken, token));
-    return user;
+    return db
+      .select()
+      .from(users)
+      .where(eq(users.emailVerificationToken, token))
+      .then(rows => rows[0] || undefined);
+  }
+
+  async getUserByPasswordResetToken(token: string): Promise<User | undefined> {
+    return db
+      .select()
+      .from(users)
+      .where(eq(users.passwordResetToken, token))
+      .then(rows => rows[0] || undefined);
   }
 
   async verifyUserEmail(id: string): Promise<void> {
@@ -134,7 +146,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return user;
   }
-  
+
   // Story operations
   async createStory(storyData: InsertStory): Promise<Story> {
     const [story] = await db
@@ -143,7 +155,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return story;
   }
-  
+
   async getStoryById(id: number): Promise<Story | undefined> {
     const [story] = await db
       .select()
@@ -151,14 +163,14 @@ export class DatabaseStorage implements IStorage {
       .where(eq(stories.id, id));
     return story;
   }
-  
+
   async getStories(): Promise<Story[]> {
     return await db
       .select()
       .from(stories)
       .orderBy(desc(stories.createdAt));
   }
-  
+
   async updateStory(id: number, storyData: Partial<Story>): Promise<Story | undefined> {
     const [story] = await db
       .update(stories)
@@ -170,7 +182,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return story;
   }
-  
+
   async getStoriesByUser(userId: string): Promise<Story[]> {
     // Get stories where user is a participant
     const participantStories = await db
@@ -179,20 +191,20 @@ export class DatabaseStorage implements IStorage {
       })
       .from(storyParticipants)
       .where(eq(storyParticipants.userId, userId));
-    
+
     const storyIds = participantStories.map(s => s.storyId);
-    
+
     if (storyIds.length === 0) {
       return [];
     }
-    
+
     return await db
       .select()
       .from(stories)
       .where(inArray(stories.id, storyIds))
       .orderBy(desc(stories.updatedAt));
   }
-  
+
   async getPublicStories(): Promise<Story[]> {
     return await db
       .select()
@@ -200,7 +212,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(stories.isPublic, true))
       .orderBy(desc(stories.createdAt));
   }
-  
+
   // Story participants
   async addParticipant(participantData: InsertStoryParticipant): Promise<StoryParticipant> {
     const [participant] = await db
@@ -208,17 +220,17 @@ export class DatabaseStorage implements IStorage {
       .values(participantData)
       .onConflictDoNothing()
       .returning();
-    
+
     return participant;
   }
-  
+
   async getStoryParticipants(storyId: number): Promise<StoryParticipant[]> {
     return await db
       .select()
       .from(storyParticipants)
       .where(eq(storyParticipants.storyId, storyId));
   }
-  
+
   async isParticipant(storyId: number, userId: string): Promise<boolean> {
     const [participant] = await db
       .select()
@@ -229,10 +241,10 @@ export class DatabaseStorage implements IStorage {
           eq(storyParticipants.userId, userId)
         )
       );
-    
+
     return !!participant;
   }
-  
+
   async removeParticipant(storyId: number, userId: string): Promise<void> {
     await db
       .delete(storyParticipants)
@@ -243,17 +255,17 @@ export class DatabaseStorage implements IStorage {
         )
       );
   }
-  
+
   // Story segments
   async addStorySegment(segmentData: InsertStorySegment): Promise<StorySegment> {
     const [segment] = await db
       .insert(storySegments)
       .values(segmentData)
       .returning();
-    
+
     return segment;
   }
-  
+
   async getStorySegments(storyId: number): Promise<StorySegment[]> {
     return await db
       .select()
@@ -261,7 +273,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(storySegments.storyId, storyId))
       .orderBy(asc(storySegments.turn));
   }
-  
+
   async getLatestSegments(storyId: number, limit: number): Promise<StorySegment[]> {
     return await db
       .select()
@@ -270,17 +282,17 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(storySegments.turn))
       .limit(limit);
   }
-  
+
   // Story turns
   async getStoryTurn(storyId: number): Promise<StoryTurn | undefined> {
     const [turn] = await db
       .select()
       .from(storyTurns)
       .where(eq(storyTurns.storyId, storyId));
-    
+
     return turn;
   }
-  
+
   async updateStoryTurn(storyId: number, turnData: Partial<InsertStoryTurn>): Promise<StoryTurn | undefined> {
     const [turn] = await db
       .update(storyTurns)
@@ -290,40 +302,40 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(storyTurns.storyId, storyId))
       .returning();
-    
+
     return turn;
   }
-  
+
   async createStoryTurn(turnData: InsertStoryTurn): Promise<StoryTurn> {
     const [turn] = await db
       .insert(storyTurns)
       .values(turnData)
       .returning();
-    
+
     return turn;
   }
-  
+
   // Story images
   async addStoryImage(imageData: InsertStoryImage): Promise<StoryImage> {
     const [image] = await db
       .insert(storyImages)
       .values(imageData)
       .returning();
-    
+
     return image;
   }
-  
+
   async getStoryImages(storyId: number): Promise<StoryImage[]> {
     return await db
       .select()
       .from(storyImages)
       .where(eq(storyImages.storyId, storyId));
   }
-  
+
   // Print orders
   async createPrintOrder(orderData: InsertPrintOrder): Promise<PrintOrder> {
     const orderId = `SW-${nanoid(6).toUpperCase()}`;
-    
+
     const [order] = await db
       .insert(printOrders)
       .values({
@@ -331,10 +343,10 @@ export class DatabaseStorage implements IStorage {
         orderId,
       })
       .returning();
-    
+
     return order;
   }
-  
+
   async getUserOrders(userId: string): Promise<PrintOrder[]> {
     return await db
       .select()
@@ -373,11 +385,11 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(userSettings.userId, userId))
       .returning();
-    
+
     if (!settings) {
       throw new Error("User settings not found");
     }
-    
+
     return settings;
   }
 
@@ -407,11 +419,11 @@ export class DatabaseStorage implements IStorage {
       .set(updates)
       .where(eq(storyInvitations.id, id))
       .returning();
-    
+
     if (!invitation) {
       throw new Error("Invitation not found");
     }
-    
+
     return invitation;
   }
 

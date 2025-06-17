@@ -14,6 +14,7 @@ import Register from "@/pages/register";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
 import VerifyEmail from "@/pages/verify-email";
+import ResetPassword from "@/pages/reset-password";
 import CheckEmail from "@/pages/check-email";
 import Layout from "@/components/Layout";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,8 +34,9 @@ function Router() {
       <Route path="/explore" component={Explore} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      <Route path="/check-email" component={CheckEmail} />
       <Route path="/verify-email" component={VerifyEmail} />
+      <Route path="/reset-password" component={ResetPassword} />
+      <Route path="/check-email" component={CheckEmail} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

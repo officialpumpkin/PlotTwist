@@ -5,13 +5,19 @@
 /* Fix dropdown positioning issues */
 [data-radix-dropdown-menu-content] {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 200 !important;
   transform-origin: var(--radix-dropdown-menu-content-transform-origin) !important;
 }
 
 [data-radix-popper-content-wrapper] {
-  z-index: 9999 !important;
+  z-index: 200 !important;
   transform: none !important;
+}
+
+/* Ensure tooltips and hover cards don't overlap */
+[data-radix-tooltip-content],
+[data-radix-hover-card-content] {
+  z-index: 150 !important;
 }
 
 /* Prevent dropdowns from inheriting transforms that break positioning */
@@ -164,7 +170,28 @@ body.theme-fade::before {
 
 /* Ensure buttons and counts have proper spacing */
 .editor-container + div.flex {
-  @apply mt-4;
+  @apply mt-4 gap-2 flex-wrap;
+}
+
+/* Prevent button overlaps on mobile */
+@media (max-width: 640px) {
+  .flex.gap-2 {
+    @apply gap-1;
+  }
+  
+  .flex.space-x-2 > * + * {
+    @apply ml-1;
+  }
+  
+  /* Ensure mobile buttons don't overflow */
+  .mobile-button-container {
+    @apply flex-wrap gap-2 justify-center;
+  }
+  
+  /* Fix mobile dialog content */
+  [data-radix-dialog-content] {
+    @apply mx-2 max-w-[calc(100vw-1rem)] max-h-[90vh] overflow-auto;
+  }
 }
 
 /* Dialog content fix for rich text editor */

@@ -8,9 +8,16 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="font-sans min-h-screen flex flex-col bg-background text-foreground">
-      {/* Always show navigation, content will adjust based on auth state */}
-      <Navbar />
-      <MobileNav />
+      {/* Desktop Navigation - hidden on mobile */}
+      <div className="hidden md:block">
+        <Navbar />
+      </div>
+      
+      {/* Mobile Navigation - hidden on desktop */}
+      <div className="block md:hidden">
+        <MobileNav />
+      </div>
+      
       <main className="flex-grow">
         {children}
       </main>

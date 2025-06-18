@@ -23,7 +23,7 @@ export default function LoginOptions() {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-sm border border-neutral-200 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6">Sign in to PlotTwist</h2>
+      <h2 className="text-2xl font-bold text-center mb-6 text-black">Sign in to PlotTwist</h2>
       <p className="text-neutral-600 text-sm text-center mb-8">
         Choose how you'd like to sign in and start collaborating on stories.
       </p>

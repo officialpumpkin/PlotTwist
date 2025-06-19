@@ -173,27 +173,6 @@ body.theme-fade::before {
   @apply mt-4 gap-2 flex-wrap;
 }
 
-/* Prevent button overlaps on mobile */
-@media (max-width: 640px) {
-  .flex.gap-2 {
-    @apply gap-1;
-  }
-  
-  .flex.space-x-2 > * + * {
-    @apply ml-1;
-  }
-  
-  /* Ensure mobile buttons don't overflow */
-  .mobile-button-container {
-    @apply flex-wrap gap-2 justify-center;
-  }
-  
-  /* Fix mobile dialog content */
-  [data-radix-dialog-content] {
-    @apply mx-2 max-w-[calc(100vw-1rem)] max-h-[90vh] overflow-auto;
-  }
-}
-
 /* Dialog content fix for rich text editor */
 .writing-modal-content {
   @apply p-0 h-[95vh] overflow-auto;
@@ -221,4 +200,11 @@ body.theme-fade::before {
   margin-left: -16px;
   padding-left: 16px;
   padding-right: 16px;
+}
+
+/* Fix mobile dialog content */
+@media (max-width: 640px) {
+  [data-radix-dialog-content] {
+    @apply mx-2 max-w-[calc(100vw-1rem)] max-h-[90vh] overflow-auto;
+  }
 }

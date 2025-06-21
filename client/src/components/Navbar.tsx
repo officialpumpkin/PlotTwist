@@ -24,7 +24,7 @@ export default function Navbar() {
       ];
 
   return (
-    <nav className="bg-background shadow-sm border-b border-border py-4 px-4 sm:px-6 lg:px-8 hidden md:block">
+    <nav className="bg-background shadow-sm border-b border-border py-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto flex items-center">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />

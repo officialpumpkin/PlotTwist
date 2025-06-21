@@ -160,7 +160,7 @@ export default function StoryCard({
                   <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                   <polyline points="14,2 14,8 20,8" />
                 </svg>
-                <span>Author: {participants?.find(p => p.user && participants.some(participant => participant.userId === story.authorId && participant.user?.id === p.user?.id))?.user?.username || 'Unknown'}</span>
+                <span>Author: {participants?.find(p => p.role === 'author')?.user?.firstName || participants?.find(p => p.role === 'author')?.user?.username || participants?.find(p => p.userId === story.creatorId)?.user?.firstName || participants?.find(p => p.userId === story.creatorId)?.user?.username || 'Unknown'}</span>
               </div>
             </div>
               <div className="flex items-center">

@@ -257,34 +257,33 @@ export default function MyStories() {
             </Button>
           </div>
         )}
-      </div>
 
-      {/* Modals */}
-      <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
-      
-      {activeStory && (
-        <>
-          <WritingModal 
-            open={writingModal} 
-            onOpenChange={closeWritingModal} 
-            storyId={activeStory}
-            onComplete={() => openCompleteStoryModal(activeStory)}
-          />
-          
-          <CompleteStoryModal 
-            open={completeStoryModal} 
-            onOpenChange={setCompleteStoryModal}
-            storyId={activeStory}
-            onPrint={() => openPrintModal(activeStory)}
-          />
-          
-          <PrintModal 
-            open={printModal} 
-            onOpenChange={setPrintModal}
-            storyId={activeStory}
-          />
-        </>
-      )}
-    </div>
+        {/* Modals */}
+        <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
+        
+        {activeStory && (
+          <>
+            <WritingModal 
+              open={writingModal} 
+              onOpenChange={closeWritingModal} 
+              storyId={activeStory}
+              onComplete={() => openCompleteStoryModal(activeStory)}
+            />
+            
+            <CompleteStoryModal 
+              open={completeStoryModal} 
+              onOpenChange={setCompleteStoryModal}
+              storyId={activeStory}
+              onPrint={() => openPrintModal(activeStory)}
+            />
+            
+            <PrintModal 
+              open={printModal} 
+              onOpenChange={setPrintModal}
+              storyId={activeStory}
+            />
+          </>
+        )}
+      </div>
   );
 }

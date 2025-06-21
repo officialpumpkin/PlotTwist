@@ -1,0 +1,103 @@
+# PlotTwist - Collaborative Storytelling Platform
+
+## Overview
+
+PlotTwist is a collaborative storytelling platform that allows users to create and participate in stories where each participant takes turns contributing content within specified word limits. The application features user authentication, real-time collaboration, story management, and print services for completed stories.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS with shadcn/ui component library
+- **State Management**: TanStack Query (React Query) for server state
+- **Routing**: Wouter for client-side routing
+- **Rich Text Editor**: ReactQuill for story writing
+- **Build Tool**: Vite for fast development and optimized builds
+
+### Backend Architecture
+- **Runtime**: Node.js with Express.js server
+- **Database**: PostgreSQL with Drizzle ORM for type-safe database operations
+- **Database Provider**: Neon serverless PostgreSQL
+- **Authentication**: Multi-provider system supporting:
+  - Replit OAuth
+  - Google OAuth
+  - Local email/password authentication
+- **Session Management**: Express sessions with PostgreSQL store
+
+### Key Components
+
+#### Authentication System
+- Session-based authentication with secure cookie handling
+- Multi-provider OAuth integration (Replit, Google)
+- Email verification and password reset functionality
+- User profile management with avatar support
+
+#### Story Management
+- Turn-based collaborative writing system
+- Word limit enforcement per contribution
+- Story state management (active, waiting, completed)
+- Participant invitation and management system
+- Real-time notifications for turn updates
+
+#### Database Schema
+- **Users**: Profile information, authentication data, preferences
+- **Stories**: Story metadata, settings, and status
+- **Story Participants**: Many-to-many relationship with roles (author, participant)
+- **Story Segments**: Individual contributions with authorship tracking
+- **Story Turns**: Turn order and current turn management
+- **Invitations**: Story invitation system
+- **Print Orders**: Physical book printing service integration
+
+## Data Flow
+
+1. **User Registration/Login**: Users authenticate via OAuth or email/password
+2. **Story Creation**: Authors create stories with genre, word limits, and privacy settings
+3. **Collaboration Flow**: 
+   - Participants are invited via email or username
+   - Turn-based writing with automatic progression
+   - Real-time notifications for turn updates
+4. **Story Completion**: Stories can be marked complete and sent for printing
+5. **Print Services**: Integration with printing services for physical book creation
+
+## External Dependencies
+
+### Core Dependencies
+- **@neondatabase/serverless**: Serverless PostgreSQL connection
+- **drizzle-orm**: Type-safe ORM for database operations
+- **@sendgrid/mail**: Email service for notifications and verification
+- **passport**: Authentication middleware with multiple strategies
+- **@tanstack/react-query**: Server state management
+- **@radix-ui/***: Accessible UI components
+- **react-quill**: Rich text editor for story writing
+
+### Development Tools
+- **drizzle-kit**: Database schema management and migrations
+- **tsx**: TypeScript execution for development
+- **esbuild**: Fast bundling for production builds
+- **tailwindcss**: Utility-first CSS framework
+
+## Deployment Strategy
+
+### Environment Configuration
+- **Development**: Local development with hot reloading via Vite
+- **Production**: Autoscale deployment on Replit infrastructure
+- **Database**: Serverless PostgreSQL with connection pooling
+- **Assets**: Static file serving with proper caching headers
+
+### Build Process
+1. Frontend build via Vite (React/TypeScript → optimized bundle)
+2. Backend build via esbuild (TypeScript → Node.js compatible)
+3. Database migrations applied automatically
+4. Environment-specific configuration loading
+
+### Scalability Considerations
+- Serverless database connection with pooling
+- Session storage in PostgreSQL for horizontal scaling
+- Static asset optimization and caching
+- Real-time features implemented via polling (WebSocket upgrade path available)
+
+## Changelog
+- June 21, 2025. Initial setup
+
+## User Preferences
+Preferred communication style: Simple, everyday language.

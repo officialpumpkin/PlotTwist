@@ -85,7 +85,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto py-8 px-4">
+    <>
+      <div className="container max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
 
         <Tabs defaultValue="profile" className="w-full">
@@ -469,6 +470,6 @@ export default function ProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </>
   );
 }

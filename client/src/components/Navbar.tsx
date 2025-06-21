@@ -1,4 +1,4 @@
-import { useLocation, Link } from "wouter";
+import { useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import UserMenu from "./UserMenu";
 import { ThemeSwitcher } from "./ThemeSwitcher";
@@ -8,7 +8,7 @@ import { QuillPenIcon } from "./assets/icons";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
-  const [location] = useLocation();
+  const location = useLocation();
   const { user, isAuthenticated } = useAuth();
 
   // Navigation items based on authentication status
@@ -28,7 +28,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
-          <Link href={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
+          <Link to={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
             PlotTwist
           </Link>
         </div>
@@ -38,10 +38,10 @@ export default function Navbar() {
           {navItems.map((item) => (
             <Link 
               key={item.path} 
-              href={item.path}
+              to={item.path}
               className={cn(
                 "transition-colors",
-                location === item.path 
+                location.pathname === item.path 
                   ? "text-primary font-medium" 
                   : "text-muted-foreground hover:text-foreground"
               )}
@@ -65,10 +65,10 @@ export default function Navbar() {
           ) : (
             <>
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/login">Log in</Link>
+                <Link to="/login">Log in</Link>
               </Button>
               <Button size="sm" asChild>
-                <Link href="/register">Sign up</Link>
+                <Link to="/register">Sign up</Link>
               </Button>
             </>
           )}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +15,7 @@ import LoginOptions from "./LoginOptions";
 export default function UserMenu() {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [, navigate] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const logoutMutation = useMutation({

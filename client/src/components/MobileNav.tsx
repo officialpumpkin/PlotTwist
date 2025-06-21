@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { Menu, Bell, Plus, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -32,7 +32,7 @@ export default function MobileNav() {
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center space-x-2">
           <QuillPenIcon className="text-2xl text-primary" />
-          <Link href={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
+          <Link to={isAuthenticated ? "/dashboard" : "/"} className="text-xl font-bold text-primary">
             PlotTwist
           </Link>
         </div>

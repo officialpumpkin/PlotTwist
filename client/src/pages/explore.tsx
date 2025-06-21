@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import StoryCard from "@/components/StoryCard";
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -84,8 +83,7 @@ export default function Explore() {
     : [];
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-neutral-900">Explore Stories</h1>
@@ -277,6 +275,6 @@ export default function Explore() {
           </div>
         )}
       </div>
-    </Layout>
+    </div>
   );
 }

@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useTheme, type Theme } from "@/components/ThemeProvider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
-import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -201,8 +200,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <Layout>
-      <div className="container max-w-4xl mx-auto py-8 px-4">
+    <div className="container max-w-4xl mx-auto py-8 px-4">
         <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
         <Tabs defaultValue="account" className="w-full">
@@ -571,6 +569,6 @@ export default function SettingsPage() {
           </form>
         </AlertDialogContent>
       </AlertDialog>
-    </Layout>
+    </div>
   );
 }

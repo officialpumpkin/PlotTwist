@@ -234,18 +234,17 @@ export default function Dashboard() {
             </Button>
           </div>
         )}
-      </div>
 
-      {/* Modals */}
-      <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
-      
-      {activeStory && (
-        <WritingModal 
-          open={writingModal} 
-          onOpenChange={closeWritingModal} 
-          storyId={activeStory} 
-        />
-      )}
-    </div>
+        {/* Modals */}
+        <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
+        
+        {activeStory && (
+          <WritingModal 
+            open={writingModal} 
+            onOpenChange={closeWritingModal} 
+            storyId={activeStory} 
+          />
+        )}
+      </div>
   );
 }

@@ -67,13 +67,11 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="container max-w-4xl mx-auto py-8 px-4">
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="w-10 h-10 border-t-2 border-primary rounded-full animate-spin"></div>
-          </div>
+      <div className="container max-w-4xl mx-auto py-8 px-4">
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-10 h-10 border-t-2 border-primary rounded-full animate-spin"></div>
         </div>
-      </Layout>
+      </div>
     );
   }
 

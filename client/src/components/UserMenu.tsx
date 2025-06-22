@@ -77,12 +77,6 @@ export default function UserMenu() {
           </div>
         }
       >
-        <DropdownItem onClick={() => navigate("/profile")}>
-          <div className="flex items-center">
-            <User className="h-4 w-4 mr-2" />
-            Profile
-          </div>
-        </DropdownItem>
         <DropdownItem onClick={() => navigate("/settings")}>
           <div className="flex items-center">
             <Settings className="h-4 w-4 mr-2" />

@@ -10,7 +10,6 @@ import Register from "@/pages/register";
 import Dashboard from "@/pages/dashboard";
 import MyStories from "@/pages/my-stories";
 import Explore from "@/pages/explore";
-import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
 import CheckEmail from "@/pages/check-email";
 import VerifyEmail from "@/pages/verify-email";
@@ -61,7 +60,6 @@ export default function Router() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/my-stories" element={<ProtectedRoute><MyStories /></ProtectedRoute>} />
         <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         
         {/* 404 route */}

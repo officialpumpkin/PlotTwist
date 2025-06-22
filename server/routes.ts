@@ -932,7 +932,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is a participant
       const isParticipant = await storage.isParticipant(storyId, userId);
       if (!isParticipant) {
-        return res.status(400).json({ message: "You are not a participant in this story" });
+        return res.status(```tool_code
+400).json({ message: "You are not a participant in this story" });
       }
 
       // Check if user is the creator - creators can't leave their own stories
@@ -1469,7 +1470,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user profile
   app.patch('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
       const { username, firstName, lastName, email } = req.body;
 
       // Get current user
@@ -1481,6 +1486,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if username is changing and if it's unique
       if (username && username !== user.username) {
+        // Validate username
+        if (username.length < 3) {
+          return res.status(400).json({ message: "Username must be at least 3 characters long" });
+        }
+        if (username.length > 30) {
+          return res.status(400).json({ message: "Username must be less than 30 characters long" });
+        }
+        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+          return res.status(400).json({ message: "Username can only contain letters, numbers, hyphens, and underscores" });
+        }
+
         const existingUser = await storage.getUserByUsername(username);
         if (existingUser && existingUser.id !== userId) {
           return res.status(400).json({ message: "Username already taken" });
@@ -1497,15 +1513,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update user
       const updatedUser = await storage.upsertUser({
-        id: userId,
+        ...user,
         username: username || user.username,
         firstName: firstName !== undefined ? firstName : user.firstName,
         lastName: lastName !== undefined ? lastName : user.lastName,
         email: email || user.email,
-        // Don't update other fields like password
+        updatedAt: new Date(),
       });
 
-      res.json(updatedUser);
+      // Update session if username changed
+      if (username && username !== user.username && req.session?.user) {
+        req.session.user.username = username;
+        await new Promise<void>((resolve, reject) => {
+          req.session.save((err: any) => {
+            if (err) {
+              console.error("Session save error:", err);
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      }
+
+      // Return updated user without sensitive information
+      const { password, emailVerificationToken, passwordResetToken, ...safeUser } = updatedUser;
+      res.json(safeUser);
     } catch (error) {
       console.error("Error updating user profile:", error);
       res.status(500).json({ message: "Failed to update user profile" });

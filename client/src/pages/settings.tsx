@@ -35,6 +35,12 @@ export default function SettingsPage() {
     newPassword: "",
     confirmPassword: "",
   });
+  const [profileData, setProfileData] = useState({
+    username: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+  });
   const [emailSettings, setEmailSettings] = useState({
     turnNotifications: true,
     invitationNotifications: true,
@@ -134,6 +140,40 @@ export default function SettingsPage() {
     }
   });
 
+  // Update profile mutation
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: typeof profileData) => {
+      return await apiRequest("PATCH", "/api/users/profile", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been successfully updated."
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error updating profile",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Initialize profile data when user data is available
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        username: user.username || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+      });
+    }
+  }, [user]);
+
   // Handle notification toggle
   function handleNotificationToggle(key: keyof typeof emailSettings) {
     setEmailSettings(prev => {
@@ -187,6 +227,37 @@ export default function SettingsPage() {
     changePasswordMutation.mutate(passwordData);
   }
 
+  // Handle profile input change
+  function handleProfileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  // Submit profile changes
+  function handleSubmitProfileChange(e: React.FormEvent) {
+    e.preventDefault();
+    if (!profileData.username.trim()) {
+      toast({
+        title: "Invalid username",
+        description: "Username cannot be empty",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (profileData.username.length < 3) {
+      toast({
+        title: "Invalid username", 
+        description: "Username must be at least 3 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+    updateProfileMutation.mutate(profileData);
+  }
+
   if (isLoading) {
     return (
       <div className="container max-w-4xl mx-auto py-8 px-4">
@@ -218,20 +289,61 @@ export default function SettingsPage() {
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium">Your Account</h3>
-                  <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label className="text-muted-foreground">Username</Label>
-                        <p className="font-medium">{user?.username}</p>
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Profile Information</h3>
+                  <form onSubmit={handleSubmitProfileChange} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="username">Username</Label>
+                        <Input
+                          id="username"
+                          name="username"
+                          value={profileData.username}
+                          onChange={handleProfileChange}
+                          disabled={updateProfileMutation.isPending}
+                          required
+                        />
                       </div>
-                      <div>
-                        <Label className="text-muted-foreground">Email</Label>
-                        <p className="font-medium">{user?.email}</p>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={profileData.email}
+                          onChange={handleProfileChange}
+                          disabled={updateProfileMutation.isPending}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          value={profileData.firstName}
+                          onChange={handleProfileChange}
+                          disabled={updateProfileMutation.isPending}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          value={profileData.lastName}
+                          onChange={handleProfileChange}
+                          disabled={updateProfileMutation.isPending}
+                        />
                       </div>
                     </div>
-                  </div>
+                    <Button 
+                      type="submit"
+                      disabled={updateProfileMutation.isPending}
+                    >
+                      {updateProfileMutation.isPending ? "Updating..." : "Update Profile"}
+                    </Button>
+                  </form>
                 </div>
                 
                 <Separator />

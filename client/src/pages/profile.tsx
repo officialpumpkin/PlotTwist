@@ -93,7 +93,7 @@ export default function ProfilePage() {
             <TabsTrigger value="stats">Statistics</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="profile">
             <Card>
               <CardHeader>
@@ -115,7 +115,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
                 {isEditing ? (
                   <form onSubmit={handleSubmit} className="space-y-4">
@@ -208,7 +208,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="stats">
             <Card>
               <CardHeader>
@@ -217,35 +217,35 @@ export default function ProfilePage() {
                   Track your contribution to the PlotTwist community
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.storiesCreated}</span>
                     <span className="text-sm text-muted-foreground">Stories Created</span>
                   </div>
-                  
+
                   <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.storiesContributed}</span>
                     <span className="text-sm text-muted-foreground">Stories Contributed</span>
                   </div>
-                  
+
                   <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.totalSegments}</span>
                     <span className="text-sm text-muted-foreground">Total Segments</span>
                   </div>
-                  
+
                   <div className="bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20 flex flex-col items-center justify-center">
                     <span className="text-2xl font-bold text-primary">{stats.completedStories}</span>
                     <span className="text-sm text-muted-foreground">Completed Stories</span>
                   </div>
                 </div>
-                
+
                 <Separator className="my-6" />
-                
+
                 <div>
                   <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
-                  
+
                   {userData?.recentActivity?.length > 0 ? (
                     <div className="space-y-4">
                       {userData.recentActivity.map((activity: any) => (
@@ -274,7 +274,7 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="notifications">
             <Card>
               <CardHeader>
@@ -283,11 +283,11 @@ export default function ProfilePage() {
                   Manage your notifications and invitations
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent>
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Story Invitations</h3>
-                  
+
                   {userData?.invitations?.length > 0 ? (
                     <div className="space-y-4">
                       {userData.invitations.map((invitation: any) => (
@@ -361,9 +361,9 @@ export default function ProfilePage() {
                       No pending invitations
                     </p>
                   )}
-                  
+
                   <Separator className="my-6" />
-                  
+
                   <h3 className="text-lg font-medium">Notification Settings</h3>
                   <div className="space-y-4 pt-2">
                     <div className="flex items-center justify-between">
@@ -397,7 +397,7 @@ export default function ProfilePage() {
                         {userData?.settings?.turnNotifications ? "Enabled" : "Disabled"}
                       </Button>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Story Invitations</h4>
@@ -429,7 +429,7 @@ export default function ProfilePage() {
                         {userData?.settings?.invitationNotifications ? "Enabled" : "Disabled"}
                       </Button>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">Story Completions</h4>

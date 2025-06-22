@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use the request's host as it's what the user is actually using
       const host = req.get('host');
       const baseUrl = `${req.protocol}://${host}`;
-      console.log(`Using baseUrl for verification: ${baseUrl}`);
+      console.log("Using baseUrl for verification: " + baseUrl);
       sendEmailVerification(email, username, verificationToken, baseUrl).catch(error => {
         console.error('Failed to send verification email:', error);
       });
@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send verification email
       const domain = process.env.REPLIT_DOMAINS?.split(',')[0] || req.get('host');
-      const baseUrl = `https://${domain}`;
+      const baseUrl = "https://" + domain;
 
       const emailSent = await sendEmailVerification(email, user.username || 'User', verificationToken, baseUrl);
 
@@ -260,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send password reset email
-      console.log(`Attempting to send password reset email to: ${email}`);
+      console.log("Attempting to send password reset email to: " + email);
       const host = req.get('host');
       const baseUrl = `${req.protocol}://${host}`;
       console.log(`Using baseUrl for password reset: ${baseUrl}`);
@@ -1003,14 +1003,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check word count against story's word limit
       if (parseInt(wordCount) > story.wordLimit) {
         return res.status(400).json({ 
-          message: `Exceeded word limit of ${story.wordLimit}` 
+          message: "Exceeded word limit of " + story.wordLimit
         });
       }
 
       // Check character count against story's character limit (if set)
       if (story.characterLimit > 0 && parseInt(characterCount) > story.characterLimit) {
         return res.status(400).json({
-          message: `Exceeded character limit of ${story.characterLimit}`
+          message: "Exceeded character limit of " + story.characterLimit
         });
       }
 
@@ -1181,7 +1181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get image file path
-      const imagePath = `/uploads/${req.file.filename}`;
+      const imagePath = "/uploads/" + req.file.filename;
 
       // Save image information
       const image = await storage.addStoryImage({
@@ -1338,7 +1338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         userSegments.forEach(segment => {
           recentActivity.push({
-            id: `segment-${segment.id}`,
+            id: "segment-" + segment.id,
             type: 'contribution',
             storyId: storyId,
             storyTitle: story?.title || 'Unknown Story',
@@ -1645,8 +1645,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .update(users)
         .set({
           originalUsername: user.username, // Preserve original username
-          username: `deleted_user_${Date.now()}`,
-          email: `deleted_${Date.now()}@example.com`,
+          username: "deleted_user_" + Date.now(),
+          email: "deleted_" + Date.now() + "@example.com",
           firstName: null,
           lastName: null,
           password: null,

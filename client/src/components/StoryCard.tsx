@@ -216,14 +216,9 @@ export default function StoryCard({
             )}
 
             {status === "Waiting" && (
-              <>
-                <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
-                  Read Story
-                </Button>
-                <Button size="sm" variant="outline" className="bg-neutral-100 text-neutral-500 cursor-not-allowed">
-                  {waitingUser ? `${waitingUser.firstName || waitingUser.username}'s Turn` : 'Waiting'}
-                </Button>
-              </>
+              <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
+                Read Story
+              </Button>
             )}
 
             {status === "Completed" && onPrint && (

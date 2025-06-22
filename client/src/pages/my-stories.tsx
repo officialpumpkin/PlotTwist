@@ -6,6 +6,7 @@ import NewStoryModal from "@/components/NewStoryModal";
 import WritingModal from "@/components/WritingModal";
 import CompleteStoryModal from "@/components/CompleteStoryModal";
 import PrintModal from "@/components/PrintModal";
+import ReadStoryModal from "@/components/ReadStoryModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +17,7 @@ export default function MyStories() {
   const [writingModal, setWritingModal] = useState(false);
   const [completeStoryModal, setCompleteStoryModal] = useState(false);
   const [printModal, setPrintModal] = useState(false);
+  const [readModal, setReadModal] = useState(false);
   const [activeStory, setActiveStory] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,6 +45,11 @@ export default function MyStories() {
     setActiveStory(storyId);
     setCompleteStoryModal(false);
     setPrintModal(true);
+  };
+
+  const openReadModal = (storyId: number) => {
+    setActiveStory(storyId);
+    setReadModal(true);
   };
 
   const filteredStories = myStories
@@ -236,6 +243,7 @@ export default function MyStories() {
                 onContinue={() => openWritingModal(story.id)}
                 onComplete={() => openCompleteStoryModal(story.id)}
                 onPrint={() => openPrintModal(story.id)}
+                onRead={() => openReadModal(story.id)}
               />
             ))}
           </div>
@@ -292,6 +300,12 @@ export default function MyStories() {
             <PrintModal 
               open={printModal} 
               onOpenChange={setPrintModal}
+              storyId={activeStory}
+            />
+
+            <ReadStoryModal 
+              open={readModal} 
+              onOpenChange={setReadModal}
               storyId={activeStory}
             />
           </>

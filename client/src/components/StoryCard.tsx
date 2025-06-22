@@ -24,6 +24,7 @@ interface StoryCardProps {
   onComplete?: () => void;
   onPrint?: () => void;
   onJoin?: () => void;
+  onRead?: () => void;
 }
 
 export default function StoryCard({
@@ -35,7 +36,8 @@ export default function StoryCard({
   onContinue,
   onComplete,
   onPrint,
-  onJoin
+  onJoin,
+  onRead
 }: StoryCardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -212,7 +214,20 @@ export default function StoryCard({
 
           <div className="flex space-x-2">
             {status === "Your Turn" && onContinue && (
-              <Button size="sm" onClick={onContinue}>Continue</Button>
+              <>
+                <Button size="sm" onClick={onContinue}>Continue</Button>
+                {onRead && (
+                  <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead}>
+                    Read
+                  </Button>
+                )}
+              </>
+            )}
+
+            {status === "Active" && onRead && (
+              <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead}>
+                Read Story
+              </Button>
             )}
 
             {status === "Waiting" && (
@@ -221,10 +236,16 @@ export default function StoryCard({
               </Button>
             )}
 
-            {status === "Completed" && onPrint && (
+            {status === "Completed" && (
               <>
-                <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>Read</Button>
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onPrint}>Print</Button>
+                <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead || (() => setShowReadModal(true))}>
+                  Read
+                </Button>
+                {onPrint && (
+                  <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onPrint}>
+                    Print
+                  </Button>
+                )}
               </>
             )}
 

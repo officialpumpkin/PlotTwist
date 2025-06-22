@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import { db } from "./db";
 import { users } from "@shared/schema";
+import { logger } from "./logger";
 import { eq } from "drizzle-orm";
 import {
   storyFormSchema,
@@ -67,6 +68,42 @@ const getCurrentUserId = (req: any): string | null => {
   };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Request logging middleware
+  app.use((req: any, res: any, next: any) => {
+    const startTime = Date.now();
+    const requestId = nanoid(8);
+    
+    req.requestId = requestId;
+    req.startTime = startTime;
+    
+    const context = {
+      requestId,
+      method: req.method,
+      url: req.url,
+      userAgent: req.get('User-Agent'),
+      ip: req.ip,
+      sessionId: req.sessionID,
+      userId: req.session?.userId || req.user?.claims?.sub
+    };
+
+    logger.debug('Incoming request', {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      query: req.query,
+      body: req.method !== 'GET' ? req.body : undefined
+    }, context);
+
+    const originalSend = res.send;
+    res.send = function(data: any) {
+      const duration = Date.now() - startTime;
+      logger.apiRequest(req.method, req.url, res.statusCode, duration, context);
+      return originalSend.call(this, data);
+    };
+
+    next();
+  });
+
   // Auth middleware
   await setupAuth(app);
 
@@ -280,6 +317,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/login", async (req: any, res) => {
+    const context = {
+      requestId: req.requestId,
+      method: req.method,
+      url: req.url,
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    };
+    
     try {
       const { email, password } = req.body;
       console.log("Login attempt for:", email);
@@ -356,7 +401,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: responseUser,
       });
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error("Login error", error as Error, context, {
+        email: req.body.email,
+        timestamp: new Date().toISOString()
+      });
       res.status(500).json({ message: "Internal server error" });
     }
   });
@@ -1264,6 +1312,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching orders:", error);
       res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  // Client error reporting
+  app.post('/api/client-error', async (req, res) => {
+    try {
+      const errorData = req.body;
+      const context = {
+        requestId: req.requestId,
+        ip: req.ip,
+        userAgent: req.get('User-Agent'),
+        userId: req.session?.userId || req.user?.claims?.sub
+      };
+
+      logger.error('Client-side error reported', undefined, context, errorData);
+      res.status(200).json({ message: 'Error logged successfully' });
+    } catch (error) {
+      logger.error('Failed to log client error', error as Error);
+      res.status(500).json({ message: 'Failed to log error' });
     }
   });
 

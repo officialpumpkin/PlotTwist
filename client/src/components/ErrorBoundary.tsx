@@ -23,7 +23,31 @@ export class ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error Boundary caught an error:', error, errorInfo);
+    const errorDetails = {
+      timestamp: new Date().toISOString(),
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      },
+      errorInfo,
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      componentStack: errorInfo.componentStack
+    };
+
+    console.error('Error Boundary caught an error:', errorDetails);
+
+    // Send error to server for logging
+    fetch('/api/client-error', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(errorDetails)
+    }).catch(err => {
+      console.error('Failed to send error to server:', err);
+    });
   }
 
   render() {

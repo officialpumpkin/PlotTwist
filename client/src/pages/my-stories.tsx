@@ -66,6 +66,10 @@ export default function MyStories() {
           // This would need additional data from API
           return true;
         }
+        if (filter === "authored" && user) {
+          // Show only stories where the user is the creator
+          return story.creatorId === user.id;
+        }
         
         return true;
       })
@@ -157,6 +161,14 @@ export default function MyStories() {
                 onClick={() => setFilter("my-turn")}
               >
                 My Turn
+              </Button>
+              <Button 
+                variant={filter === "authored" ? "default" : "outline"}
+                size="sm"
+                className={filter === "authored" ? "rounded-full" : "bg-muted text-muted-foreground rounded-full hover:bg-muted/80"}
+                onClick={() => setFilter("authored")}
+              >
+                Authored
               </Button>
             </div>
             <div className="flex items-center gap-2">

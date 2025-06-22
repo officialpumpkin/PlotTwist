@@ -72,16 +72,16 @@ export default function MobileNav() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-4 pt-4">
-                    <Link href="/dashboard" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link to="/dashboard" className="text-lg font-medium hover:text-primary transition-colors">
                       Dashboard
                     </Link>
-                    <Link href="/my-stories" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link to="/my-stories" className="text-lg font-medium hover:text-primary transition-colors">
                       My Stories
                     </Link>
-                    <Link href="/explore" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link to="/explore" className="text-lg font-medium hover:text-primary transition-colors">
                       Explore
                     </Link>
-                    <Link href="/settings" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link to="/settings" className="text-lg font-medium hover:text-primary transition-colors">
                       Settings
                     </Link>
                     <div className="pt-4 border-t">
@@ -111,10 +111,10 @@ export default function MobileNav() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-4 pt-4">
-                    <Link href="/" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link to="/" className="text-lg font-medium hover:text-primary transition-colors">
                       Home
                     </Link>
-                    <Link href="/explore" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link to="/explore" className="text-lg font-medium hover:text-primary transition-colors">
                       Explore
                     </Link>
                     <div className="pt-4 border-t space-y-2">
@@ -127,7 +127,7 @@ export default function MobileNav() {
                         Log in
                       </Button>
                       <Button asChild className="w-full">
-                        <Link href="/register">
+                        <Link to="/register">
                           <UserPlus className="h-4 w-4 mr-2" />
                           Sign up
                         </Link>

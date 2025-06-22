@@ -690,11 +690,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Join a story
-  app.post('/api/stories/:id/join', isAuthenticated, async (req: any, res) => {
+  // Request to join a story
+  app.post('/api/stories/:id/request-join', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
       const userId = req.user.claims.sub;
+      const { message } = req.body;
 
       const story = await storage.getStoryById(storyId);
       if (!story) {
@@ -707,16 +708,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Already a participant in this story" });
       }
 
-      // Add user as a participant
-      const participant = await storage.addParticipant({
+      // Check if user is the author
+      if (story.creatorId === userId) {
+        return res.status(400).json({ message: "You are the author of this story" });
+      }
+
+      // Check if there's already a pending request
+      const existingRequest = await storage.getStoryJoinRequest(storyId, userId);
+      if (existingRequest && existingRequest.status === "pending") {
+        return res.status(400).json({ message: "You already have a pending request for this story" });
+      }
+
+      // Create join request
+      const joinRequest = await storage.createStoryJoinRequest({
         storyId,
-        userId
+        requesterId: userId,
+        authorId: story.creatorId,
+        message: message || null,
+        status: "pending"
       });
 
-      res.status(201).json(participant);
+      res.status(201).json(joinRequest);
     } catch (error) {
-      console.error("Error joining story:", error);
-      res.status(500).json({ message: "Failed to join story" });
+      console.error("Error creating join request:", error);
+      res.status(500).json({ message: "Failed to create join request" });
+    }
+  });
+
+  // Cancel join request
+  app.delete('/api/stories/:id/cancel-request', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const joinRequest = await storage.getStoryJoinRequest(storyId, userId);
+      if (!joinRequest) {
+        return res.status(404).json({ message: "Join request not found" });
+      }
+
+      if (joinRequest.requesterId !== userId) {
+        return res.status(403).json({ message: "You can only cancel your own requests" });
+      }
+
+      if (joinRequest.status !== "pending") {
+        return res.status(400).json({ message: "Can only cancel pending requests" });
+      }
+
+      await storage.updateStoryJoinRequest(joinRequest.id, { status: "cancelled" });
+
+      res.json({ message: "Join request cancelled successfully" });
+    } catch (error) {
+      console.error("Error cancelling join request:", error);
+      res.status(500).json({ message: "Failed to cancel join request" });
+    }
+  });
+
+  // Get pending join requests for current user's stories (as author)
+  app.get('/api/join-requests/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+
+      const requests = await storage.getPendingJoinRequestsForAuthor(userId);
+
+      // Get additional data for each request
+      const requestsWithDetails = await Promise.all(
+        requests.map(async (request) => {
+          const story = await storage.getStoryById(request.storyId);
+          const requester = await storage.getUser(request.requesterId);
+
+          return {
+            ...request,
+            story: story ? {
+              id: story.id,
+              title: story.title,
+              description: story.description,
+              genre: story.genre,
+            } : null,
+            requester: requester ? {
+              id: requester.id,
+              username: requester.username || "Unknown",
+              firstName: requester.firstName,
+              lastName: requester.lastName,
+              profileImageUrl: requester.profileImageUrl,
+            } : null,
+          };
+        })
+      );
+
+      res.json(requestsWithDetails);
+    } catch (error) {
+      console.error("Error fetching pending join requests:", error);
+      res.status(500).json({ message: "Failed to fetch join requests" });
+    }
+  });
+
+  // Approve join request
+  app.post('/api/join-requests/:id/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const joinRequest = await storage.getStoryJoinRequestById(requestId);
+      if (!joinRequest) {
+        return res.status(404).json({ message: "Join request not found" });
+      }
+
+      if (joinRequest.authorId !== userId) {
+        return res.status(403).json({ message: "Only the story author can approve requests" });
+      }
+
+      if (joinRequest.status !== "pending") {
+        return res.status(400).json({ message: "Request has already been " + joinRequest.status });
+      }
+
+      // Update request status
+      await storage.updateStoryJoinRequest(requestId, { status: "approved" });
+
+      // Add user as participant
+      await storage.addParticipant({
+        storyId: joinRequest.storyId,
+        userId: joinRequest.requesterId
+      });
+
+      res.json({ message: "Join request approved successfully" });
+    } catch (error) {
+      console.error("Error approving join request:", error);
+      res.status(500).json({ message: "Failed to approve join request" });
+    }
+  });
+
+  // Deny join request
+  app.post('/api/join-requests/:id/deny', isAuthenticated, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const joinRequest = await storage.getStoryJoinRequestById(requestId);
+      if (!joinRequest) {
+        return res.status(404).json({ message: "Join request not found" });
+      }
+
+      if (joinRequest.authorId !== userId) {
+        return res.status(403).json({ message: "Only the story author can deny requests" });
+      }
+
+      if (joinRequest.status !== "pending") {
+        return res.status(400).json({ message: "Request has already been " + joinRequest.status });
+      }
+
+      // Update request status
+      await storage.updateStoryJoinRequest(requestId, { status: "denied" });
+
+      res.json({ message: "Join request denied successfully" });
+    } catch (error) {
+      console.error("Error denying join request:", error);
+      res.status(500).json({ message: "Failed to deny join request" });
+    }
+  });
+
+  // Get user's join request status for a story
+  app.get('/api/stories/:id/join-request-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const joinRequest = await storage.getStoryJoinRequest(storyId, userId);
+
+      if (!joinRequest) {
+        return res.json({ hasRequest: false, status: null });
+      }
+
+      res.json({ 
+        hasRequest: true, 
+        status: joinRequest.status,
+        requestId: joinRequest.id 
+      });
+    } catch (error) {
+      console.error("Error fetching join request status:", error);
+      res.status(500).json({ message: "Failed to fetch join request status" });
     }
   });
 

@@ -55,6 +55,12 @@ export default function StoryCard({
     enabled: !!story?.id,
   });
 
+  // Fetch join request status for explore variant
+  const { data: joinRequestStatus } = useQuery({
+    queryKey: [`/api/stories/${story.id}/join-request-status`],
+    enabled: !!story?.id && variant === "explore" && !!user,
+  });
+
   // Find waiting user
   const waitingUser = participants?.find(p => p.userId === waitingUserId)?.user;
 
@@ -86,6 +92,46 @@ export default function StoryCard({
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to leave the story",
+      });
+    }
+  });
+
+  // Mutation for requesting to join a story
+  const requestJoinMutation = useMutation({
+    mutationFn: (message?: string) => apiRequest("POST", `/api/stories/${story.id}/request-join`, { message }),
+    onSuccess: () => {
+      toast({
+        title: "Request sent",
+        description: "Your request to join this story has been sent to the author",
+      });
+      // Refresh join request status
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${story.id}/join-request-status`] });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to send join request",
+      });
+    }
+  });
+
+  // Mutation for cancelling join request
+  const cancelRequestMutation = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/stories/${story.id}/cancel-request`),
+    onSuccess: () => {
+      toast({
+        title: "Request cancelled",
+        description: "Your join request has been cancelled",
+      });
+      // Refresh join request status
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${story.id}/join-request-status`] });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to cancel join request",
       });
     }
   });
@@ -248,14 +294,55 @@ export default function StoryCard({
               </>
             )}
 
-            {variant === "explore" && onJoin && (
-              <Button 
-                size="sm" 
-                className={status === "Completed" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-primary text-primary-foreground hover:bg-primary/90"}
-                onClick={onJoin}
-              >
-                Join Story
-              </Button>
+            {variant === "explore" && user && (
+              <>
+                {joinRequestStatus?.hasRequest ? (
+                  joinRequestStatus.status === "pending" ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      className="border-red-200 text-red-500 hover:bg-red-50"
+                      onClick={() => cancelRequestMutation.mutate()}
+                      disabled={cancelRequestMutation.isPending}
+                    >
+                      {cancelRequestMutation.isPending ? 'Cancelling...' : 'Cancel Request'}
+                    </Button>
+                  ) : joinRequestStatus.status === "approved" ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      disabled
+                    >
+                      Request Approved
+                    </Button>
+                  ) : joinRequestStatus.status === "denied" ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      disabled
+                    >
+                      Request Denied
+                    </Button>
+                  ) : null
+                ) : onJoin ? (
+                  <Button 
+                    size="sm" 
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={onJoin}
+                  >
+                    Join Story
+                  </Button>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => requestJoinMutation.mutate()}
+                    disabled={requestJoinMutation.isPending}
+                  >
+                    {requestJoinMutation.isPending ? 'Requesting...' : 'Request to Join'}
+                  </Button>
+                )}
+              </>
             )}
 
             {/* Leave Story button - only visible for participants who are not creators */}

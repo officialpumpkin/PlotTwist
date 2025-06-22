@@ -147,6 +147,20 @@ export const userSettings = pgTable("user_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Story join requests
+export const storyJoinRequests = pgTable("story_join_requests", {
+  id: serial("id").primaryKey(),
+  storyId: integer("story_id").notNull().references(() => stories.id),
+  requesterId: varchar("requester_id").notNull().references(() => users.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  status: varchar("status").notNull().default("pending"), // pending, approved, denied, cancelled
+  message: text("message"), // Optional message from requester
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqRequestIdx: index("uniq_request_idx").on(table.storyId, table.requesterId),
+}));
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   stories: many(stories),
@@ -154,6 +168,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   participations: many(storyParticipants),
   sentInvitations: many(storyInvitations, { relationName: "inviter" }),
   receivedInvitations: many(storyInvitations, { relationName: "invitee" }),
+  sentJoinRequests: many(storyJoinRequests, { relationName: "requester" }),
+  receivedJoinRequests: many(storyJoinRequests, { relationName: "author" }),
   settings: one(userSettings),
 }));
 
@@ -168,6 +184,7 @@ export const storiesRelations = relations(stories, ({ one, many }) => ({
   images: many(storyImages),
   orders: many(printOrders),
   invitations: many(storyInvitations),
+  joinRequests: many(storyJoinRequests),
 }));
 
 export const storyParticipantsRelations = relations(storyParticipants, ({ one }) => ({
@@ -227,6 +244,23 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
   }),
 }));
 
+export const storyJoinRequestsRelations = relations(storyJoinRequests, ({ one }) => ({
+  story: one(stories, {
+    fields: [storyJoinRequests.storyId],
+    references: [stories.id],
+  }),
+  requester: one(users, {
+    fields: [storyJoinRequests.requesterId],
+    references: [users.id],
+    relationName: "requester"
+  }),
+  author: one(users, {
+    fields: [storyJoinRequests.authorId],
+    references: [users.id],
+    relationName: "author"
+  }),
+}));
+
 // Insert schemas
 export const upsertUserSchema = createInsertSchema(users);
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -263,6 +297,10 @@ export type StoryInvitation = typeof storyInvitations.$inferSelect;
 export const insertUserSettingsSchema = createInsertSchema(userSettings).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertUserSettings = z.infer<typeof insertUserSettingsSchema>;
 export type UserSettings = typeof userSettings.$inferSelect;
+
+export const insertStoryJoinRequestSchema = createInsertSchema(storyJoinRequests).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertStoryJoinRequest = z.infer<typeof insertStoryJoinRequestSchema>;
+export type StoryJoinRequest = typeof storyJoinRequests.$inferSelect;
 
 // Auth schemas
 export const registerSchema = z.object({

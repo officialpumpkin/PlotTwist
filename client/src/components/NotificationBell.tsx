@@ -1,5 +1,5 @@
 import { Bell } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import CustomDropdown from '@/components/CustomDropdown';
 import { Button } from '@/components/ui/button';
@@ -9,25 +9,32 @@ import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 export default function NotificationBell() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch pending invitations
-  const { data: invitations, refetch, isLoading } = useQuery({
+  const { data: pendingInvitations, refetch: refetchInvitations, isLoading: isLoadingInvitations } = useQuery({
     queryKey: ['/api/invitations/pending'],
-    enabled: isAuthenticated,
+    enabled: !!user,
     refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
+  const { data: pendingJoinRequests, refetch: refetchJoinRequests, isLoading: isLoadingJoinRequests } = useQuery({
+    queryKey: ["/api/join-requests/pending"],
+    enabled: !!user,
+    refetchInterval: 30000,
+  });
+
   // Handle invitation acceptance
-  const handleAccept = async (invitationId: number) => {
+  const handleAcceptInvitation = async (invitationId: number) => {
     try {
       await apiRequest('POST', `/api/invitations/${invitationId}/accept`);
       toast({
         title: 'Invitation accepted',
         description: 'You have successfully joined the story!',
       });
-      refetch();
+      refetchInvitations();
     } catch (error) {
       console.error('Error accepting invitation:', error);
       toast({
@@ -39,14 +46,14 @@ export default function NotificationBell() {
   };
 
   // Handle invitation decline
-  const handleDecline = async (invitationId: number) => {
+  const handleDeclineInvitation = async (invitationId: number) => {
     try {
       await apiRequest('POST', `/api/invitations/${invitationId}/decline`);
       toast({
         title: 'Invitation declined',
         description: 'The invitation has been declined',
       });
-      refetch();
+      refetchInvitations();
     } catch (error) {
       console.error('Error declining invitation:', error);
       toast({
@@ -57,9 +64,79 @@ export default function NotificationBell() {
     }
   };
 
+  const approveJoinMutation = useMutation({
+    mutationFn: (requestId: number) => 
+      apiRequest("POST", `/api/join-requests/${requestId}/approve`),
+    onSuccess: () => {
+      toast({
+        title: "Request approved",
+        description: "The join request has been approved",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/join-requests/pending"] });
+      refetchJoinRequests();
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to approve request",
+      });
+    }
+  });
+
+  const denyJoinMutation = useMutation({
+    mutationFn: (requestId: number) => 
+      apiRequest("POST", `/api/join-requests/${requestId}/deny`),
+    onSuccess: () => {
+      toast({
+        title: "Request denied",
+        description: "The join request has been denied",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/join-requests/pending"] });
+      refetchJoinRequests();
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to deny request",
+      });
+    }
+  });
+
+  const declineMutation = useMutation({
+    mutationFn: (invitationId: number) => 
+      apiRequest("POST", `/api/invitations/${invitationId}/decline`),
+    onSuccess: () => {
+      toast({
+        title: "Invitation declined",
+        description: "You have declined the story invitation",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/invitations/pending"] });
+      refetchInvitations();
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to decline invitation",
+      });
+    }
+  });
+
+  const handleApproveJoinRequest = (requestId: number) => {
+    approveJoinMutation.mutate(requestId);
+  };
+
+  const handleDenyJoinRequest = (requestId: number) => {
+    denyJoinMutation.mutate(requestId);
+  };
+
   if (!isAuthenticated) return null;
 
-  const pendingCount = Array.isArray(invitations) ? invitations.length : 0;
+  const totalNotifications = (pendingInvitations?.length || 0) + (pendingJoinRequests?.length || 0);
+
+  const isLoading = isLoadingInvitations || isLoadingJoinRequests;
 
   return (
     <TooltipProvider>
@@ -76,12 +153,12 @@ export default function NotificationBell() {
                   className="relative h-9 w-9 rounded-full"
                 >
                   <Bell className="h-[1.2rem] w-[1.2rem]" />
-                  {pendingCount > 0 && (
+                  {totalNotifications > 0 && (
                     <Badge 
                       variant="destructive" 
                       className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                     >
-                      {pendingCount}
+                      {totalNotifications}
                     </Badge>
                   )}
                 </Button>
@@ -90,12 +167,12 @@ export default function NotificationBell() {
               <div className="px-4 py-3 font-medium text-sm border-b">
                 Notifications
               </div>
-              
+
               {isLoading ? (
                 <div className="p-4 text-center text-sm text-muted-foreground">
                   Loading notifications...
                 </div>
-              ) : pendingCount === 0 ? (
+              ) : totalNotifications === 0 ? (
                 <div className="p-6 text-center">
                   <div className="text-muted-foreground mb-2">
                     <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -107,37 +184,86 @@ export default function NotificationBell() {
                 </div>
               ) : (
                 <>
-                  {(invitations as any[]).map((invitation: any) => (
-                    <div key={invitation.id} className="p-3 border-b last:border-b-0">
-                      <div className="text-sm mb-2">
-                        <span className="font-medium">
-                          {invitation.inviter?.username || 'Someone'}
-                        </span>{' '}
-                        invited you to join a story:
-                        <div className="font-medium text-primary mt-1">
-                          {invitation.story?.title || 'Untitled Story'}
+                {pendingInvitations && pendingInvitations.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Story Invitations</h4>
+                  {pendingInvitations.map((invitation) => (
+                    <div key={invitation.id} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">{invitation.story?.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            From {invitation.inviter?.username}
+                          </p>
                         </div>
-                      </div>
-                      <div className="flex justify-between gap-2 mt-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => handleDecline(invitation.id)}
-                        >
-                          Decline
-                        </Button>
-                        <Button
-                          size="sm"
-                          className="w-full"
-                          onClick={() => handleAccept(invitation.id)}
-                        >
-                          Accept
-                        </Button>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAcceptInvitation(invitation.id)}
+                            disabled={declineMutation.isPending}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDeclineInvitation(invitation.id)}
+                            disabled={declineMutation.isPending}
+                          >
+                            Decline
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {pendingJoinRequests && pendingJoinRequests.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Join Requests</h4>
+                  {pendingJoinRequests.map((request) => (
+                    <div key={request.id} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">{request.story?.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            From {request.requester?.firstName || request.requester?.username}
+                          </p>
+                          {request.message && (
+                            <p className="text-xs text-muted-foreground mt-1">"{request.message}"</p>
+                          )}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleApproveJoinRequest(request.id)}
+                            disabled={approveJoinMutation.isPending}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDenyJoinRequest(request.id)}
+                            disabled={denyJoinMutation.isPending}
+                          >
+                            Deny
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
                 </>
+              )}
+              {(!pendingInvitations || pendingInvitations.length === 0) && (!pendingJoinRequests || pendingJoinRequests.length === 0) && (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No new notifications
+                </p>
               )}
             </CustomDropdown>
           </div>

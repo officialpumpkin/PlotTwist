@@ -120,10 +120,7 @@ export default function WritingModal({
 
   const handleSkipTurn = async () => {
     try {
-      await apiRequest({
-        endpoint: `/api/stories/${storyId}/skip-turn`,
-        method: 'POST',
-      });
+      await apiRequest("POST", `/api/stories/${storyId}/skip-turn`);
 
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/turn`] });
       queryClient.invalidateQueries({ queryKey: [`/api/my-turn`] });

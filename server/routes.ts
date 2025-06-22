@@ -1177,6 +1177,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Skip turn (authors only)
+  app.post('/api/stories/:id/skip-turn', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      if (story.isComplete) {
+        return res.status(400).json({ message: "Story is already complete" });
+      }
+
+      // Check if user is the author/creator
+      if (story.creatorId !== userId) {
+        return res.status(403).json({ message: "Only the story author can skip turns" });
+      }
+
+      // Get current turn
+      const turn = await storage.getStoryTurn(storyId);
+      if (!turn) {
+        return res.status(404).json({ message: "Turn information not found" });
+      }
+
+      // Get all participants to determine next turn
+      const participants = await storage.getStoryParticipants(storyId);
+
+      if (participants.length > 1) {
+        // Find the index of the current user whose turn is being skipped
+        const currentUserIndex = participants.findIndex(p => p.userId === turn.currentUserId);
+
+        // Determine the next user (circular)
+        const nextUserIndex = (currentUserIndex + 1) % participants.length;
+        const nextUserId = participants[nextUserIndex].userId;
+
+        // Update the turn
+        await storage.updateStoryTurn(storyId, {
+          currentTurn: turn.currentTurn + 1,
+          currentUserId: nextUserId
+        });
+
+        res.json({ 
+          message: "Turn skipped successfully",
+          nextUserId,
+          currentTurn: turn.currentTurn + 1
+        });
+      } else {
+        return res.status(400).json({ message: "Cannot skip turn with only one participant" });
+      }
+    } catch (error) {
+      console.error("Error skipping turn:", error);
+      res.status(500).json({ message: "Failed to skip turn" });
+    }
+  });
+
   // Mark a story as complete
   app.post('/api/stories/:id/complete', isAuthenticated, async (req: any, res) => {
     try {

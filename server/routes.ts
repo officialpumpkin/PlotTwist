@@ -790,7 +790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           res.status(201).json({ 
-            message: `Invitation sent to ${email}`,
+            message: "Invitation sent to " + email,
             invitation
           });
         } else {
@@ -1691,7 +1691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if invitation is pending
       if (invitation.status !== "pending") {
-        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+        return res.status(400).json({ message: "Invitation has already been " + invitation.status });
       }
 
       // Check if invitation has expired
@@ -1808,7 +1808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
           res.status(201).json({ 
-            message: `Invitation sent to ${email}`,
+            message: "Invitation sent to " + email,
             invitation
           });
         } else {
@@ -1868,7 +1868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         res.status(201).json({ 
-          message: `Invitation sent to ${username}`,
+          message: "Invitation sent to " + username,
           invitation
         });
       } else {
@@ -1947,7 +1947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if invitation is already accepted or declined
       if (invitation.status !== "pending") {
-        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+        return res.status(400).json({ message: "Invitation has already been " + invitation.status });
       }
 
       // Update invitation status

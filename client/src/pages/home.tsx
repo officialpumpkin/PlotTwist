@@ -46,7 +46,7 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Button size="lg" className="font-medium" onClick={openLoginOptions}>
-                Get Started/Login
+                Signup/Login
               </Button>
               <Button size="lg" variant="outline" className="font-medium" asChild>
                 <Link href="/explore">

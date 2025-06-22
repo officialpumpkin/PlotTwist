@@ -1846,7 +1846,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate input
       if (!currentPassword || !newPassword) {
         return res.status(400).json({ message: "Current password and new password are required" });
-      ```
       }
 
       // Get user

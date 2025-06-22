@@ -23,7 +23,8 @@ import {
   FileIcon,
   PlusIcon,
   MinusIcon,
-  CartIcon
+  CartIcon,
+  CheckIcon
 } from "./assets/icons";
 
 interface PrintModalProps {

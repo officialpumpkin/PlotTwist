@@ -932,8 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is a participant
       const isParticipant = await storage.isParticipant(storyId, userId);
       if (!isParticipant) {
-        return res.status(```tool_code
-400).json({ message: "You are not a participant in this story" });
+        return res.status(400).json({ message: "You are not a participant in this story" });
       }
 
       // Check if user is the creator - creators can't leave their own stories

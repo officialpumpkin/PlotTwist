@@ -72,10 +72,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use((req: any, res: any, next: any) => {
     const startTime = Date.now();
     const requestId = nanoid(8);
-    
+
     req.requestId = requestId;
     req.startTime = startTime;
-    
+
     const context = {
       requestId,
       method: req.method,
@@ -324,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ip: req.ip,
       userAgent: req.get('User-Agent')
     };
-    
+
     try {
       const { email, password } = req.body;
       console.log("Login attempt for:", email);
@@ -768,7 +768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
 
-      const requests = await storage.getPendingJoinRequestsForAuthor(userId);
+      const requests = await storage.getPendingJoinRequestsForUser(userId);
 
       // Get additional data for each request
       const requestsWithDetails = await Promise.all(
@@ -1846,6 +1846,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate input
       if (!currentPassword || !newPassword) {
         return res.status(400).json({ message: "Current password and new password are required" });
+      ```
       }
 
       // Get user

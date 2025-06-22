@@ -158,7 +158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send verification email (async, don't wait for it)
       // Use the request's host as it's what the user is actually using
       const host = req.get('host');
-      const baseUrl = `${req.protocol}://${host}`;
+      const baseUrl = req.protocol + "://" + host;
       console.log("Using baseUrl for verification: " + baseUrl);
       sendEmailVerification(email, username, verificationToken, baseUrl).catch(error => {
         console.error('Failed to send verification email:', error);
@@ -262,10 +262,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send password reset email
       console.log("Attempting to send password reset email to: " + email);
       const host = req.get('host');
-      const baseUrl = `${req.protocol}://${host}`;
-      console.log(`Using baseUrl for password reset: ${baseUrl}`);
+      const baseUrl = req.protocol + "://" + host;
+      console.log("Using baseUrl for password reset: " + baseUrl);
       const emailSent = await sendPasswordResetEmail(email, user.username || 'User', resetToken, baseUrl);
-      console.log(`Password reset email sent result: ${emailSent}`);
+      console.log("Password reset email sent result: " + emailSent);
 
       if (emailSent) {
         res.json({ message: "If an account with that email exists, we've sent a password reset link" });
@@ -869,7 +869,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         res.status(201).json({ 
-          message: `${username} has been invited to the story`,
+          message: username + " has been invited to the story",
           invitation
         });
       } else {
@@ -1736,7 +1736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if invitation is pending
       if (invitation.status !== "pending") {
-        return res.status(400).json({ message: `Invitation has already been ${invitation.status}` });
+        return res.status(400).json({ message: "Invitation has already been " + invitation.status });
       }
 
       // Update invitation status

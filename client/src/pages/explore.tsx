@@ -19,6 +19,12 @@ export default function Explore() {
     queryKey: ["/api/stories"],
   });
 
+  // Get user's stories to filter them out from explore
+  const { data: userStories } = useQuery({
+    queryKey: ["/api/my-stories"],
+    enabled: isAuthenticated,
+  });
+
   const joinStoryMutation = useMutation({
     mutationFn: async (storyId: number) => {
       return await apiRequest("POST", `/api/stories/${storyId}/join`);
@@ -51,6 +57,14 @@ export default function Explore() {
 
   const filteredStories = stories
     ? stories.filter((story: any) => {
+        // Filter out stories user is already involved with
+        if (isAuthenticated && userStories) {
+          const isAlreadyInvolved = userStories.some((userStory: any) => userStory.id === story.id);
+          if (isAlreadyInvolved) {
+            return false;
+          }
+        }
+        
         // Apply search filter
         if (searchQuery) {
           if (!story.title.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -68,19 +82,15 @@ export default function Explore() {
     : [];
 
   // Group stories by genre for the genre showcase
-  const genres = stories 
-    ? Array.from(new Set(stories.map((story: any) => story.genre)))
+  const genres = filteredStories.length > 0
+    ? Array.from(new Set(filteredStories.map((story: any) => story.genre)))
     : [];
 
-  // Featured stories (first 3 most recent stories)
-  const featuredStories = stories 
-    ? stories.slice(0, 3)
-    : [];
+  // Featured stories (first 3 most recent stories, excluding user's stories)
+  const featuredStories = filteredStories.slice(0, 3);
 
-  // Recently added stories (next 3 most recent stories)
-  const recentStories = stories 
-    ? stories.slice(3, 6)
-    : [];
+  // Recently added stories (next 3 most recent stories, excluding user's stories)
+  const recentStories = filteredStories.slice(3, 6);
 
   return (
     <>
@@ -188,7 +198,7 @@ export default function Explore() {
                 ];
                 
                 // Count stories in this genre
-                const count = stories.filter((s: any) => s.genre === genre).length;
+                const count = filteredStories.filter((s: any) => s.genre === genre).length;
                 
                 return (
                   <div 

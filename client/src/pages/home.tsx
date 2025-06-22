@@ -39,14 +39,14 @@ export default function Home() {
               <span className="text-xl font-bold text-primary">PlotTwist</span>
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-neutral-900 max-w-3xl">
-              Collaborate on stories with friends, one turn at a time
+              Collaborate with friends, writing stories one turn at a time
             </h1>
             <p className="text-xl text-neutral-600 max-w-prose">
               Build creative narratives together where each person contributes within word limits
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-8">
               <Button size="lg" className="font-medium" onClick={openLoginOptions}>
-                Get Started
+                Get Started/Login
               </Button>
               <Button size="lg" variant="outline" className="font-medium" asChild>
                 <Link href="/explore">
@@ -139,7 +139,8 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-bold text-neutral-900 mb-2">Print Your Story</h3>
               <p className="text-neutral-600">
-                When the story is complete, print it as a keepsake or gift for contributors.
+                When the story is complete, print it as a keepsake or gift for contributors. 
+                (Under Construction, ts and cs apply, may cause mild to severe allergic reactions)
               </p>
             </div>
           </div>
@@ -152,17 +153,17 @@ export default function Home() {
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-neutral-900">Creative Collaboration</h2>
             <p className="text-lg text-neutral-600 mt-2">
-              See how others are using PlotTwist
+              See how other real totally not made up people are using PlotTwist
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
                 <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                  "Our book club uses PlotTwist between meetings to keep our creative writing flowing."
+                  "Our book club uses PlotTwist, specifically the erotic fiction function, between meetings to keep our creative juices flowing."
                 </h3>
                 <p className="text-neutral-600 italic">
-                  — Sarah L., Book Club Organizer
+                  — Sarah L. Fake Book Club Organiser and Casual Testimonial Enthusiast
                 </p>
               </div>
             </div>
@@ -172,7 +173,7 @@ export default function Home() {
                   "My creative writing students collaborate on stories to learn about narrative structure and voice."
                 </h3>
                 <p className="text-neutral-600 italic">
-                  — Professor James W., Literature Department
+                  — Professor James W. Paid Literature Department Influencer
                 </p>
               </div>
             </div>

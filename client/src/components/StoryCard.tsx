@@ -62,9 +62,8 @@ export default function StoryCard({
   const progress = segments ? 
     Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) : 0;
 
-  // Calculate actual contributors (unique users who have written segments)
-  const actualContributors = segments ? 
-    [...new Set(segments.map(segment => segment.userId))].length : 0;
+  // Use actual participants count (all users who joined the story)
+  const participantCount = participants?.length || 0;
 
   // Check if user is the creator (needed for leave story logic)
   const isCreator = user && story.creatorId === user.id;
@@ -118,7 +117,7 @@ export default function StoryCard({
 
         <div className="flex items-center mt-4 text-sm text-neutral-500">
           <UserIcon className="mr-1" />
-          <span>{actualContributors} contributors</span>
+          <span>{participantCount} participants</span>
           <span className="mx-2">•</span>
           <TimeIcon className="mr-1" />
           <span>

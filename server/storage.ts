@@ -6,8 +6,8 @@ import {
   storyTurns,
   storyImages,
   printOrders,
-  storyInvitations,
   userSettings,
+  storyInvitations,
   storyJoinRequests,
   type UpsertUser,
   type User,
@@ -87,6 +87,13 @@ export interface IStorage {
   getStoryInvitationById(id: number): Promise<StoryInvitation | undefined>;
   updateStoryInvitation(id: number, updates: Partial<StoryInvitation>): Promise<StoryInvitation>;
   getPendingInvitationsForUser(userId: string): Promise<StoryInvitation[]>;
+
+  // Story join requests
+  getPendingJoinRequestsForUser(userId: string): Promise<StoryJoinRequest[]>;
+  getStoryJoinRequest(storyId: number, userId: string): Promise<StoryJoinRequest | null>;
+  getStoryJoinRequestById(requestId: number): Promise<StoryJoinRequest | null>;
+  createStoryJoinRequest(data: any): Promise<StoryJoinRequest>;
+  updateStoryJoinRequest(requestId: number, data: any): Promise<StoryJoinRequest>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -236,18 +243,76 @@ export class DatabaseStorage implements IStorage {
       .where(eq(storyParticipants.storyId, storyId));
   }
 
+  // Story participant management
   async isParticipant(storyId: number, userId: string): Promise<boolean> {
-    const [participant] = await db
+    const participant = await db
       .select()
       .from(storyParticipants)
-      .where(
-        and(
-          eq(storyParticipants.storyId, storyId),
-          eq(storyParticipants.userId, userId)
-        )
-      );
+      .where(and(eq(storyParticipants.storyId, storyId), eq(storyParticipants.userId, userId)))
+      .limit(1);
 
-    return !!participant;
+    return participant.length > 0;
+  }
+
+  // Join request functions
+  async getPendingJoinRequestsForUser(userId: string): Promise<StoryJoinRequest[]> {
+    return await db
+      .select()
+      .from(storyJoinRequests)
+      .where(and(
+        eq(storyJoinRequests.authorId, userId),
+        eq(storyJoinRequests.status, "pending")
+      ))
+      .orderBy(desc(storyJoinRequests.createdAt));
+  }
+
+  async getStoryJoinRequest(storyId: number, userId: string): Promise<StoryJoinRequest | null> {
+    const request = await db
+      .select()
+      .from(storyJoinRequests)
+      .where(and(
+        eq(storyJoinRequests.storyId, storyId),
+        eq(storyJoinRequests.requesterId, userId)
+      ))
+      .limit(1);
+
+    return request.length > 0 ? request[0] : null;
+  }
+
+  async getStoryJoinRequestById(requestId: number): Promise<StoryJoinRequest | null> {
+    const request = await db
+      .select()
+      .from(storyJoinRequests)
+      .where(eq(storyJoinRequests.id, requestId))
+      .limit(1);
+
+    return request.length > 0 ? request[0] : null;
+  }
+
+  async createStoryJoinRequest(data: any): Promise<StoryJoinRequest> {
+    const [request] = await db
+      .insert(storyJoinRequests)
+      .values({
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+
+    return request;
+  }
+
+  async updateStoryJoinRequest(requestId: number, data: any): Promise<StoryJoinRequest> {
+    const [request] = await db
+      .update(storyJoinRequests)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(storyJoinRequests.id, requestId))
+      .returning();
+
+    return request;
   }
 
   async removeParticipant(storyId: number, userId: string): Promise<void> {

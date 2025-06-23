@@ -927,6 +927,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Accept invitation
+  app.post('/api/invitations/:id/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      if (isNaN(invitationId)) {
+        return res.status(400).json({ message: "Invalid invitation ID" });
+      }
+
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const invitation = await storage.getStoryInvitationById(invitationId);
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+
+      if (invitation.inviteeId !== userId) {
+        return res.status(403).json({ message: "You can only accept your own invitations" });
+      }
+
+      if (invitation.status !== "pending") {
+        return res.status(400).json({ message: "Invitation has already been " + invitation.status });
+      }
+
+      // Check if invitation has expired
+      if (new Date() > invitation.expiresAt) {
+        return res.status(400).json({ message: "Invitation has expired" });
+      }
+
+      // Update invitation status
+      await storage.updateStoryInvitation(invitationId, { status: "accepted" });
+
+      // Add user as participant
+      await storage.addParticipant({
+        storyId: invitation.storyId,
+        userId: userId
+      });
+
+      res.json({ message: "Invitation accepted successfully" });
+    } catch (error) {
+      console.error("Error accepting invitation:", error);
+      res.status(500).json({ message: "Failed to accept invitation" });
+    }
+  });
+
+  // Decline invitation
+  app.post('/api/invitations/:id/decline', isAuthenticated, async (req: any, res) => {
+    try {
+      const invitationId = parseInt(req.params.id);
+      if (isNaN(invitationId)) {
+        return res.status(400).json({ message: "Invalid invitation ID" });
+      }
+
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const invitation = await storage.getStoryInvitationById(invitationId);
+      if (!invitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+
+      if (invitation.inviteeId !== userId) {
+        return res.status(403).json({ message: "You can only decline your own invitations" });
+      }
+
+      if (invitation.status !== "pending") {
+        return res.status(400).json({ message: "Invitation has already been " + invitation.status });
+      }
+
+      // Update invitation status
+      await storage.updateStoryInvitation(invitationId, { status: "declined" });
+
+      res.json({ message: "Invitation declined successfully" });
+    } catch (error) {
+      console.error("Error declining invitation:", error);
+      res.status(500).json({ message: "Failed to decline invitation" });
+    }
+  });
+
   // Invite a user to a story
   app.post('/api/stories/:id/invite', isAuthenticated, async (req: any, res) => {
     try {

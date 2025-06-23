@@ -1,0 +1,30 @@
+Issue: Dropdowns in "Create New Story" UI opening from incorrect position.
+
+Steps to Reproduce:
+
+    Open the "Create New Story" window.
+
+    Click on any of the following dropdowns:
+
+        Genre
+
+        Word Limit per Turn
+
+        Character Limit per Turn
+
+        Max Story Segments
+
+Expected Behavior:
+Each dropdown should open from the location of its corresponding button.
+
+Actual Behavior:
+All four dropdowns open from the top-left corner of the screen, rather than directly below their buttons.
+
+Impact:
+This misalignment makes the interface harder to use and visually inconsistent.
+
+
+UI element:
+<button type="button" role="combobox" aria-controls="radix-:r7:" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" data-replit-metadata="client/src/components/NewStoryModal.tsx:225:26" data-component-name="SelectTrigger" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&amp;>span]:line-clamp-1" id=":r6:-form-item" aria-describedby=":r6:-form-item-description" aria-invalid="false"><span data-replit-metadata="client/src/components/NewStoryModal.tsx:226:28" data-component-name="SelectValue" style="pointer-events: none;">Adventure</span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down h-4 w-4 opacity-50" data-replit-metadata="client/src/components/ui/select.tsx:48:6" data-component-name="ChevronDown" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button>
+
+The SelectTrigger component (used for Genre, Word Limit, etc. in NewStoryModal.tsx) opens its dropdown from the top-left of the screen instead of directly beneath the trigger button.

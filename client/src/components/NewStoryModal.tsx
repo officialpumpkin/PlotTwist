@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { storyFormSchema, Story } from "@shared/schema";
 import { z } from "zod";
-import "@/lib/dropdown-fix.css";
 
 import {
   Dialog,
@@ -141,7 +140,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto" style={{ transform: 'none' }}>
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
           <DialogDescription>
@@ -204,11 +203,11 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="relative">
+                          <SelectTrigger>
                             <SelectValue placeholder="Select a genre" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent position="popper" sideOffset={4}>
+                        <SelectContent>
                           <SelectItem value="Fantasy">Fantasy</SelectItem>
                           <SelectItem value="Science Fiction">Science Fiction</SelectItem>
                           <SelectItem value="Mystery">Mystery</SelectItem>
@@ -273,11 +272,11 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                       defaultValue={field.value.toString()}
                     >
                       <FormControl>
-                        <SelectTrigger className="relative">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select word limit" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent position="popper" sideOffset={4}>
+                      <SelectContent>
                         <SelectItem value="50">50 words</SelectItem>
                         <SelectItem value="100">100 words</SelectItem>
                         <SelectItem value="150">150 words</SelectItem>
@@ -303,11 +302,11 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                       defaultValue={field.value.toString()}
                     >
                       <FormControl>
-                        <SelectTrigger className="relative">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select character limit" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent position="popper" sideOffset={4}>
+                      <SelectContent>
                         <SelectItem value="0">No limit</SelectItem>
                         <SelectItem value="280">280 characters (Tweet length)</SelectItem>
                         <SelectItem value="500">500 characters</SelectItem>
@@ -332,11 +331,11 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                       defaultValue={field.value.toString()}
                     >
                       <FormControl>
-                        <SelectTrigger className="relative">
+                        <SelectTrigger>
                           <SelectValue placeholder="Select max segments" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent position="popper" sideOffset={4}>
+                      <SelectContent>
                         <SelectItem value="10">10 turns</SelectItem>
                         <SelectItem value="20">20 turns</SelectItem>
                         <SelectItem value="30">30 turns</SelectItem>

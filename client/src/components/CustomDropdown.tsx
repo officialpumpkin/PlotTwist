@@ -50,6 +50,7 @@ export default function CustomDropdown({
       {isOpen && (
         <div 
           className={`absolute top-full mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg min-w-48 ${alignmentClasses[align]}`}
+          onClick={(e) => e.stopPropagation()} // Prevent dropdown from closing when clicking inside
         >
           <div className="py-1">
             {children}

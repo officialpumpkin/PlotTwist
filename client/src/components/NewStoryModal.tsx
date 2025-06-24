@@ -140,7 +140,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto relative z-10">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
           <DialogDescription>

@@ -49,7 +49,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
   const [customGenre, setCustomGenre] = useState("");
-  const [showCustomGenre, setShowCustomGenre] = useState(false);
+  const [showCustomGenre, setShowCustomGenre(false);
 
   const form = useForm<z.infer<typeof storyFormSchema>>({
     resolver: zodResolver(storyFormSchema),
@@ -140,7 +140,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="relative sm:max-w-lg max-h-[85vh] overflow-visible sm:overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
           <DialogDescription>
@@ -207,7 +207,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                             <SelectValue placeholder="Select a genre" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent sideOffset={4}>
+                        <SelectContent position="item-aligned" sideOffset={4}>
                           <SelectItem value="Fantasy">Fantasy</SelectItem>
                           <SelectItem value="Science Fiction">Science Fiction</SelectItem>
                           <SelectItem value="Mystery">Mystery</SelectItem>
@@ -276,7 +276,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                           <SelectValue placeholder="Select word limit" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent sideOffset={4}>
+                      <SelectContent position="item-aligned" sideOffset={4}>
                         <SelectItem value="50">50 words</SelectItem>
                         <SelectItem value="100">100 words</SelectItem>
                         <SelectItem value="150">150 words</SelectItem>
@@ -306,7 +306,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                           <SelectValue placeholder="Select character limit" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent sideOffset={4}>
+                      <SelectContent position="item-aligned" sideOffset={4}>
                         <SelectItem value="0">No limit</SelectItem>
                         <SelectItem value="280">280 characters (Tweet length)</SelectItem>
                         <SelectItem value="500">500 characters</SelectItem>
@@ -335,7 +335,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                           <SelectValue placeholder="Select max segments" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent sideOffset={4}>
+                      <SelectContent position="item-aligned" sideOffset={4}>
                         <SelectItem value="10">10 turns</SelectItem>
                         <SelectItem value="20">20 turns</SelectItem>
                         <SelectItem value="30">30 turns</SelectItem>

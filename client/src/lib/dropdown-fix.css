@@ -1,5 +1,12 @@
 /* Fix for dropdown positioning in iframe environments */
 
+/* Prevent transform/fixed positioning bugs */
+html, body, #root {
+  position: static !important;
+  transform: none !important;
+  overflow: visible !important;
+}
+
 /* Ensure select content uses proper portal positioning */
 [data-radix-select-content] {
   position: fixed !important;

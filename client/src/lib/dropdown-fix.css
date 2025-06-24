@@ -1,12 +1,14 @@
-/* Comprehensive fix for dropdown positioning issues */
+/* Comprehensive fix for dropdown positioning issues in iframe environments */
 
 /* Force all Radix dropdowns to use proper positioning */
 [data-radix-dropdown-menu-content],
 [data-radix-popover-content],
 [data-radix-select-content],
 [data-radix-context-menu-content] {
+  position: absolute !important;
   z-index: 9999 !important;
-  position: fixed !important;
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin, var(--radix-select-content-transform-origin)) !important;
+  will-change: auto !important;
 }
 
 /* Ensure triggers maintain proper positioning context */
@@ -25,20 +27,51 @@
   position: fixed !important;
 }
 
-/* Override any container styles that might interfere */
-.dropdown-container,
-.dropdown-container * {
+/* Override any container styles that might interfere with positioning */
+[role="dialog"],
+[data-radix-dialog-content],
+.modal-container,
+form {
+  contain: none !important;
   transform: none !important;
-  position: static !important;
+  will-change: auto !important;
+  overflow: visible !important;
 }
 
-/* Specific fix for user menu and other dropdown triggers */
-.dropdown-container[data-radix-dropdown-menu-trigger] {
+/* Specific fix for select content positioning in iframe environments */
+[data-radix-select-content] {
+  position: absolute !important;
+  z-index: 9999 !important;
+  contain: layout !important;
+  isolation: auto !important;
+}
+
+/* Ensure select triggers maintain relative positioning */
+[data-radix-select-trigger] {
   position: relative !important;
+  z-index: auto !important;
 }
 
-/* Ensure dropdown content appears in the correct location */
-[data-state="open"][data-radix-dropdown-menu-content] {
-  animation: none !important;
-  transform: none !important;
+/* Fix for portal containers in iframe */
+[data-radix-select-portal] {
+  position: absolute !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+}
+
+[data-radix-select-portal] > * {
+  pointer-events: auto !important;
+}
+
+/* Prevent layout shifts that break positioning */
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure viewport calculations work in iframe */
+[data-radix-select-viewport] {
+  position: relative !important;
+  width: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
 }

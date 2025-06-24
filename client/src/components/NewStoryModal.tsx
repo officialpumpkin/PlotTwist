@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
@@ -51,6 +52,34 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   const [customGenre, setCustomGenre] = useState("");
   const [showCustomGenre, setShowCustomGenre] = useState(false);
 
+  // Log accessibility errors and modal state
+  React.useEffect(() => {
+    console.log('NewStoryModal state changed:', { open });
+    
+    // Listen for accessibility warnings
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    console.error = (...args) => {
+      if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
+        console.log('ACCESSIBILITY ERROR:', ...args);
+      }
+      originalError.apply(console, args);
+    };
+    
+    console.warn = (...args) => {
+      if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
+        console.log('ACCESSIBILITY WARNING:', ...args);
+      }
+      originalWarn.apply(console, args);
+    };
+    
+    return () => {
+      console.error = originalError;
+      console.warn = originalWarn;
+    };
+  }, [open]);
+
   const form = useForm<z.infer<typeof storyFormSchema>>({
     resolver: zodResolver(storyFormSchema),
     defaultValues: {
@@ -66,6 +95,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   const createStoryMutation = useMutation({
     mutationFn: async (values: z.infer<typeof storyFormSchema>) => {
+      console.log('Creating story with values:', values);
       // Create the story first
       const story = await apiRequest<Story>("POST", "/api/stories", values);
 
@@ -90,6 +120,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       return story;
     },
     onSuccess: () => {
+      console.log('Story created successfully');
       toast({
         title: "Story created!",
         description: invites.length > 0 
@@ -106,6 +137,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       onOpenChange(false);
     },
     onError: (error) => {
+      console.error('Error creating story:', error);
       toast({
         title: "Error creating story",
         description: error.message,
@@ -135,15 +167,19 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   };
 
   function onSubmit(values: z.infer<typeof storyFormSchema>) {
+    console.log('Form submitted with values:', values);
     createStoryMutation.mutate(values);
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="relative sm:max-w-lg max-h-[85vh] overflow-visible sm:overflow-y-auto">
+      <DialogContent 
+        className="relative sm:max-w-lg max-h-[85vh] overflow-visible sm:overflow-y-auto"
+        aria-describedby="new-story-description"
+      >
         <DialogHeader>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
-          <DialogDescription>
+          <DialogDescription id="new-story-description">
             Set up your collaborative storytelling project
           </DialogDescription>
         </DialogHeader>

@@ -49,7 +49,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
   const [customGenre, setCustomGenre] = useState("");
-  const [showCustomGenre, setShowCustomGenre(false);
+  const [showCustomGenre, setShowCustomGenre] = useState(false);
 
   const form = useForm<z.infer<typeof storyFormSchema>>({
     resolver: zodResolver(storyFormSchema),

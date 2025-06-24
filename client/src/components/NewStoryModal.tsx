@@ -140,7 +140,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto relative z-10">
         <DialogHeader>
           <DialogTitle className="text-lg">Create a New Story</DialogTitle>
           <DialogDescription>
@@ -207,7 +207,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                             <SelectValue placeholder="Select a genre" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent position="popper" sideOffset={4}>
+                        <SelectContent sideOffset={4}>
                           <SelectItem value="Fantasy">Fantasy</SelectItem>
                           <SelectItem value="Science Fiction">Science Fiction</SelectItem>
                           <SelectItem value="Mystery">Mystery</SelectItem>

@@ -276,7 +276,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                           <SelectValue placeholder="Select word limit" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent position="popper" sideOffset={4}>
+                      <SelectContent sideOffset={4}>
                         <SelectItem value="50">50 words</SelectItem>
                         <SelectItem value="100">100 words</SelectItem>
                         <SelectItem value="150">150 words</SelectItem>
@@ -306,7 +306,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                           <SelectValue placeholder="Select character limit" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent position="popper" sideOffset={4}>
+                      <SelectContent sideOffset={4}>
                         <SelectItem value="0">No limit</SelectItem>
                         <SelectItem value="280">280 characters (Tweet length)</SelectItem>
                         <SelectItem value="500">500 characters</SelectItem>
@@ -335,7 +335,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                           <SelectValue placeholder="Select max segments" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent position="popper" sideOffset={4}>
+                      <SelectContent sideOffset={4}>
                         <SelectItem value="10">10 turns</SelectItem>
                         <SelectItem value="20">20 turns</SelectItem>
                         <SelectItem value="30">30 turns</SelectItem>

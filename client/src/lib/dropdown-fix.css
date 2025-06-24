@@ -1,77 +1,25 @@
-/* Comprehensive fix for dropdown positioning issues in iframe environments */
+/* Fix for dropdown positioning in iframe environments */
 
-/* Force all Radix dropdowns to use proper positioning */
-[data-radix-dropdown-menu-content],
-[data-radix-popover-content],
-[data-radix-select-content],
-[data-radix-context-menu-content] {
-  position: absolute !important;
-  z-index: 9999 !important;
-  transform-origin: var(--radix-dropdown-menu-content-transform-origin, var(--radix-select-content-transform-origin)) !important;
-  will-change: auto !important;
-}
-
-/* Ensure triggers maintain proper positioning context */
-[data-radix-dropdown-menu-trigger],
-[data-radix-popover-trigger],
-[data-radix-select-trigger],
-[data-radix-context-menu-trigger] {
-  position: relative !important;
-}
-
-/* Target the Radix portal containers specifically */
-[data-radix-popper-content-wrapper],
-[data-radix-dropdown-menu-portal],
-[data-radix-popover-portal] {
-  z-index: 9999 !important;
+/* Ensure select content uses proper portal positioning */
+[data-radix-select-content] {
   position: fixed !important;
+  z-index: 9999 !important;
 }
 
-/* Override any container styles that might interfere with positioning */
-[role="dialog"],
-[data-radix-dialog-content],
-.modal-container,
-form {
+/* Ensure select portals work correctly */
+[data-radix-select-portal] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* Fix for all Radix popper content */
+[data-radix-popper-content-wrapper] {
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+/* Prevent parent containers from breaking positioning */
+[data-radix-dialog-content] {
   contain: none !important;
   transform: none !important;
-  will-change: auto !important;
-  overflow: visible !important;
-}
-
-/* Specific fix for select content positioning in iframe environments */
-[data-radix-select-content] {
-  position: absolute !important;
-  z-index: 9999 !important;
-  contain: layout !important;
-  isolation: auto !important;
-}
-
-/* Ensure select triggers maintain relative positioning */
-[data-radix-select-trigger] {
-  position: relative !important;
-  z-index: auto !important;
-}
-
-/* Fix for portal containers in iframe */
-[data-radix-select-portal] {
-  position: absolute !important;
-  z-index: 9999 !important;
-  pointer-events: none !important;
-}
-
-[data-radix-select-portal] > * {
-  pointer-events: auto !important;
-}
-
-/* Prevent layout shifts that break positioning */
-* {
-  box-sizing: border-box;
-}
-
-/* Ensure viewport calculations work in iframe */
-[data-radix-select-viewport] {
-  position: relative !important;
-  width: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
 }

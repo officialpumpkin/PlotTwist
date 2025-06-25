@@ -56,7 +56,13 @@ export default function Home() {
             </div>
             
             <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent 
+                className="sm:max-w-md"
+                aria-describedby="login-options-description"
+              >
+                <div className="sr-only" id="login-options-description">
+                  Choose your login method to access PlotTwist
+                </div>
                 <LoginOptions />
               </DialogContent>
             </Dialog>

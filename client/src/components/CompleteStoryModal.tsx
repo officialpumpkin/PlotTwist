@@ -162,7 +162,7 @@ export default function CompleteStoryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent aria-describedby="complete-story-description">
         <div className="absolute top-4 right-4">
           <Button 
             variant="ghost" 
@@ -178,7 +178,7 @@ export default function CompleteStoryModal({
           <CheckIcon className="text-accent" />
         </div>
         <DialogTitle className="text-center mt-3">Complete Story</DialogTitle>
-        <DialogDescription className="text-center">
+        <DialogDescription id="complete-story-description" className="text-center">
           Are you sure you want to mark "{story?.title}" as complete? All contributors will be notified and no further additions will be allowed.
         </DialogDescription>
         

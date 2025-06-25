@@ -4,7 +4,8 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle 
+  DialogTitle,
+  DialogDescription 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -83,11 +84,17 @@ export default function MobileNotificationsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+        className="sm:max-w-md"
+        aria-describedby="mobile-notifications-description"
+      >
         <DialogHeader>
           <DialogTitle>Invitations</DialogTitle>
+          <DialogDescription id="mobile-notifications-description">
+            View your latest notifications and updates
+          </DialogDescription>
         </DialogHeader>
-        
+
         <div className="mt-4">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">

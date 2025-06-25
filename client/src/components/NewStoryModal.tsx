@@ -55,6 +55,17 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   // Log accessibility errors and modal state
   React.useEffect(() => {
     console.log('NewStoryModal state changed:', { open });
+    if (open) {
+      console.log('NewStoryModal should be visible now');
+      // Check if DOM element is actually present
+      setTimeout(() => {
+        const dialogElement = document.querySelector('[role="dialog"]');
+        console.log('Dialog element found:', !!dialogElement);
+        if (dialogElement) {
+          console.log('Dialog element computed style:', window.getComputedStyle(dialogElement).display);
+        }
+      }, 100);
+    }
     
     // Listen for accessibility warnings
     const originalError = console.error;

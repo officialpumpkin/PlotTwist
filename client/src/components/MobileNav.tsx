@@ -143,7 +143,13 @@ export default function MobileNav() {
       <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
 
       <Dialog open={showLoginOptions} onOpenChange={setShowLoginOptions}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent 
+          className="sm:max-w-md"
+          aria-describedby="mobile-login-description"
+        >
+          <div className="sr-only" id="mobile-login-description">
+            Choose your login method to access PlotTwist
+          </div>
           <LoginOptions />
         </DialogContent>
       </Dialog>

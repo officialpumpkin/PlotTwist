@@ -1836,7 +1836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { username, firstName, lastName, bio } = req.body;
+      const { username, firstName, lastName } = req.body;
 
       // Get current user
       const user = await storage.getUser(userId);
@@ -1864,14 +1864,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (username !== undefined) updateData.username = username;
       if (firstName !== undefined) updateData.firstName = firstName;
       if (lastName !== undefined) updateData.lastName = lastName;
-      if (bio !== undefined) updateData.bio = bio;
 
       // Update user
       const updatedUser = await storage.upsertUser({
         id: userId,
         ...updateData,
         email: user.email,
-        isEmailVerified: user.isEmailVerified,
+        emailVerified: user.emailVerified,
       });
 
       res.json({
@@ -1881,7 +1880,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: updatedUser.username,
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
-          bio: updatedUser.bio,
           email: updatedUser.email,
         },
       });

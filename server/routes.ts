@@ -928,8 +928,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Accept invitation
-  app.post('/api/inv```tool_code
-itations/:id/accept', isAuthenticated, async (req: any, res) => {
+  app.post('/api/invitations/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const invitationId = parseInt(req.params.id);
       if (isNaN(invitationId)) {
@@ -1837,7 +1836,7 @@ itations/:id/accept', isAuthenticated, async (req: any, res) => {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { username, firstName, lastName, email } = req.body;
+      const { username, firstName, lastName, bio } = req.body;
 
       // Get current user
       const user = await storage.getUser(userId);
@@ -1852,3 +1851,48 @@ itations/:id/accept', isAuthenticated, async (req: any, res) => {
         if (username.length < 3) {
           return res.status(400).json({ message: "Username must be at least 3 characters long" });
         }
+
+        // Check if username already exists
+        const existingUser = await storage.getUserByUsername(username);
+        if (existingUser && existingUser.id !== userId) {
+          return res.status(400).json({ message: "Username already taken" });
+        }
+      }
+
+      // Prepare update data
+      const updateData: any = {};
+      if (username !== undefined) updateData.username = username;
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (bio !== undefined) updateData.bio = bio;
+
+      // Update user
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        ...updateData,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+      });
+
+      res.json({
+        message: "Profile updated successfully",
+        user: {
+          id: updatedUser.id,
+          username: updatedUser.username,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          bio: updatedUser.bio,
+          email: updatedUser.email,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Create HTTP server
+  const server = createServer(app);
+  
+  return server;
+}

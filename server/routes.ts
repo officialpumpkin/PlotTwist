@@ -928,14 +928,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Accept invitation
-  app.post('/api/invitations/:id/accept', isAuthenticated, async (req: any, res) => {
+  app.post('/api/inv```tool_code
+itations/:id/accept', isAuthenticated, async (req: any, res) => {
     try {
       const invitationId = parseInt(req.params.id);
       if (isNaN(invitationId)) {
         return res.status(400).json({ message: "Invalid invitation ID" });
       }
 
-      const userId = req.user?.claims?.sub;
+      const userId = getCurrentUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -982,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid invitation ID" });
       }
 
-      const userId = req.user?.claims?.sub;
+      const userId = getCurrentUserId(req);
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -1851,105 +1852,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (username.length < 3) {
           return res.status(400).json({ message: "Username must be at least 3 characters long" });
         }
-        if (username.length > 30) {
-          return res.status(400).json({ message: "Username must be less than 30 characters long" });
-        }
-        if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-          return res.status(400).json({ message: "Username can only contain letters, numbers, hyphens, and underscores" });
-        }
-
-        const existingUser = await storage.getUserByUsername(username);
-        if (existingUser && existingUser.id !== userId) {
-          return res.status(400).json({ message: "Username already taken" });
-        }
-      }
-
-      // Check if email is changing and if it's unique
-      if (email && email !== user.email) {
-        const existingUser = await storage.getUserByEmail(email);
-        if (existingUser && existingUser.id !== userId) {
-          return res.status(400).json({ message: "Email already in use" });
-        }
-      }
-
-      // Update user
-      const updatedUser = await storage.upsertUser({
-        ...user,
-        username: username || user.username,
-        firstName: firstName !== undefined ? firstName : user.firstName,
-        lastName: lastName !== undefined ? lastName : user.lastName,
-        email: email || user.email,
-        updatedAt: new Date(),
-      });
-
-      // Update session if username changed
-      if (username && username !== user.username && req.session?.user) {
-        req.session.user.username = username;
-        await new Promise<void>((resolve, reject) => {
-          req.session.save((err: any) => {
-            if (err) {
-              console.error("Session save error:", err);
-              reject(err);
-            } else {
-              resolve();
-            }
-          });
-        });
-      }
-
-      // Return updated user without sensitive information
-      const { password, emailVerificationToken, passwordResetToken, ...safeUser } = updatedUser;
-      res.json(safeUser);
-    } catch (error) {
-      console.error("Error updating user profile:", error);
-      res.status(500).json({ message: "Failed to update user profile" });
-    }
-  });
-
-  // Change password
-  app.post('/api/users/change-password', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const { currentPassword, newPassword } = req.body;
-
-      // Validate input
-      if (!currentPassword || !newPassword) {
-        return res.status(400).json({ message: "Current password and new password are required" });
-      }
-
-      // Get user
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Check if user's auth is not password-based
-      if (user.authProvider && user.authProvider !== 'local') {
-        return res.status(400).json({ message: "Password cannot be changed for this account type" });
-      }
-
-      // Verify current password
-      const isMatch = await bcrypt.compare(currentPassword, user.password || "");
-      if (!isMatch) {
-        return res.status(400).json({ message: "Current password is incorrect" });
-      }
-
-      // Hash new password
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      // Update password
-      await storage.upsertUser({
-        id: userId,
-        password: hashedPassword
-      });
-
-      res.json({ message: "Password changed successfully" });
-    } catch (error) {
-      console.error("Error changing password:", error);
-      res.status(500).json({ message: "Failed to change password" });
-    }
-  });
-
-  const server = createServer(app);
-  return server;
-}

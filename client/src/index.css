@@ -169,46 +169,56 @@ body.theme-fade::before {
   padding: 0;
 }
 
-/* Contributor alternating text colors */
+/* Contributor alternating text colors with stronger contrast and varying weights */
 .contributor-text-0 {
-  color: hsl(240, 10%, 20%); /* Dark grey */
+  color: hsl(240, 15%, 10%); /* Very dark grey */
+  font-weight: 600; /* Semi-bold */
 }
 
 .contributor-text-1 {
-  color: hsl(240, 8%, 35%); /* Medium dark grey */
+  color: hsl(240, 12%, 30%); /* Dark grey */
+  font-weight: 400; /* Normal */
 }
 
 .contributor-text-2 {
-  color: hsl(240, 6%, 50%); /* Medium grey */
+  color: hsl(240, 10%, 15%); /* Very dark grey */
+  font-weight: 500; /* Medium */
 }
 
 .contributor-text-3 {
-  color: hsl(240, 8%, 25%); /* Darker medium grey */
+  color: hsl(240, 8%, 35%); /* Medium dark grey */
+  font-weight: 400; /* Normal */
 }
 
 .contributor-text-4 {
-  color: hsl(240, 12%, 15%); /* Very dark grey */
+  color: hsl(240, 18%, 8%); /* Almost black */
+  font-weight: 600; /* Semi-bold */
 }
 
-/* Dark mode contributor colors */
+/* Dark mode contributor colors with stronger contrast */
 .dark .contributor-text-0 {
-  color: hsl(240, 5%, 85%); /* Light grey */
+  color: hsl(240, 8%, 90%); /* Very light grey */
+  font-weight: 600; /* Semi-bold */
 }
 
 .dark .contributor-text-1 {
-  color: hsl(240, 7%, 70%); /* Medium light grey */
+  color: hsl(240, 10%, 70%); /* Medium light grey */
+  font-weight: 400; /* Normal */
 }
 
 .dark .contributor-text-2 {
-  color: hsl(240, 5%, 65%); /* Slightly darker light grey */
+  color: hsl(240, 8%, 85%); /* Light grey */
+  font-weight: 500; /* Medium */
 }
 
 .dark .contributor-text-3 {
-  color: hsl(240, 8%, 75%); /* Lighter medium grey */
+  color: hsl(240, 12%, 65%); /* Medium grey */
+  font-weight: 400; /* Normal */
 }
 
 .dark .contributor-text-4 {
-  color: hsl(240, 6%, 80%); /* Very light grey */
+  color: hsl(240, 6%, 95%); /* Almost white */
+  font-weight: 600; /* Semi-bold */
 }
 
 .editor-container .ql-container:focus-within {

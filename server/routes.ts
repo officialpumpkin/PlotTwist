@@ -145,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Check for passport-based auth (Replit Auth and Google Auth)
     if (req.user?.claims?.sub) {
       try {
-        const userId = req.user.claims.sub;
+        const userId = req.session?.userId || req.user?.claims?.sub;
         console.log("Looking up user in database for ID:", userId);
         const user = await storage.getUser(userId);
         console.log("Database lookup result:", user);
@@ -596,15 +596,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create a new story
   app.post('/api/stories', isAuthenticated, async (req: any, res) => {
     try {
-      // Make sure we have a userId
-      if (!req.user || !req.user.claims || !req.user.claims.sub) {
+      // Get userId from session or OAuth claims
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      
+      if (!userId) {
         return res.status(401).json({ 
           message: "Unauthorized - user not properly authenticated",
           details: "User ID missing from authentication"
         });
       }
 
-      const userId = req.user.claims.sub;
       console.log("Creating story with userID:", userId);
 
       try {
@@ -658,7 +659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's stories
   app.get('/api/my-stories', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const userStories = await storage.getStoriesByUser(userId);
       res.json(userStories);
     } catch (error) {
@@ -670,7 +671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get stories where it's the user's turn
   app.get('/api/my-turn', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
@@ -703,7 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get stories waiting for others
   app.get('/api/waiting-turn', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
@@ -741,7 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/request-join', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const { message } = req.body;
 
       const story = await storage.getStoryById(storyId);
@@ -786,7 +787,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/stories/:id/cancel-request', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const joinRequest = await storage.getStoryJoinRequest(storyId, userId);
       if (!joinRequest) {
@@ -813,7 +814,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending join requests for current user's stories (as author)
   app.get('/api/join-requests/pending', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const requests = await storage.getPendingJoinRequestsForUser(userId);
 
@@ -853,7 +854,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/join-requests/:id/approve', isAuthenticated, async (req: any, res) => {
     try {
       const requestId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const joinRequest = await storage.getStoryJoinRequestById(requestId);
       if (!joinRequest) {
@@ -888,7 +889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/join-requests/:id/deny', isAuthenticated, async (req: any, res) => {
     try {
       const requestId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const joinRequest = await storage.getStoryJoinRequestById(requestId);
       if (!joinRequest) {
@@ -917,7 +918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/stories/:id/join-request-status', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const joinRequest = await storage.getStoryJoinRequest(storyId, userId);
 
@@ -939,7 +940,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending invitations for the current user
   app.get('/api/invitations/pending', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       // Fetch pending invitations
       const invitations = await storage.getPendingInvitationsForUser(userId);
@@ -1061,7 +1062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/invite', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const inviterId = req.user.claims.sub;
+      const inviterId = req.session?.userId || req.user?.claims?.sub;
       const { inviteType, email, username } = req.body;
 
       // Check if the story exists and the inviter is a participant
@@ -1254,7 +1255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/stories/:id/leave', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       // Check if story exists
       const story = await storage.getStoryById(storyId);
@@ -1293,7 +1294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/segments', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const story = await storage.getStoryById(storyId);
       if (!story) {
@@ -1466,7 +1467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/skip-turn', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const story = await storage.getStoryById(storyId);
       if (!story) {
@@ -1523,7 +1524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/complete', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const story = await storage.getStoryById(storyId);
       if (!story) {
@@ -1552,7 +1553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/images', isAuthenticated, upload.single('image'), async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       if (!req.file) {
         return res.status(400).json({ message: "No image file provided" });
@@ -1609,7 +1610,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/stories/:id/print', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
 
       const story = await storage.getStoryById(storyId);
       if (!story) {
@@ -1648,7 +1649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's print orders
   app.get('/api/orders', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const orders = await storage.getUserOrders(userId);
       res.json(orders);
     } catch (error) {
@@ -1678,7 +1679,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User profile routes
   app.get('/api/users/profile', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const user = await storage.getUser(userId);
 
       if (!user) {
@@ -1794,7 +1795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User settings routes
   app.get('/api/users/settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       let settings = await storage.getUserSettings(userId);
 
       if (!settings) {
@@ -1820,7 +1821,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update notification settings
   app.patch('/api/users/settings/notifications', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const { turnNotifications, invitationNotifications, completionNotifications } = req.body;
 
       // Get current settings
@@ -1856,7 +1857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update appearance settings
   app.patch('/api/users/settings/appearance', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const { fontSize, editorHeight, theme } = req.body;
 
       // Get current settings

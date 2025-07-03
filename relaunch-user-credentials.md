@@ -164,6 +164,14 @@ The PlotTwist Team
   - Performs soft delete to preserve data integrity
 - **Status**: Fully resolved - account deletion now works safely
 
+### Authentication System Issue - RESOLVED ✅
+- **Problem**: Users with local authentication (email/password) couldn't create stories or perform authenticated actions
+- **Root Cause**: Endpoints only checked for OAuth authentication structure (`req.user.claims.sub`) but not session-based authentication
+- **Solution**: Updated all authenticated endpoints to support both authentication types:
+  - `const userId = req.session?.userId || req.user?.claims?.sub;`
+  - This supports both local authentication (session) and OAuth authentication (claims)
+- **Status**: Fully resolved - all users can now create stories and perform authenticated actions
+
 ### Google OAuth 403 Error - Pending Configuration
 - **Issue**: Google OAuth returns 403 forbidden error
 - **Required Fix**: Update Google Cloud Console with current domain

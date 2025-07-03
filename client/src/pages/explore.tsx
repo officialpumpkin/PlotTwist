@@ -48,7 +48,7 @@ export default function Explore() {
 
   const handleJoinStory = (storyId: number) => {
     if (!isAuthenticated) {
-      window.location.href = "/api/login";
+      window.location.href = "/register";
       return;
     }
     
@@ -152,7 +152,7 @@ export default function Explore() {
                   className="w-max bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" 
                   onClick={() => handleJoinStory(featuredStories[0].id)}
                 >
-                  Join Story
+                  {isAuthenticated ? "Join Story" : "Sign up"}
                 </Button>
               </div>
             </div>
@@ -280,7 +280,7 @@ export default function Explore() {
               </Button>
             ) : (
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold" asChild>
-                <a href="/api/login">Sign in to Create Stories</a>
+                <a href="/register">Sign up to Create Stories</a>
               </Button>
             )}
           </div>

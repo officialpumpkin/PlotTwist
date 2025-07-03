@@ -294,44 +294,56 @@ export default function StoryCard({
               </>
             )}
 
-            {variant === "explore" && user && (
+            {variant === "explore" && (
               <>
-                {joinRequestStatus?.hasRequest ? (
-                  joinRequestStatus.status === "pending" ? (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      className="border-red-200 text-red-500 hover:bg-red-50"
-                      onClick={() => cancelRequestMutation.mutate()}
-                      disabled={cancelRequestMutation.isPending}
-                    >
-                      {cancelRequestMutation.isPending ? 'Cancelling...' : 'Cancel Request'}
-                    </Button>
-                  ) : joinRequestStatus.status === "approved" ? (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled
-                    >
-                      Request Approved
-                    </Button>
-                  ) : joinRequestStatus.status === "denied" ? (
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      disabled
-                    >
-                      Request Denied
-                    </Button>
-                  ) : null
+                {user ? (
+                  <>
+                    {joinRequestStatus?.hasRequest ? (
+                      joinRequestStatus.status === "pending" ? (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          className="border-red-200 text-red-500 hover:bg-red-50"
+                          onClick={() => cancelRequestMutation.mutate()}
+                          disabled={cancelRequestMutation.isPending}
+                        >
+                          {cancelRequestMutation.isPending ? 'Cancelling...' : 'Cancel Request'}
+                        </Button>
+                      ) : joinRequestStatus.status === "approved" ? (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled
+                        >
+                          Request Approved
+                        </Button>
+                      ) : joinRequestStatus.status === "denied" ? (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          disabled
+                        >
+                          Request Denied
+                        </Button>
+                      ) : null
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        onClick={() => requestJoinMutation.mutate()}
+                        disabled={requestJoinMutation.isPending}
+                      >
+                        {requestJoinMutation.isPending ? 'Requesting...' : 'Request to Join'}
+                      </Button>
+                    )}
+                  </>
                 ) : (
                   <Button 
                     size="sm" 
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={() => requestJoinMutation.mutate()}
-                    disabled={requestJoinMutation.isPending}
+                    onClick={() => window.location.href = '/register'}
                   >
-                    {requestJoinMutation.isPending ? 'Requesting...' : 'Request to Join'}
+                    Sign up
                   </Button>
                 )}
               </>

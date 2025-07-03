@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import LoginOptions from "@/components/LoginOptions";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -49,7 +49,7 @@ export default function Home() {
                 Signup/Login
               </Button>
               <Button size="lg" variant="outline" className="font-medium" asChild>
-                <Link href="/explore">
+                <Link to="/explore">
                   Explore Stories
                 </Link>
               </Button>

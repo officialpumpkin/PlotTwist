@@ -309,97 +309,25 @@ export default function WritingModal({
           {/* Scrollable Story Content - takes remaining space minus header and input form */}
           <div className="overflow-y-auto bg-muted/30 flex-grow">
             <div className="p-4 max-w-3xl mx-auto space-y-4">
-              {/* Original Story Prompt - Always show this */}
-              <div className="bg-background rounded-lg shadow-sm p-4 border border-primary/20 mb-5">
-                <div className="flex items-start space-x-3 mb-2">
-                  <div className="h-8 w-8 flex items-center justify-center bg-primary text-primary-foreground rounded-full ring-2 ring-background">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">Story Prompt</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span className="bg-secondary px-2 py-0.5 rounded-full">
-                        Original
-                      </span>
-                      <span>
-                        {new Date(story?.createdAt || Date.now()).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="font-serif text-foreground leading-relaxed">
-                  <h3 className="text-lg font-semibold mb-2">{story?.title}</h3>
-                  <p className="italic">{story?.description}</p>
-
-                  {recentSegments?.length === 0 && (
-                    <div className="mt-3 pt-3 border-t border-border">
-                      <p className="text-sm text-muted-foreground">It's time to begin the story! You're the first contributor.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Previous Content with connecting lines to show the story flow */}
-              <div className="relative">
-                {recentSegments?.map((segment, index) => (
-                  <div key={segment.id} className="relative">
-                    {/* Vertical connecting line between segments */}
-                    {index < (recentSegments?.length || 0) - 1 && (
-                      <div className="absolute left-4 top-16 w-0.5 bg-border h-6 z-0"></div>
-                    )}
-
-                    <div className={`bg-background rounded-lg shadow-sm p-4 border mb-5 relative z-10 ${
-                      segment.userId === user?.id 
-                        ? "border-primary/30 bg-primary/5" 
-                        : "border-border"
-                    }`}>
-                      <div className="flex items-start space-x-3 mb-2">
-                        <Avatar className="h-8 w-8 ring-2 ring-background">
-                          {segment.user?.profileImageUrl ? (
-                            <AvatarImage 
-                              src={segment.user.profileImageUrl} 
-                              alt={segment.user?.username || "User"} 
-                            />
-                          ) : (
-                            <AvatarFallback className={segment.userId === user?.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}>
-                              {segment.user?.isDeleted 
-                                ? (segment.user?.originalUsername?.[0] || "U")
-                                : (segment.user?.firstName?.[0] || segment.user?.username?.[0] || "U")
-                              }
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {segment.userId === user?.id 
-                              ? "You" 
-                              : segment.user?.isDeleted 
-                                ? `${segment.user?.originalUsername || segment.user?.username || "Unknown User"} (deleted)`
-                                : (segment.user?.firstName || segment.user?.username || "Unknown User")
-                            }
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <span className="bg-secondary px-2 py-0.5 rounded-full">Turn {segment.turn}</span>
-                            <span>{new Date(segment.createdAt).toLocaleDateString(undefined, {
-                              month: 'short',
-                              day: 'numeric'
-                            })}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="font-serif text-foreground leading-relaxed">
-                        <div dangerouslySetInnerHTML={{ __html: segment.content }} />
-                      </div>
-                    </div>
-                  </div>
+              {/* Story content - continuous flow */}
+              <div className="story-segment">
+                <p className="font-serif text-foreground leading-relaxed">
+                  {story?.description}
+                </p>
+                
+                {recentSegments?.map((segment) => (
+                  <div 
+                    key={segment.id}
+                    className="story-segment font-serif text-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: segment.content }}
+                  />
                 ))}
+                
+                {recentSegments?.length === 0 && (
+                  <p className="text-sm text-muted-foreground italic">
+                    It's time to begin the story! You're the first contributor.
+                  </p>
+                )}
               </div>
             </div>
           </div>

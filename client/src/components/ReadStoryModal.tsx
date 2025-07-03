@@ -97,91 +97,21 @@ export default function ReadStoryModal({
               </div>
             ) : (
               <>
-                {/* Original Story Prompt */}
-                <div className="bg-background rounded-lg border border-primary/20 p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 flex items-center justify-center bg-primary text-primary-foreground rounded-full">
-                      <Book className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-medium">Story Prompt</h3>
-                      <p className="text-sm text-muted-foreground">How it all began</p>
-                    </div>
-                  </div>
-                  <div className="prose prose-sm max-w-none">
-                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                      {story.description}
-                    </p>
-                  </div>
+                {/* Story content - continuous flow */}
+                <div className="story-segment">
+                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                    {story.description}
+                  </p>
+                  {safeSegments
+                    .sort((a: any, b: any) => a.turn - b.turn)
+                    .map((segment: any) => (
+                    <div 
+                      key={segment.id}
+                      className="story-segment"
+                      dangerouslySetInnerHTML={{ __html: segment.content || '' }}
+                    />
+                  ))}
                 </div>
-
-                {/* Story Segments */}
-                {safeSegments
-                  .sort((a: any, b: any) => a.turn - b.turn)
-                  .map((segment: any, index: number) => (
-                  <div key={segment.id} className="relative">
-                    {/* Connecting line */}
-                    {index < safeSegments.length - 1 && (
-                      <div className="absolute left-5 top-16 w-0.5 bg-border h-6 z-0"></div>
-                    )}
-
-                    <div className={`bg-background rounded-lg border p-6 relative z-10 ${
-                      segment.userId === user?.id 
-                        ? "border-primary/30 bg-primary/5" 
-                        : "border-border"
-                    }`}>
-                      <div className="flex items-center gap-3 mb-4">
-                        <Avatar className="h-10 w-10 ring-2 ring-background">
-                          {segment.user?.profileImageUrl ? (
-                            <AvatarImage 
-                              src={segment.user.profileImageUrl} 
-                              alt={segment.user?.username || "User"} 
-                            />
-                          ) : (
-                            <AvatarFallback className="bg-secondary text-secondary-foreground">
-                              {segment.user?.isDeleted 
-                                ? (segment.user?.originalUsername?.charAt(0)?.toUpperCase() || "?")
-                                : (segment.user?.username?.charAt(0)?.toUpperCase() || segment.user?.firstName?.charAt(0)?.toUpperCase() || "?")
-                              }
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-medium">
-                              {segment.user?.isDeleted 
-                                ? `${segment.user?.originalUsername || segment.user?.username || "Unknown User"} (deleted)`
-                                : (segment.user?.firstName || segment.user?.username || "Anonymous")
-                              }
-                            </h4>
-                            {segment.userId === user?.id && (
-                              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                                You
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            Turn {segment.turn} • {new Date(segment.createdAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="prose prose-sm max-w-none">
-                        <div 
-                          className="text-foreground leading-relaxed whitespace-pre-wrap mb-0"
-                          dangerouslySetInnerHTML={{ __html: segment.content || '' }}
-                        />
-                      </div>
-
-                      {/* Word count */}
-                      <div className="mt-3 pt-3 border-t border-border/50">
-                        <p className="text-xs text-muted-foreground">
-                          {segment.wordCount || segment.content?.split(/\s+/).filter((word: string) => word.length > 0).length || 0} words
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
 
                 {/* Story Status */}
                 {story?.isComplete ? (

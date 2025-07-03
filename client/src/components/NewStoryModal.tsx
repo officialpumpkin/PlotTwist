@@ -62,7 +62,34 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
         const dialogElement = document.querySelector('[role="dialog"]');
         console.log('Dialog element found:', !!dialogElement);
         if (dialogElement) {
-          console.log('Dialog element computed style:', window.getComputedStyle(dialogElement).display);
+          const computedStyle = window.getComputedStyle(dialogElement);
+          console.log('Dialog element positioning:', {
+            display: computedStyle.display,
+            position: computedStyle.position,
+            top: computedStyle.top,
+            left: computedStyle.left,
+            transform: computedStyle.transform,
+            zIndex: computedStyle.zIndex,
+            width: computedStyle.width,
+            height: computedStyle.height,
+            visibility: computedStyle.visibility,
+            opacity: computedStyle.opacity
+          });
+          
+          const rect = dialogElement.getBoundingClientRect();
+          console.log('Dialog element bounding rect:', {
+            top: rect.top,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+            bottom: rect.bottom,
+            right: rect.right
+          });
+          
+          console.log('Viewport dimensions:', {
+            width: window.innerWidth,
+            height: window.innerHeight
+          });
         }
       }, 100);
     }
@@ -184,7 +211,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="relative sm:max-w-lg max-h-[85vh] overflow-visible sm:overflow-y-auto"
+        className="sm:max-w-lg max-h-[85vh] overflow-y-auto"
         aria-describedby="new-story-description"
       >
         <DialogHeader>

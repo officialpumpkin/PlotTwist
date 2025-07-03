@@ -1155,8 +1155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`Invitation notification would be sent to user ${inviteeUser.id}`);
 
         res.status(201).json({ 
-          message: username + " has been invited to the story",
-          invitation
+            message: username + " has been invited to the story",
+            invitation
         });
       } else {
         return res.status(400).json({ message: "Invalid invitation type" });
@@ -1691,7 +1691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storyTitle: string;
         date: Date | null;
       }
-      
+
       const recentActivity: ActivityItem[] = [];
 
       // Add contributions to activity
@@ -1850,7 +1850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { username, firstName, lastName } = req.body;
+      const { username, firstName, lastName }      } = req.body;
 
       // Get current user
       const user = await storage.getUser(userId);

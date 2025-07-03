@@ -127,6 +127,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       wordLimit: 100,
       characterLimit: 0, // 0 means no character limit
       maxSegments: 30,
+      firstChapterAssignment: "author",
     },
   });
 
@@ -468,6 +469,37 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                 </div>
               )}
             </div>
+
+            <FormField
+              control={form.control}
+              name="firstChapterAssignment"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>First Chapter Assignment</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="flex flex-col space-y-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="author" id="author-first" />
+                        <label htmlFor="author-first" className="text-sm font-normal cursor-pointer">
+                          I'll write the first chapter
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="random" id="random-first" />
+                        <label htmlFor="random-first" className="text-sm font-normal cursor-pointer">
+                          Randomly assign first chapter to a contributor
+                        </label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter className="flex justify-end space-x-3 pt-2">
               <Button 

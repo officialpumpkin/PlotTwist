@@ -336,6 +336,7 @@ export const storyFormSchema = insertStorySchema
       (val) => parseInt(String(val), 10),
       z.number().min(5).max(100)
     ),
+    firstChapterAssignment: z.enum(["author", "random"]).default("author"),
   });
 
 // Server-side only schema that includes creatorId

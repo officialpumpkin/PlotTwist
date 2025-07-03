@@ -103,6 +103,38 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // Configure Passport serialization
+  passport.serializeUser((user: any, done) => {
+    console.log("Serializing user:", user);
+    // Store the entire user object in the session
+    done(null, user);
+  });
+
+  passport.deserializeUser(async (serializedUser: any, done) => {
+    try {
+      console.log("Deserializing user:", serializedUser);
+      
+      // If the serialized user has the expected structure, return it
+      if (serializedUser && serializedUser.claims && serializedUser.claims.sub) {
+        // Optionally verify the user still exists in the database
+        const dbUser = await storage.getUser(serializedUser.claims.sub);
+        if (dbUser) {
+          done(null, serializedUser);
+        } else {
+          // User no longer exists in database
+          done(null, false);
+        }
+      } else {
+        // Invalid user structure
+        console.error("Invalid user structure during deserialization:", serializedUser);
+        done(null, false);
+      }
+    } catch (error) {
+      console.error("Error deserializing user:", error);
+      done(error, null);
+    }
+  });
+
   // Setup Local Strategy
   passport.use(new LocalStrategy(
     { usernameField: 'email' },

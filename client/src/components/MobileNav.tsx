@@ -16,6 +16,7 @@ export default function MobileNav() {
   const [newStoryModal, setNewStoryModal] = useState(false);
   const [showLoginOptions, setShowLoginOptions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const { isAuthenticated } = useAuth();
 
   // Fetch pending invitations
@@ -69,7 +70,7 @@ export default function MobileNav() {
                 )}
               </Button>
 
-              <Sheet>
+              <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm">
                     <Menu className="h-5 w-5" />
@@ -77,16 +78,32 @@ export default function MobileNav() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-4 pt-4">
-                    <Link to="/dashboard" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link 
+                      to="/dashboard" 
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setSheetOpen(false)}
+                    >
                       Dashboard
                     </Link>
-                    <Link to="/my-stories" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link 
+                      to="/my-stories" 
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setSheetOpen(false)}
+                    >
                       My Stories
                     </Link>
-                    <Link to="/explore" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link 
+                      to="/explore" 
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setSheetOpen(false)}
+                    >
                       Explore
                     </Link>
-                    <Link to="/settings" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link 
+                      to="/settings" 
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setSheetOpen(false)}
+                    >
                       Settings
                     </Link>
                     <div className="pt-4 border-t">
@@ -108,7 +125,7 @@ export default function MobileNav() {
                 Log in
               </Button>
 
-              <Sheet>
+              <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="sm">
                     <Menu className="h-5 w-5" />
@@ -116,15 +133,26 @@ export default function MobileNav() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-4 pt-4">
-                    <Link to="/" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link 
+                      to="/" 
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setSheetOpen(false)}
+                    >
                       Home
                     </Link>
-                    <Link to="/explore" className="text-lg font-medium hover:text-primary transition-colors">
+                    <Link 
+                      to="/explore" 
+                      className="text-lg font-medium hover:text-primary transition-colors"
+                      onClick={() => setSheetOpen(false)}
+                    >
                       Explore
                     </Link>
                     <div className="pt-4 border-t space-y-2">
                       <Button
-                        onClick={() => setShowLoginOptions(true)}
+                        onClick={() => {
+                          setSheetOpen(false);
+                          setShowLoginOptions(true);
+                        }}
                         variant="ghost"
                         className="w-full justify-start"
                       >
@@ -132,7 +160,10 @@ export default function MobileNav() {
                         Log in
                       </Button>
                       <Button asChild className="w-full">
-                        <Link to="/register">
+                        <Link 
+                          to="/register"
+                          onClick={() => setSheetOpen(false)}
+                        >
                           <UserPlus className="h-4 w-4 mr-2" />
                           Sign up
                         </Link>

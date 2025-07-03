@@ -57,10 +57,10 @@ export default function RegisterForm() {
   const isLoading = registerMutation.isPending;
 
   return (
-    <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-sm border border-neutral-200">
+    <div className="w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-neutral-200 dark:border-neutral-700">
       <div className="mb-6 text-center">
-        <h2 className="text-2xl font-bold mb-2">Create your account</h2>
-        <p className="text-neutral-600 text-sm">
+        <h2 className="text-2xl font-bold mb-2 text-neutral-900 dark:text-neutral-100">Create your account</h2>
+        <p className="text-neutral-600 dark:text-neutral-300 text-sm">
           Join PlotTwist to start collaborating on stories
         </p>
       </div>
@@ -163,7 +163,7 @@ export default function RegisterForm() {
       </Form>
 
       <div className="mt-6 text-center text-sm">
-        <p className="text-neutral-600">
+        <p className="text-neutral-600 dark:text-neutral-300">
           Already have an account?{" "}
           <Button
             variant="link"

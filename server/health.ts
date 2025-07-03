@@ -19,6 +19,32 @@ export function setupHealthCheck(app: Express) {
     res.status(200).json(healthCheck);
   });
 
+  // Google OAuth diagnostic endpoint
+  app.get('/api/google-oauth-info', (req, res) => {
+    const domain = req.get('host');
+    const replitDomains = process.env.REPLIT_DOMAINS;
+    const hasGoogleCreds = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+    
+    res.json({
+      currentDomain: domain,
+      replitDomains: replitDomains,
+      primaryDomain: replitDomains?.split(',')[0],
+      googleCredsConfigured: hasGoogleCreds,
+      expectedCallbackUrl: `https://${domain}/api/auth/google/callback`,
+      configuredCallbackUrl: `https://${replitDomains?.split(',')[0]}/api/auth/google/callback`,
+      googleClientId: process.env.GOOGLE_CLIENT_ID ? `${process.env.GOOGLE_CLIENT_ID.substring(0, 20)}...` : 'Not set',
+      troubleshooting: {
+        message: "If Google OAuth returns 403, ensure these URLs are authorized in Google Console:",
+        requiredSettings: [
+          `Authorized JavaScript origins: https://${domain}`,
+          `Authorized redirect URIs: https://${domain}/api/auth/google/callback`,
+          "OAuth consent screen must be properly configured",
+          "Project must be in testing mode or published for external users"
+        ]
+      }
+    });
+  });
+
   app.get('/api/logs', (req, res) => {
     try {
       const logsDir = path.join(process.cwd(), 'logs');

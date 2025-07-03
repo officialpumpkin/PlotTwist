@@ -272,16 +272,30 @@ export async function setupAuth(app: Express) {
     try {
       console.log("Initiating Google OAuth flow");
       console.log("Request headers:", req.headers);
+      console.log("Current domain:", req.get('host'));
 
       if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         console.error("Google OAuth not configured");
         return res.redirect('/login?error=oauth_not_configured');
       }
 
-      passport.authenticate('google', { 
+      const authenticator = passport.authenticate('google', { 
         scope: ['profile', 'email'],
         prompt: 'select_account'
-      })(req, res, next);
+      });
+
+      authenticator(req, res, (err) => {
+        if (err) {
+          console.error("Google OAuth authentication error:", err);
+          console.error("Error details:", {
+            name: err.name,
+            message: err.message,
+            stack: err.stack
+          });
+          return res.redirect('/login?error=oauth_auth_error');
+        }
+        next();
+      });
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);
       res.redirect('/login?error=oauth_init_failed');

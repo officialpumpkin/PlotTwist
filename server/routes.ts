@@ -925,7 +925,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching pending invitations:", error);
       res.status(500).json({ message: "Failed to fetch invitations" });
     }
-```
   });
 
   // Accept invitation

@@ -315,10 +315,10 @@ export default function WritingModal({
                   {story?.description}
                 </p>
                 
-                {recentSegments?.map((segment) => (
+                {recentSegments?.map((segment, index) => (
                   <div 
                     key={segment.id}
-                    className="story-segment font-serif text-foreground leading-relaxed"
+                    className={`story-segment font-serif leading-relaxed contributor-text-${index % 5}`}
                     dangerouslySetInnerHTML={{ __html: segment.content }}
                   />
                 ))}

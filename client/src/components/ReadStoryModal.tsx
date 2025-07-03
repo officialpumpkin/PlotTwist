@@ -104,10 +104,10 @@ export default function ReadStoryModal({
                   </p>
                   {safeSegments
                     .sort((a: any, b: any) => a.turn - b.turn)
-                    .map((segment: any) => (
+                    .map((segment: any, index: number) => (
                     <div 
                       key={segment.id}
-                      className="story-segment"
+                      className={`story-segment contributor-text-${index % 5}`}
                       dangerouslySetInnerHTML={{ __html: segment.content || '' }}
                     />
                   ))}

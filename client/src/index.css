@@ -169,6 +169,48 @@ body.theme-fade::before {
   padding: 0;
 }
 
+/* Contributor alternating text colors */
+.contributor-text-0 {
+  color: hsl(240, 10%, 20%); /* Dark grey */
+}
+
+.contributor-text-1 {
+  color: hsl(240, 8%, 35%); /* Medium dark grey */
+}
+
+.contributor-text-2 {
+  color: hsl(240, 6%, 50%); /* Medium grey */
+}
+
+.contributor-text-3 {
+  color: hsl(240, 8%, 25%); /* Darker medium grey */
+}
+
+.contributor-text-4 {
+  color: hsl(240, 12%, 15%); /* Very dark grey */
+}
+
+/* Dark mode contributor colors */
+.dark .contributor-text-0 {
+  color: hsl(240, 5%, 85%); /* Light grey */
+}
+
+.dark .contributor-text-1 {
+  color: hsl(240, 7%, 70%); /* Medium light grey */
+}
+
+.dark .contributor-text-2 {
+  color: hsl(240, 5%, 65%); /* Slightly darker light grey */
+}
+
+.dark .contributor-text-3 {
+  color: hsl(240, 8%, 75%); /* Lighter medium grey */
+}
+
+.dark .contributor-text-4 {
+  color: hsl(240, 6%, 80%); /* Very light grey */
+}
+
 .editor-container .ql-container:focus-within {
   outline: 2px solid #3b82f6; /* Primary blue color */
   outline-offset: -1px;

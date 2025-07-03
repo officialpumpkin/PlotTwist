@@ -24,6 +24,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -623,16 +631,16 @@ export default function SettingsPage() {
         </Tabs>
         
         {/* Password Change Dialog */}
-        <AlertDialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Change Password</AlertDialogTitle>
-              <AlertDialogDescription>
+        <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Change Password</DialogTitle>
+              <DialogDescription>
                 Enter your current password and a new password below.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
+              </DialogDescription>
+            </DialogHeader>
             
-            <form onSubmit={handleSubmitPasswordChange} className="space-y-4 py-2">
+            <form onSubmit={handleSubmitPasswordChange} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <Input
@@ -669,15 +677,17 @@ export default function SettingsPage() {
                 />
               </div>
               
-              <AlertDialogFooter>
-                <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
-                <AlertDialogAction type="submit" disabled={changePasswordMutation.isPending}>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={changePasswordMutation.isPending}>
                   {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
+                </Button>
+              </DialogFooter>
             </form>
-          </AlertDialogContent>
-        </AlertDialog>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

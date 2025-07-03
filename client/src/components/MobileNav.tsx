@@ -24,7 +24,13 @@ export default function MobileNav() {
     enabled: isAuthenticated,
   });
 
-  const pendingCount = invitations?.length || 0;
+  // Fetch pending join requests
+  const { data: joinRequests } = useQuery({
+    queryKey: ['/api/join-requests/pending'],
+    enabled: isAuthenticated,
+  });
+
+  const pendingCount = (invitations?.length || 0) + (joinRequests?.length || 0);
 
   return (
     <div>

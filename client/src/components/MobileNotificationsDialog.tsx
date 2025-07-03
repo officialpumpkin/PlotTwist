@@ -26,10 +26,18 @@ export default function MobileNotificationsDialog({
   const [pendingAction, setPendingAction] = useState<number | null>(null);
 
   // Fetch pending invitations
-  const { data: invitations, isLoading, refetch } = useQuery({
+  const { data: invitations, isLoading: isLoadingInvitations, refetch: refetchInvitations } = useQuery({
     queryKey: ['/api/invitations/pending'],
     enabled: open,
   });
+
+  // Fetch pending join requests
+  const { data: joinRequests, isLoading: isLoadingJoinRequests, refetch: refetchJoinRequests } = useQuery({
+    queryKey: ['/api/join-requests/pending'],
+    enabled: open,
+  });
+
+  const isLoading = isLoadingInvitations || isLoadingJoinRequests;
 
   // Handle invitation acceptance
   const handleAccept = async (invitationId: number) => {
@@ -40,7 +48,7 @@ export default function MobileNotificationsDialog({
         title: 'Invitation accepted',
         description: 'You have successfully joined the story!',
       });
-      await refetch();
+      await refetchInvitations();
       queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
       setPendingAction(null);
     } catch (error) {
@@ -63,7 +71,7 @@ export default function MobileNotificationsDialog({
         title: 'Invitation declined',
         description: 'The invitation has been declined',
       });
-      await refetch();
+      await refetchInvitations();
       setPendingAction(null);
     } catch (error) {
       console.error('Error declining invitation:', error);
@@ -76,11 +84,53 @@ export default function MobileNotificationsDialog({
     }
   };
 
-  // Auto-close when there are no more invitations
-  const pendingCount = Array.isArray(invitations) ? invitations.length : 0;
-  if (open && pendingCount === 0 && !isLoading) {
-    setTimeout(() => onOpenChange(false), 300);
-  }
+  // Handle join request approval
+  const handleApproveJoinRequest = async (requestId: number) => {
+    try {
+      setPendingAction(requestId);
+      await apiRequest('POST', `/api/join-requests/${requestId}/approve`);
+      toast({
+        title: 'Request approved',
+        description: 'The join request has been approved',
+      });
+      await refetchJoinRequests();
+      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
+      setPendingAction(null);
+    } catch (error) {
+      console.error('Error approving join request:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to approve request',
+        variant: 'destructive',
+      });
+      setPendingAction(null);
+    }
+  };
+
+  // Handle join request denial
+  const handleDenyJoinRequest = async (requestId: number) => {
+    try {
+      setPendingAction(requestId);
+      await apiRequest('POST', `/api/join-requests/${requestId}/deny`);
+      toast({
+        title: 'Request denied',
+        description: 'The join request has been denied',
+      });
+      await refetchJoinRequests();
+      setPendingAction(null);
+    } catch (error) {
+      console.error('Error denying join request:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to deny request',
+        variant: 'destructive',
+      });
+      setPendingAction(null);
+    }
+  };
+
+  const pendingCount = (Array.isArray(invitations) ? invitations.length : 0) + 
+                      (Array.isArray(joinRequests) ? joinRequests.length : 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,50 +148,103 @@ export default function MobileNotificationsDialog({
         <div className="mt-4">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              Loading invitations...
+              Loading notifications...
             </div>
           ) : pendingCount === 0 ? (
-            <div className="p-4 text-center text-sm text-muted-foreground">
-              No pending invitations
+            <div className="p-6 text-center">
+              <div className="text-sm font-medium mb-1">All caught up!</div>
+              <div className="text-xs text-muted-foreground">
+                You'll see story invitations and updates here
+              </div>
             </div>
           ) : (
             <ScrollArea className="max-h-[60vh]">
-              {invitations.map((invitation: any) => (
-                <div key={invitation.id} className="p-3 border-b last:border-b-0">
-                  <div className="text-sm mb-3">
-                    <span className="font-medium">
-                      {invitation.inviter?.username || 'Someone'}
-                    </span>{' '}
-                    invited you to join a story:
-                    <div className="font-medium text-primary mt-1">
-                      {invitation.story?.title || 'Untitled Story'}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {invitation.story?.genre} · {invitation.story?.description.substring(0, 60)}
-                      {invitation.story?.description.length > 60 ? '...' : ''}
-                    </div>
+              {invitations && invitations.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
+                    STORY INVITATIONS
                   </div>
-                  <div className="flex justify-between gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      disabled={pendingAction === invitation.id}
-                      onClick={() => handleDecline(invitation.id)}
-                    >
-                      Decline
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="w-full"
-                      disabled={pendingAction === invitation.id}
-                      onClick={() => handleAccept(invitation.id)}
-                    >
-                      Accept
-                    </Button>
+                  {invitations.map((invitation: any) => (
+                    <div key={invitation.id} className="p-3 border-b last:border-b-0">
+                      <div className="text-sm mb-3">
+                        <span className="font-medium">
+                          {invitation.inviter?.username || 'Someone'}
+                        </span>{' '}
+                        invited you to join a story:
+                        <div className="font-medium text-primary mt-1">
+                          {invitation.story?.title || 'Untitled Story'}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {invitation.story?.genre} · {invitation.story?.description.substring(0, 60)}
+                          {invitation.story?.description.length > 60 ? '...' : ''}
+                        </div>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          disabled={pendingAction === invitation.id}
+                          onClick={() => handleDecline(invitation.id)}
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          disabled={pendingAction === invitation.id}
+                          onClick={() => handleAccept(invitation.id)}
+                        >
+                          Accept
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              
+              {joinRequests && joinRequests.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-xs font-medium text-muted-foreground">
+                    JOIN REQUESTS
                   </div>
-                </div>
-              ))}
+                  {joinRequests.map((request: any) => (
+                    <div key={request.id} className="p-3 border-b last:border-b-0">
+                      <div className="text-sm mb-3">
+                        <span className="font-medium">
+                          {request.requester?.firstName || request.requester?.username}
+                        </span>{' '}
+                        wants to join your story:
+                        <div className="font-medium text-primary mt-1">
+                          {request.story?.title || 'Untitled Story'}
+                        </div>
+                        {request.message && (
+                          <div className="text-xs text-muted-foreground mt-1">"{request.message}"</div>
+                        )}
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          disabled={pendingAction === request.id}
+                          onClick={() => handleDenyJoinRequest(request.id)}
+                        >
+                          Deny
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="w-full"
+                          disabled={pendingAction === request.id}
+                          onClick={() => handleApproveJoinRequest(request.id)}
+                        >
+                          Approve
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </ScrollArea>
           )}
         </div>

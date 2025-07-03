@@ -117,13 +117,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   // Get current user
   app.get("/api/auth/user", async (req: any, res) => {
+    console.log("=== /api/auth/user endpoint ===");
     console.log("Session data:", req.session);
     console.log("User from session:", req.session?.user);
     console.log("UserId from session:", req.session?.userId);
     console.log("Passport user:", req.user);
+    console.log("Session ID:", req.sessionID);
 
     // Check for local auth session first
     if (req.session?.userId && req.session?.user) {
+      console.log("Returning user from session");
       return res.json({
         id: req.session.user.id,
         email: req.session.user.email,
@@ -138,7 +141,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.user?.claims?.sub) {
       try {
         const userId = req.user.claims.sub;
+        console.log("Looking up user in database for ID:", userId);
         const user = await storage.getUser(userId);
+        console.log("Database lookup result:", user);
+        
         if (user) {
           // Set session data for consistency
           req.session.userId = userId;
@@ -151,6 +157,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             profileImageUrl: user.profileImageUrl,
           };
           
+          // Save session
+          await new Promise<void>((resolve, reject) => {
+            req.session.save((err: any) => {
+              if (err) {
+                console.error("Session save error in auth/user:", err);
+                reject(err);
+              } else {
+                console.log("Session saved in auth/user endpoint");
+                resolve();
+              }
+            });
+          });
+          
+          console.log("Returning user from database lookup");
           return res.json({
             id: user.id,
             email: user.email,
@@ -159,6 +179,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             lastName: user.lastName,
             profileImageUrl: user.profileImageUrl,
           });
+        } else {
+          console.log("No user found in database for ID:", userId);
         }
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -166,6 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
 
+    console.log("No valid authentication found, returning 401");
     return res.status(401).json({ message: "Unauthorized" });
   });
 

@@ -75,13 +75,25 @@ async function upsertUser(
 async function upsertGoogleUser(
   profile: any,
 ) {
+  const email = profile.emails?.[0]?.value;
+  const username = profile.displayName || (email ? email.split("@")[0] : `user_${profile.id}`);
+  
+  console.log("Upserting Google user:", {
+    id: `google:${profile.id}`,
+    email,
+    username,
+    firstName: profile.name?.givenName,
+    lastName: profile.name?.familyName,
+  });
+  
   await storage.upsertUser({
     id: `google:${profile.id}`, // Prefix with "google:" to avoid ID conflicts
-    email: profile.emails?.[0]?.value,
+    email,
     firstName: profile.name?.givenName,
     lastName: profile.name?.familyName,
     profileImageUrl: profile.photos?.[0]?.value,
-    username: profile.displayName || profile.emails?.[0]?.value?.split("@")[0],
+    username,
+    emailVerified: true, // Google users are already verified
   });
 }
 
@@ -230,13 +242,18 @@ export async function setupAuth(app: Express) {
       failureRedirect: '/login'
     }),
     async (req, res) => {
+      console.log("Google OAuth callback - req.user:", req.user);
+      
       // Set session data for Google users to match email/password users
       const user = req.user as any;
       if (user?.claims?.sub) {
+        console.log("Setting session for Google user:", user.claims.sub);
         req.session.userId = user.claims.sub;
         
         // Get user details from database
         const dbUser = await storage.getUser(user.claims.sub);
+        console.log("Retrieved dbUser:", dbUser);
+        
         if (dbUser) {
           req.session.user = {
             id: dbUser.id,
@@ -246,7 +263,29 @@ export async function setupAuth(app: Express) {
             lastName: dbUser.lastName,
             profileImageUrl: dbUser.profileImageUrl,
           };
+          
+          console.log("Session data set:", {
+            userId: req.session.userId,
+            user: req.session.user
+          });
+          
+          // Save session explicitly
+          await new Promise<void>((resolve, reject) => {
+            req.session.save((err: any) => {
+              if (err) {
+                console.error("Session save error:", err);
+                reject(err);
+              } else {
+                console.log("Google OAuth session saved successfully");
+                resolve();
+              }
+            });
+          });
+        } else {
+          console.error("No database user found for Google user:", user.claims.sub);
         }
+      } else {
+        console.error("No user claims found in Google OAuth callback");
       }
       
       res.redirect('/');

@@ -227,9 +227,30 @@ export async function setupAuth(app: Express) {
 
   app.get('/api/auth/google/callback', 
     passport.authenticate('google', { 
-      failureRedirect: '/login',
-      successRedirect: '/'
-    })
+      failureRedirect: '/login'
+    }),
+    async (req, res) => {
+      // Set session data for Google users to match email/password users
+      const user = req.user as any;
+      if (user?.claims?.sub) {
+        req.session.userId = user.claims.sub;
+        
+        // Get user details from database
+        const dbUser = await storage.getUser(user.claims.sub);
+        if (dbUser) {
+          req.session.user = {
+            id: dbUser.id,
+            email: dbUser.email,
+            username: dbUser.username,
+            firstName: dbUser.firstName,
+            lastName: dbUser.lastName,
+            profileImageUrl: dbUser.profileImageUrl,
+          };
+        }
+      }
+      
+      res.redirect('/');
+    }
   );
 
   // Note: Local auth registration is handled in routes.ts to support email verification

@@ -57,14 +57,21 @@ const upload = multer({
 
 // Middleware to check if user is authenticated
 const isAuthenticated = (req: any, res: any, next: any) => {
+  // Check session-based auth first
   if (req.session?.userId && req.session?.user) {
     return next();
   }
+  
+  // Check passport-based auth
+  if (req.user?.claims?.sub) {
+    return next();
+  }
+  
   res.status(401).json({ message: "Unauthorized" });
 };
 
 const getCurrentUserId = (req: any): string | null => {
-    return req.session?.userId || null;
+    return req.session?.userId || req.user?.claims?.sub || null;
   };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -127,12 +134,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
 
-    // Check for passport-based auth (Replit Auth)
+    // Check for passport-based auth (Replit Auth and Google Auth)
     if (req.user?.claims?.sub) {
       try {
         const userId = req.user.claims.sub;
         const user = await storage.getUser(userId);
         if (user) {
+          // Set session data for consistency
+          req.session.userId = userId;
+          req.session.user = {
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImageUrl: user.profileImageUrl,
+          };
+          
           return res.json({
             id: user.id,
             email: user.email,
@@ -144,6 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (error) {
         console.error("Error fetching user:", error);
+        return res.status(500).json({ message: "Internal server error" });
       }
     }
 

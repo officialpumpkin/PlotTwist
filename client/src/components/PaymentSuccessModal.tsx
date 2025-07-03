@@ -3,6 +3,8 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
+  DialogDescription,
+  DialogHeader,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { CheckIcon } from "./assets/icons";
@@ -31,15 +33,19 @@ export default function PaymentSuccessModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="text-center">
-        <div>
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-            <CheckIcon className="h-8 w-8 text-green-600" />
-          </div>
-          <h3 className="text-lg font-medium text-neutral-900 mb-2">Order Confirmed!</h3>
-          <p className="text-sm text-neutral-500">
+      <DialogContent className="text-center" aria-describedby="payment-success-description">
+        <DialogHeader>
+          <DialogTitle className="text-lg font-medium text-neutral-900 mb-2">Order Confirmed!</DialogTitle>
+          <DialogDescription id="payment-success-description" className="text-sm text-neutral-500">
             Thank you for your order. Your story will be professionally printed and shipped to you shortly.
-          </p>
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+          <CheckIcon className="h-8 w-8 text-green-600" />
+        </div>
+        
+        <div>
           
           <div className="mt-6 bg-neutral-50 rounded-md p-4 text-left">
             <p className="text-sm font-medium text-neutral-800 mb-1">Order Summary</p>

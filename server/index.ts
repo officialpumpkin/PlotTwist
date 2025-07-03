@@ -5,7 +5,7 @@ import "./db";
 import { setupHealthCheck } from "./health";
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 
 // Trust proxy for session cookies
 app.set('trust proxy', 1);

@@ -1615,10 +1615,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const errorData = req.body;
       const context = {
-        requestId: req.requestId,
         ip: req.ip,
         userAgent: req.get('User-Agent'),
-        userId: req.session?.userId || req.user?.claims?.sub
+        userId: (req as any).session?.userId || (req as any).user?.id
       };
 
       logger.error('Client-side error reported', undefined, context, errorData);
@@ -1685,7 +1684,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pendingInvitations = await storage.getPendingInvitationsForUser(userId);
 
       // Get recent activity
-      const recentActivity = [];
+      interface ActivityItem {
+        id: string;
+        type: string;
+        storyId: number;
+        storyTitle: string;
+        date: Date | null;
+      }
+      
+      const recentActivity: ActivityItem[] = [];
 
       // Add contributions to activity
       for (const storyId of storyIds) {
@@ -1694,7 +1701,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const userSegments = segments
           .filter(segment => segment.userId === userId)
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .filter(segment => segment.createdAt) // Filter out null dates
+          .sort((a, b) => {
+            if (!a.createdAt || !b.createdAt) return 0;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          })
           .slice(0, 5); // Get 5 most recent
 
         userSegments.forEach(segment => {
@@ -1709,7 +1720,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Sort activity by date
-      recentActivity.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      recentActivity.sort((a, b) => {
+        if (!a.date || !b.date) return 0;
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
 
       // Return user profile data
       res.json({

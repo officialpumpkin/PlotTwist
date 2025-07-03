@@ -51,7 +51,6 @@ export interface IStorage {
   getStories(): Promise<Story[]>;
   updateStory(id: number, story: Partial<Story>): Promise<Story | undefined>;
   getStoriesByUser(userId: string): Promise<Story[]>;
-  getPublicStories(): Promise<Story[]>;
 
   // Story participants
   addParticipant(participant: InsertStoryParticipant & { role?: string }): Promise<StoryParticipant>;
@@ -215,13 +214,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(stories.updatedAt));
   }
 
-  async getPublicStories(): Promise<Story[]> {
-    return await db
-      .select()
-      .from(stories)
-      .where(eq(stories.isPublic, true))
-      .orderBy(desc(stories.createdAt));
-  }
+  
 
   // Story participants
   async addParticipant(participantData: InsertStoryParticipant & { role?: string }): Promise<StoryParticipant> {

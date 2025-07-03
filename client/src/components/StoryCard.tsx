@@ -324,14 +324,6 @@ export default function StoryCard({
                       Request Denied
                     </Button>
                   ) : null
-                ) : onJoin ? (
-                  <Button 
-                    size="sm" 
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    onClick={onJoin}
-                  >
-                    Join Story
-                  </Button>
                 ) : (
                   <Button 
                     size="sm" 

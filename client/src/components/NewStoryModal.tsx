@@ -100,7 +100,6 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       wordLimit: 100,
       characterLimit: 0, // 0 means no character limit
       maxSegments: 30,
-      isPublic: true,
     },
   });
 
@@ -135,8 +134,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       toast({
         title: "Story created!",
         description: invites.length > 0 
-          ? `Your story has been created and ${invites.length} contributor${invites.length > 1 ? 's' : ''} invited.`
-          : "Your new story has been created successfully.",
+          ? `Your story has been created and ${invites.length} contributor${invites.length > 1 ? 's' : ''} invited. All stories are now discoverable and users can request to join.`
+          : "Your new story has been created successfully. Users can discover and request to join your story.",
       });
       form.reset();
       setInvites([]);
@@ -395,33 +394,6 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="isPublic"
-              render={({ field }) => (
-                <FormItem className="space-y-1">
-                  <FormLabel>Privacy Settings</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={(value) => field.onChange(value === "public")}
-                      defaultValue={field.value ? "public" : "private"}
-                      className="flex items-center space-x-4"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="public" id="public" />
-                        <label htmlFor="public" className="text-sm">Public</label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="private" id="private" />
-                        <label htmlFor="private" className="text-sm">Invite Only</label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <div className="space-y-3">
               <FormLabel>Invite Contributors (Optional)</FormLabel>

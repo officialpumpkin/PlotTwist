@@ -49,14 +49,13 @@ export const users = pgTable("users", {
 // Stories table
 export const stories = pgTable("stories", {
   id: serial("id").primaryKey(),
-  title: varchar("title").notNull(),
+  title: text("title").notNull(),
   description: text("description").notNull(),
-  genre: varchar("genre").notNull(),
+  genre: text("genre").notNull(),
   wordLimit: integer("word_limit").notNull(),
   characterLimit: integer("character_limit").notNull().default(0), // 0 means no character limit
   maxSegments: integer("max_segments").notNull().default(30),
   isComplete: boolean("is_complete").notNull().default(false),
-  isPublic: boolean("is_public").notNull().default(true),
   creatorId: varchar("creator_id").notNull().references(() => users.id), // Keep as creatorId to match existing DB
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -205,7 +204,7 @@ export const storySegmentsRelations = relations(storySegments, ({ one }) => ({
   }),
   user: one(users, {
     fields: [storySegments.userId],
-    references: [users.id],
+    references: [stories.id],
   }),
 }));
 

@@ -521,7 +521,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all stories
   app.get('/api/stories', async (req, res) => {
     try {
-      const stories = await storage.getPublicStories();
+      const stories = await storage.getStories();
       res.json(stories);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -925,6 +925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching pending invitations:", error);
       res.status(500).json({ message: "Failed to fetch invitations" });
     }
+```
   });
 
   // Accept invitation
@@ -1891,6 +1892,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create HTTP server
   const server = createServer(app);
-  
+
   return server;
 }

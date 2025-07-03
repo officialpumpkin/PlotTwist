@@ -1850,7 +1850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const { username, firstName, lastName }      } = req.body;
+      const { username, firstName, lastName } = req.body;
 
       // Get current user
       const user = await storage.getUser(userId);

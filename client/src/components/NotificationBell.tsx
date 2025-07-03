@@ -143,7 +143,7 @@ export default function NotificationBell() {
       <Tooltip>
         <TooltipTrigger asChild>
           <CustomDropdown
-            align="right"
+            align="left"
             className="w-64"
             trigger={
               <Button 

@@ -57,12 +57,22 @@ export default function Explore() {
 
   const filteredStories = stories
     ? stories.filter((story: any) => {
+        // Filter out completed stories
+        if (story.isComplete) {
+          return false;
+        }
+        
         // Filter out stories user is already involved with
         if (isAuthenticated && userStories) {
           const isAlreadyInvolved = userStories.some((userStory: any) => userStory.id === story.id);
           if (isAlreadyInvolved) {
             return false;
           }
+        }
+        
+        // Filter out stories created by the current user
+        if (isAuthenticated && user && story.creatorId === user.id) {
+          return false;
         }
         
         // Apply search filter

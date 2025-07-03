@@ -32,7 +32,7 @@ export default function Navbar() {
             PlotTwist
           </Link>
         </div>
-        
+
         {/* Navigation for Desktop */}
         <div className="hidden md:flex items-center space-x-6 ml-8">
           {navItems.map((item) => (
@@ -50,20 +50,21 @@ export default function Navbar() {
             </Link>
           ))}
         </div>
-        
+
         {/* Spacer to push user controls to the right */}
         <div className="flex-1"></div>
-        
+
         {/* User Controls */}
-        <div className="flex items-center gap-2">
-          <ThemeSwitcher />
+        <div className="flex items-center gap-1">
           {isAuthenticated ? (
-            <>
+            <div className="flex items-center gap-1">
+              <ThemeSwitcher />
               <NotificationBell />
               <UserMenu />
-            </>
+            </div>
           ) : (
             <>
+              <ThemeSwitcher />
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/login">Log in</Link>
               </Button>

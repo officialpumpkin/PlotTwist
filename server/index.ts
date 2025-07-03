@@ -3,6 +3,8 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import "./db";
 import { setupHealthCheck } from "./health";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
@@ -82,8 +84,6 @@ app.use((req, res, next) => {
     console.error('===================');
 
     // Log to file for persistence
-    const fs = require('fs');
-    const path = require('path');
     const logsDir = path.join(process.cwd(), 'logs');
 
     if (!fs.existsSync(logsDir)) {

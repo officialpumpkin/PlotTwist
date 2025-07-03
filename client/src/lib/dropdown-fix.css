@@ -10,19 +10,19 @@ html, body, #root {
 /* Ensure select content uses proper portal positioning */
 [data-radix-select-content] {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 10000 !important;
 }
 
 /* Ensure select portals work correctly */
 [data-radix-select-portal] {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 10000 !important;
 }
 
 /* Fix for all Radix popper content */
 [data-radix-popper-content-wrapper] {
   position: fixed !important;
-  z-index: 9999 !important;
+  z-index: 10000 !important;
 }
 
 /* Prevent parent containers from breaking positioning */

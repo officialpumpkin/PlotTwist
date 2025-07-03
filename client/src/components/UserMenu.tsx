@@ -58,7 +58,7 @@ export default function UserMenu() {
   return (
     <div className="flex items-center">
       <CustomDropdown
-        align="right"
+        align={window.innerWidth <= 768 ? "left" : "right"}
         trigger={
           <div className="flex items-center gap-2 cursor-pointer">
             <Avatar className="h-8 w-8">

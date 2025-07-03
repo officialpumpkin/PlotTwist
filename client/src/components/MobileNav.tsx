@@ -107,7 +107,9 @@ export default function MobileNav() {
                       Settings
                     </Link>
                     <div className="pt-4 border-t">
-                      <UserMenu />
+                      <div className="mobile-user-menu">
+                        <UserMenu />
+                      </div>
                     </div>
                   </div>
                 </SheetContent>

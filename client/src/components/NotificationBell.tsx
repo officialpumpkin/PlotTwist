@@ -142,28 +142,27 @@ export default function NotificationBell() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative">
-            <CustomDropdown
-              align="right"
-              className="w-64"
-              trigger={
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="relative h-9 w-9 rounded-full"
-                >
-                  <Bell className="h-[1.2rem] w-[1.2rem]" />
-                  {totalNotifications > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                    >
-                      {totalNotifications}
-                    </Badge>
-                  )}
-                </Button>
-              }
-            >
+          <CustomDropdown
+            align="right"
+            className="w-64"
+            trigger={
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="relative h-9 w-9 rounded-full"
+              >
+                <Bell className="h-[1.2rem] w-[1.2rem]" />
+                {totalNotifications > 0 && (
+                  <Badge 
+                    variant="destructive" 
+                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                  >
+                    {totalNotifications}
+                  </Badge>
+                )}
+              </Button>
+            }
+          >
               <div className="px-4 py-3 font-medium text-sm border-b">
                 Notifications
               </div>
@@ -266,7 +265,6 @@ export default function NotificationBell() {
                 </p>
               )}
             </CustomDropdown>
-          </div>
         </TooltipTrigger>
         <TooltipContent>
           <p>Notifications</p>

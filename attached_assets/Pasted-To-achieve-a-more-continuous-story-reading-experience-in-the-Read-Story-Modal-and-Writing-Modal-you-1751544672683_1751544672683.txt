@@ -1,0 +1,56 @@
+To achieve a more continuous story reading experience in the Read Story Modal and Writing Modal, you can remove the boxes and gaps around each section by adjusting the CSS styles. Specifically, you'll remove margin and padding settings that create separation between sections.
+
+Here’s how you can update both modals:
+For
+:
+
+Modify the DialogContent component to ensure that there are no additional boxes or gaps. You may want to check how the segments of the story are being rendered and adjust their styles too.
+
+return (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="sm:max-w-4xl p-0 h-[90vh] flex flex-col" aria-describedby="read-story-description">
+      <div className="sr-only" id="read-story-description">Reading story content</div>
+      {safeSegments.map((segment, index) => (
+        <div key={segment.id} className="story-segment">
+          {segment.text}
+        </div>
+      ))}
+    </DialogContent>
+  </Dialog>
+);
+
+CSS styles (add in your CSS file for the modal):
+
+.story-segment {
+  margin: 0; /* Remove any default margin */
+  padding: 0; /* Remove any padding */
+  line-height: 1.5; /* Adjust line height for better readability */
+}
+
+For
+:
+
+Make similar adjustments when you implement the layout for the writing interface. Remove margins and paddings around each part.
+
+return (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="sm:max-w-3xl p-0 flex flex-col writing-modal-content" aria-describedby="writing-modal-description">
+      <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
+      <textarea className="w-full h-full p-4" placeholder="Write your story here..." />
+    </DialogContent>
+  </Dialog>
+);
+
+CSS styles (add in your CSS file):
+
+.writing-modal-content {
+  margin: 0; /* Remove any default margin */
+  padding: 0; /* Remove any padding */
+}
+
+Summary
+
+    Remove padding and margin for the segments in both ReadStoryModal and WritingModal.
+    Ensure a proper line-height for readability.
+
+Make sure to check whether the story-segment and writing-modal-content classes are correctly targeting the elements in your layout. This will help achieve a continuous flow of text without extra boxes or gaps, making for a seamless reading or writing experience.

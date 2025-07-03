@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 export default function RegisterForm() {
   const { toast } = useToast();
-  const [_, navigate] = useLocation();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
 
   const form = useForm<RegisterInput>({

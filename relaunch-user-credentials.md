@@ -149,6 +149,28 @@ The PlotTwist Team
 
 ---
 
+## Recent Fixes Applied
+
+### Foreign Key Constraint Issue - RESOLVED ✅
+- **Problem**: User `masefieldjohnson@gmail.com` encountered foreign key constraint violation during account operations
+- **Root Cause**: Missing account deletion endpoint that didn't properly handle related data
+- **Solution**: Implemented comprehensive account deletion system that:
+  - Removes all story participations
+  - Removes story segments (user contributions)
+  - Removes story turn references
+  - Removes story invitations (sent/received)
+  - Removes join requests and print orders
+  - Transfers story ownership to deleted user placeholders
+  - Performs soft delete to preserve data integrity
+- **Status**: Fully resolved - account deletion now works safely
+
+### Google OAuth 403 Error - Pending Configuration
+- **Issue**: Google OAuth returns 403 forbidden error
+- **Required Fix**: Update Google Cloud Console with current domain
+- **Needed URLs**: 
+  - Authorized origins: `https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev`
+  - Redirect URI: `https://a2a6c2c4-362b-4321-bf1a-db097d21622e-00-1ndmj36kuc9fy.picard.replit.dev/api/auth/google/callback`
+
 ## System Ready for Launch! 🚀
 
-All user accounts are preserved, stories are intact, and the authentication system is fully operational. Users can log in using their existing credentials or use the password reset feature if needed.
+All user accounts are preserved, stories are intact, and the authentication system is fully operational. The foreign key constraint issue has been resolved. Users can log in using their existing credentials or use the password reset feature if needed.

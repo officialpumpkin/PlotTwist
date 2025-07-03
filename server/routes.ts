@@ -20,6 +20,11 @@ import {
   stories,
   storyParticipants,
   storyTurns,
+  storySegments,
+  storyInvitations,
+  storyJoinRequests,
+  printOrders,
+  userSettings,
 } from "@shared/schema";
 import multer from "multer";
 import path from "path";
@@ -1942,6 +1947,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Delete user account
+  app.delete('/api/users/account', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      // Get user details first
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log(`Starting account deletion for user: ${userId} (${user.email})`);
+
+      // Begin transaction-like deletion process
+      // 1. Remove from story participants
+      await db.delete(storyParticipants).where(eq(storyParticipants.userId, userId));
+      console.log(`Removed story participations for user: ${userId}`);
+
+      // 2. Remove story segments (contributions)
+      await db.delete(storySegments).where(eq(storySegments.userId, userId));
+      console.log(`Removed story segments for user: ${userId}`);
+
+      // 3. Update story turns to remove user references
+      await db.delete(storyTurns).where(eq(storyTurns.currentUserId, userId));
+      console.log(`Removed story turn references for user: ${userId}`);
+
+      // 4. Remove story invitations (both sent and received)
+      await db.delete(storyInvitations).where(eq(storyInvitations.inviterId, userId));
+      await db.delete(storyInvitations).where(eq(storyInvitations.inviteeId, userId));
+      console.log(`Removed story invitations for user: ${userId}`);
+
+      // 5. Remove join requests (both sent and received)
+      await db.delete(storyJoinRequests).where(eq(storyJoinRequests.requesterId, userId));
+      await db.delete(storyJoinRequests).where(eq(storyJoinRequests.authorId, userId));
+      console.log(`Removed join requests for user: ${userId}`);
+
+      // 6. Remove print orders
+      await db.delete(printOrders).where(eq(printOrders.userId, userId));
+      console.log(`Removed print orders for user: ${userId}`);
+
+      // 7. Remove user settings
+      await db.delete(userSettings).where(eq(userSettings.userId, userId));
+      console.log(`Removed user settings for user: ${userId}`);
+
+      // 8. Handle stories created by user - mark as deleted user rather than cascading delete
+      const userStories = await db.select().from(stories).where(eq(stories.creatorId, userId));
+      
+      // Create a placeholder "deleted user" if needed
+      const deletedUserId = `deleted_${Date.now()}`;
+      const deletedUser = await storage.upsertUser({
+        id: deletedUserId,
+        email: `deleted_${Date.now()}@example.com`,
+        username: `deleted_user_${Date.now()}`,
+        isDeleted: true,
+        emailVerified: true,
+      });
+
+      // Transfer story ownership to deleted user placeholder
+      if (userStories.length > 0) {
+        await db.update(stories)
+          .set({ creatorId: deletedUserId })
+          .where(eq(stories.creatorId, userId));
+        console.log(`Transferred ${userStories.length} stories to deleted user placeholder`);
+      }
+
+      // 9. Finally, mark the user as deleted (soft delete)
+      await storage.upsertUser({
+        ...user,
+        email: `deleted_${Date.now()}@example.com`,
+        username: `deleted_user_${Date.now()}`,
+        firstName: null,
+        lastName: null,
+        profileImageUrl: null,
+        originalUsername: user.username,
+        isDeleted: true,
+        emailVerificationToken: null,
+        passwordResetToken: null,
+        password: null,
+      });
+
+      console.log(`Successfully deleted account for user: ${userId}`);
+
+      // Clear session
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+        }
+      });
+
+      res.json({ 
+        message: "Account successfully deleted",
+        redirectTo: "/" 
+      });
+
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ 
+        message: "Failed to delete account",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

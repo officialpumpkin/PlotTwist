@@ -12,6 +12,21 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { nanoid } from "nanoid";
 
+// Extend session types
+declare module 'express-session' {
+  interface SessionData {
+    userId?: string;
+    user?: {
+      id: string;
+      email: string;
+      username: string;
+      firstName?: string | null;
+      lastName?: string | null;
+      profileImageUrl?: string | null;
+    };
+  }
+}
+
 if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }

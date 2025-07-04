@@ -164,6 +164,17 @@ body.theme-fade::before {
   color: #e5e5e5 !important;
 }
 
+/* Target all text elements within the dark mode Quill editor */
+.dark .editor-container .ql-editor * {
+  color: #e5e5e5 !important;
+}
+
+.dark .editor-container .ql-editor p,
+.dark .editor-container .ql-editor div,
+.dark .editor-container .ql-editor span {
+  color: #e5e5e5 !important;
+}
+
 /* Fix focus outline alignment */
 .editor-container .ql-container {
   outline: none;

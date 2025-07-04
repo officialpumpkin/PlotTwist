@@ -91,7 +91,7 @@ async function upsertGoogleUser(
   profile: any,
 ) {
   const email = profile.emails?.[0]?.value;
-  const username = profile.displayName || (email ? email.split("@")[0] : `user_${profile.id}`);
+  let username = profile.displayName || (email ? email.split("@")[0] : `user_${profile.id}`);
 
   console.log("Upserting Google user:", {
     id: `google:${profile.id}`,
@@ -110,10 +110,18 @@ async function upsertGoogleUser(
       email: email
     });
     
+    // Check if the new username conflicts with another user
+    const usernameConflict = await storage.getUserByUsername(username);
+    if (usernameConflict && usernameConflict.id !== existingUser.id) {
+      // Username is taken by another user, keep the existing username
+      console.log("Username conflict detected, keeping existing username:", existingUser.username);
+      username = existingUser.username;
+    }
+    
     // Update the existing local user with Google profile information
     await storage.upsertUser({
       ...existingUser,
-      username: username || existingUser.username, // Update username from Google displayName
+      username: username || existingUser.username, // Use safe username
       firstName: profile.name?.givenName || existingUser.firstName,
       lastName: profile.name?.familyName || existingUser.lastName,
       profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
@@ -122,6 +130,20 @@ async function upsertGoogleUser(
     
     return existingUser.id; // Return the existing user ID
   } else {
+    // For new Google users, ensure username uniqueness
+    const usernameConflict = await storage.getUserByUsername(username);
+    if (usernameConflict) {
+      // Generate a unique username by appending a number
+      let counter = 1;
+      let baseUsername = username;
+      do {
+        username = `${baseUsername}_${counter}`;
+        counter++;
+      } while (await storage.getUserByUsername(username));
+      
+      console.log("Generated unique username:", username);
+    }
+    
     // Create new Google user or update existing Google user
     await storage.upsertUser({
       id: `google:${profile.id}`, // Prefix with "google:" to avoid ID conflicts

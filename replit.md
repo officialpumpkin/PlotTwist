@@ -97,6 +97,8 @@ PlotTwist is a collaborative storytelling platform that allows users to create a
 - Real-time features implemented via polling (WebSocket upgrade path available)
 
 ## Changelog
+- July 4, 2025. Fixed Google OAuth issues: account linking, redirect flow, and username population from Google profile
+- July 4, 2025. Fixed SendGrid email delivery by implementing verified sender configuration
 - July 3, 2025. Fixed authentication system to support both local and OAuth authentication
 - July 3, 2025. Implemented comprehensive account deletion system with proper foreign key handling
 - June 21, 2025. Initial setup

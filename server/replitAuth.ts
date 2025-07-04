@@ -113,6 +113,7 @@ async function upsertGoogleUser(
     // Update the existing local user with Google profile information
     await storage.upsertUser({
       ...existingUser,
+      username: username || existingUser.username, // Update username from Google displayName
       firstName: profile.name?.givenName || existingUser.firstName,
       lastName: profile.name?.familyName || existingUser.lastName,
       profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,

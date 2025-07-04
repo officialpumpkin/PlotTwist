@@ -432,7 +432,7 @@ export async function setupAuth(app: Express) {
         });
 
         console.log("Redirecting to dashboard after successful Google OAuth");
-        res.redirect('/');
+        res.redirect('/dashboard');
 
       } catch (error) {
         console.error("Error in Google OAuth callback:", error);

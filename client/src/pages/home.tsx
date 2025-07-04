@@ -1,11 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { useState } from "react";
 import LoginOptions from "@/components/LoginOptions";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
   const [showLoginOptions, setShowLoginOptions] = useState(false);
+  
+  // Show loading while checking authentication
+  if (isLoading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+  
+  // Redirect authenticated users to dashboard
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
   
   const openLoginOptions = () => {
     setShowLoginOptions(true);

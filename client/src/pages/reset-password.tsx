@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ResetPassword() {
-  const [location, navigate] = useLocation();
+  const [location, setLocation] = useLocation();
   const { toast } = useToast();
   const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'resetting' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
@@ -19,6 +19,7 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [token, setToken] = useState('');
+  const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
     // Get token from URL
@@ -83,10 +84,17 @@ export default function ResetPassword() {
         description: "Password reset successfully!",
       });
 
-      // Redirect to login after 3 seconds
-      setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+      // Start countdown timer
+      const countdownInterval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(countdownInterval);
+            setLocation('/login');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (error: any) {
       setStatus('error');
       setMessage(error.message || 'Failed to reset password');
@@ -240,7 +248,7 @@ export default function ResetPassword() {
               {message}
               <div className="mt-4">
                 <p className="text-sm text-gray-600">
-                  Redirecting to login page in 3 seconds...
+                  Redirecting to login page in {countdown} second{countdown !== 1 ? 's' : ''}...
                 </p>
                 <Link href="/login">
                   <Button variant="outline" size="sm" className="mt-2">

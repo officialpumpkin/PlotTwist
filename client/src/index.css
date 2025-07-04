@@ -150,6 +150,20 @@ body.theme-fade::before {
   font-size: 12pt;
 }
 
+/* Dark mode styles for React Quill editor */
+.dark .editor-container .ql-toolbar {
+  @apply border-neutral-600 bg-neutral-800;
+}
+
+.dark .editor-container .ql-container {
+  @apply border-neutral-600 text-neutral-200 bg-neutral-800;
+}
+
+.dark .editor-container .ql-editor {
+  @apply text-neutral-200;
+  color: #e5e5e5 !important;
+}
+
 /* Fix focus outline alignment */
 .editor-container .ql-container {
   outline: none;
@@ -162,6 +176,13 @@ body.theme-fade::before {
 .font-serif {
   font-family: 'Courier', monospace !important;
   font-size: 12pt !important;
+}
+
+/* Dark mode story content */
+.dark .story-content,
+.dark .story-segment,
+.dark .font-serif {
+  color: #e5e5e5 !important;
 }
 
 /* Continuous story flow styles */

@@ -13,17 +13,21 @@ export default function NotificationBell() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch pending invitations
+  // Fetch pending invitations with optimized polling
   const { data: pendingInvitations, refetch: refetchInvitations, isLoading: isLoadingInvitations } = useQuery({
     queryKey: ['/api/invitations/pending'],
     enabled: !!user,
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: 2 * 60 * 1000, // Reduced to every 2 minutes
+    refetchOnWindowFocus: true, // Only refetch when window gains focus
+    staleTime: 60 * 1000, // Consider data fresh for 1 minute
   });
 
   const { data: pendingJoinRequests, refetch: refetchJoinRequests, isLoading: isLoadingJoinRequests } = useQuery({
     queryKey: ["/api/join-requests/pending"],
     enabled: !!user,
-    refetchInterval: 30000,
+    refetchInterval: 2 * 60 * 1000, // Reduced to every 2 minutes
+    refetchOnWindowFocus: true,
+    staleTime: 60 * 1000,
   });
 
   // Handle invitation acceptance

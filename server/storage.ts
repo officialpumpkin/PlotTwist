@@ -33,6 +33,7 @@ import {
 import { db } from "./db";
 import { eq, and, desc, asc, sql, inArray, not, or, isNull } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import memoize from "memoizee";
 
 // Interface for storage operations
 export interface IStorage {
@@ -96,10 +97,21 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Cache frequently accessed user data (5 minute TTL)
+  private getUserCached = memoize(
+    async (id: string): Promise<User | undefined> => {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    },
+    { 
+      maxAge: 5 * 60 * 1000, // 5 minutes
+      primitive: true 
+    }
+  );
+
   // User operations
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    return this.getUserCached(id);
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {

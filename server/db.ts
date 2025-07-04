@@ -12,7 +12,11 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Optimized connection pool for better performance
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  maxUses: 7500, // Max uses per connection before rotating
+});
 export const db = drizzle({ client: pool, schema });
 
 export const stories = pgTable("stories", {

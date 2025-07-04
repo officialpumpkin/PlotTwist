@@ -13,12 +13,19 @@ export default function Dashboard() {
   const [writingModal, setWritingModal] = useState(false);
   const [activeStory, setActiveStory] = useState<number | null>(null);
 
+  // Optimized story queries with reduced polling
   const { data: myTurnStories, isLoading: myTurnLoading } = useQuery({
     queryKey: ["/api/my-turn"],
+    refetchInterval: 5 * 60 * 1000, // Reduced to every 5 minutes
+    staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
+    refetchOnWindowFocus: true,
   });
 
   const { data: waitingStories, isLoading: waitingLoading } = useQuery({
     queryKey: ["/api/waiting-turn"],
+    refetchInterval: 5 * 60 * 1000, // Reduced to every 5 minutes
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 
   const openWritingModal = (storyId: number) => {

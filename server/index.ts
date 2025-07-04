@@ -12,33 +12,20 @@ const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
 // Trust proxy for session cookies
 app.set('trust proxy', 1);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Optimize express settings
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Simplified performance logging (only for slow requests)
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+    // Only log API requests that take longer than 100ms
+    if (path.startsWith("/api") && duration > 100) {
+      log(`SLOW: ${req.method} ${path} ${res.statusCode} in ${duration}ms`);
     }
   });
 

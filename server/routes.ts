@@ -80,36 +80,19 @@ const getCurrentUserId = (req: any): string | null => {
   };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Request logging middleware
+  // Lightweight request logging (only for errors and slow requests)
   app.use((req: any, res: any, next: any) => {
     const startTime = Date.now();
-    const requestId = nanoid(8);
-
-    req.requestId = requestId;
-    req.startTime = startTime;
-
-    const context = {
-      requestId,
-      method: req.method,
-      url: req.url,
-      userAgent: req.get('User-Agent'),
-      ip: req.ip,
-      sessionId: req.sessionID,
-      userId: req.session?.userId || req.user?.claims?.sub
-    };
-
-    logger.debug('Incoming request', {
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
-      query: req.query,
-      body: req.method !== 'GET' ? req.body : undefined
-    }, context);
 
     const originalSend = res.send;
     res.send = function(data: any) {
       const duration = Date.now() - startTime;
-      logger.apiRequest(req.method, req.url, res.statusCode, duration, context);
+      // Only log slow requests (>200ms) or errors
+      if (duration > 200 || res.statusCode >= 400) {
+        logger.apiRequest(req.method, req.url, res.statusCode, duration, {
+          userId: req.session?.userId || req.user?.claims?.sub
+        });
+      }
       return originalSend.call(this, data);
     };
 
@@ -122,16 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   // Get current user
   app.get("/api/auth/user", async (req: any, res) => {
-    console.log("=== /api/auth/user endpoint ===");
-    console.log("Session data:", req.session);
-    console.log("User from session:", req.session?.user);
-    console.log("UserId from session:", req.session?.userId);
-    console.log("Passport user:", req.user);
-    console.log("Session ID:", req.sessionID);
-
     // Check for local auth session first
     if (req.session?.userId && req.session?.user) {
-      console.log("Returning user from session");
       return res.json({
         id: req.session.user.id,
         email: req.session.user.email,
@@ -146,7 +121,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.user?.claims?.sub) {
       try {
         const userId = req.session?.userId || req.user?.claims?.sub;
-        console.log("Looking up user in database for ID:", userId);
         const user = await storage.getUser(userId);
         console.log("Database lookup result:", user);
         

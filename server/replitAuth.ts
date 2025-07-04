@@ -101,15 +101,39 @@ async function upsertGoogleUser(
     lastName: profile.name?.familyName,
   });
 
-  await storage.upsertUser({
-    id: `google:${profile.id}`, // Prefix with "google:" to avoid ID conflicts
-    email,
-    firstName: profile.name?.givenName,
-    lastName: profile.name?.familyName,
-    profileImageUrl: profile.photos?.[0]?.value,
-    username,
-    emailVerified: true, // Google users are already verified
-  });
+  // Check if a user with this email already exists (from local registration)
+  const existingUser = await storage.getUserByEmail(email);
+  
+  if (existingUser && !existingUser.id.startsWith('google:')) {
+    console.log("Found existing local user with this email. Updating their Google profile info.", {
+      existingId: existingUser.id,
+      email: email
+    });
+    
+    // Update the existing local user with Google profile information
+    await storage.upsertUser({
+      ...existingUser,
+      firstName: profile.name?.givenName || existingUser.firstName,
+      lastName: profile.name?.familyName || existingUser.lastName,
+      profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
+      emailVerified: true, // Mark as verified since Google verified it
+    });
+    
+    return existingUser.id; // Return the existing user ID
+  } else {
+    // Create new Google user or update existing Google user
+    await storage.upsertUser({
+      id: `google:${profile.id}`, // Prefix with "google:" to avoid ID conflicts
+      email,
+      firstName: profile.name?.givenName,
+      lastName: profile.name?.familyName,
+      profileImageUrl: profile.photos?.[0]?.value,
+      username,
+      emailVerified: true, // Google users are already verified
+    });
+    
+    return `google:${profile.id}`;
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -254,12 +278,12 @@ export async function setupAuth(app: Express) {
             return done(new Error("Invalid profile data from Google"));
           }
 
-          await upsertGoogleUser(profile);
+          const actualUserId = await upsertGoogleUser(profile);
 
           // Create a user object similar to the Replit Auth user
           const user = {
             claims: {
-              sub: `google:${profile.id}`,
+              sub: actualUserId, // Use the actual user ID (could be existing local user ID)
               email: profile.emails[0].value,
               first_name: profile.name?.givenName,
               last_name: profile.name?.familyName,

@@ -113,7 +113,7 @@ The PlotTwist Team`;
 
   return await sendEmail({
     to: userEmail,
-    from: 'officialpumpkininspector@gmail.com',
+    from: process.env.SENDGRID_VERIFIED_SENDER!,
     subject,
     text,
     html
@@ -180,7 +180,7 @@ The PlotTwist Team`;
 
   return await sendEmail({
     to: recipientEmail,
-    from: 'officialpumpkininspector@gmail.com',
+    from: process.env.SENDGRID_VERIFIED_SENDER!,
     subject,
     text,
     html
@@ -257,7 +257,7 @@ You received this because an account was created with this email address.`;
 
   return await sendEmail({
     to: userEmail,
-    from: 'PlotTwist <officialpumpkininspector@gmail.com>',
+    from:  `PlotTwist <${process.env.SENDGRID_VERIFIED_SENDER}>`,
     subject,
     text,
     html
@@ -333,7 +333,7 @@ If you did not request this password reset, please ignore this email.`;
 
   return await sendEmail({
     to: userEmail,
-    from: 'PlotTwist <officialpumpkininspector@gmail.com>',
+    from:  `PlotTwist <${process.env.SENDGRID_VERIFIED_SENDER}>`,
     subject,
     text,
     html

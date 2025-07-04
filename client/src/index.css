@@ -260,6 +260,12 @@ body.theme-fade::before {
   font-style: italic;
 }
 
+/* Dark mode placeholder text for React Quill editor */
+.dark .editor-container .ql-editor.ql-blank::before {
+  @apply text-neutral-300;
+  color: #d1d5db !important;
+}
+
 /* Ensure buttons and counts have proper spacing */
 .editor-container + div.flex {
   @apply mt-4 gap-2 flex-wrap;

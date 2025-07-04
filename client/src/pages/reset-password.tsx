@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useLocation, Link } from "wouter";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -9,7 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ResetPassword() {
-  const [location, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [status, setStatus] = useState<'loading' | 'valid' | 'invalid' | 'resetting' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
@@ -89,7 +89,8 @@ export default function ResetPassword() {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(countdownInterval);
-            setLocation('/login');
+            console.log('Attempting to redirect to login...');
+            navigate('/login');
             return 0;
           }
           return prev - 1;
@@ -129,7 +130,7 @@ export default function ResetPassword() {
             <AlertDescription>
               {message}
               <div className="mt-4">
-                <Link href="/login">
+                <Link to="/login">
                   <Button variant="outline" size="sm">
                     Back to Login
                   </Button>
@@ -225,7 +226,7 @@ export default function ResetPassword() {
             </div>
 
             <div className="text-center">
-              <Link href="/login">
+              <Link to="/login">
                 <Button variant="link" size="sm">
                   Back to Login
                 </Button>
@@ -250,7 +251,7 @@ export default function ResetPassword() {
                 <p className="text-sm text-gray-600">
                   Redirecting to login page in {countdown} second{countdown !== 1 ? 's' : ''}...
                 </p>
-                <Link href="/login">
+                <Link to="/login">
                   <Button variant="outline" size="sm" className="mt-2">
                     Go to Login Now
                   </Button>
@@ -266,7 +267,7 @@ export default function ResetPassword() {
             <AlertDescription>
               {message}
               <div className="mt-4">
-                <Link href="/login">
+                <Link to="/login">
                   <Button variant="outline" size="sm">
                     Back to Login
                   </Button>

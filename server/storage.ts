@@ -149,6 +149,13 @@ export class DatabaseStorage implements IStorage {
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
+          username: userData.username,
+          password: userData.password,
+          emailVerified: userData.emailVerified,
+          emailVerificationToken: userData.emailVerificationToken,
+          passwordResetToken: userData.passwordResetToken,
+          passwordResetExpires: userData.passwordResetExpires,
+          passwordLastChanged: userData.passwordLastChanged,
           updatedAt: new Date(),
         },
       })

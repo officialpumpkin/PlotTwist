@@ -34,7 +34,7 @@ export default function ResetPassword() {
     setToken(resetToken);
 
     // Verify the token
-    apiRequest('/api/auth/verify-reset-token?token=' + encodeURIComponent(resetToken))
+    apiRequest('GET', '/api/auth/verify-reset-token?token=' + encodeURIComponent(resetToken))
       .then((response) => {
         setStatus('valid');
         setEmail(response.email);
@@ -70,15 +70,9 @@ export default function ResetPassword() {
     setStatus('resetting');
 
     try {
-      await apiRequest('/api/auth/reset-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token,
-          password,
-        }),
+      await apiRequest('POST', '/api/auth/reset-password', {
+        token,
+        password,
       });
 
       setStatus('success');

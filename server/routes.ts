@@ -240,9 +240,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send verification email (async, don't wait for it)
-      // Use the request's host as it's what the user is actually using
+      // Use production domain for email links
       const host = req.get('host');
-      const baseUrl = req.protocol + "://" + host;
+      let baseUrl;
+      if (host && host.includes('replit.dev')) {
+        baseUrl = `https://${host}`;
+      } else {
+        // Fallback for development or if host is not available
+        baseUrl = process.env.REPLIT_DOMAINS 
+          ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+          : `${req.protocol}://${host}`;
+      }
       console.log("Using baseUrl for verification: " + baseUrl);
       sendEmailVerification(email, username, verificationToken, baseUrl).catch(error => {
         console.error('Failed to send verification email:', error);
@@ -345,8 +353,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send password reset email
       console.log("Attempting to send password reset email to: " + email);
+      
+      // Use production domain for email links
       const host = req.get('host');
-      const baseUrl = req.protocol + "://" + host;
+      let baseUrl;
+      if (host && host.includes('replit.dev')) {
+        baseUrl = `https://${host}`;
+      } else {
+        // Fallback for development or if host is not available
+        baseUrl = process.env.REPLIT_DOMAINS 
+          ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+          : `${req.protocol}://${host}`;
+      }
+      
       console.log("Using baseUrl for password reset: " + baseUrl);
       const emailSent = await sendPasswordResetEmail(email, user.username || 'User', resetToken, baseUrl);
       console.log("Password reset email sent result: " + emailSent);

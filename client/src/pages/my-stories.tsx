@@ -250,10 +250,18 @@ export default function MyStories() {
         ) : filteredStories.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => {
+              // Use exact same logic as dashboard
               const isMyTurn = story.currentUserId === user?.id && !story.isComplete;
               
-              // Determine status based on actual conditions - same logic as dashboard
-              const status = story.isComplete ? "Completed" : isMyTurn ? "Your Turn" : "Active";
+              // Determine status - simplified logic
+              let status: "Your Turn" | "Waiting" | "Active" | "Completed";
+              if (story.isComplete) {
+                status = "Completed";
+              } else if (isMyTurn) {
+                status = "Your Turn";
+              } else {
+                status = "Active";
+              }
               
               // Debug logging
               console.log('My Stories Card:', {
@@ -262,7 +270,8 @@ export default function MyStories() {
                 status,
                 currentUserId: story.currentUserId,
                 userId: user?.id,
-                isComplete: story.isComplete
+                isComplete: story.isComplete,
+                willProvideOnContinue: isMyTurn
               });
 
               return (

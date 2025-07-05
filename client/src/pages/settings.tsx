@@ -4,6 +4,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTheme } from "@/components/ThemeProvider";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";

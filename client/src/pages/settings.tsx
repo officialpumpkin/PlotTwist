@@ -119,11 +119,6 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       // Force refetch of auth user data
       queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
-      
-      // Reset mutation success state after a short delay to allow future updates
-      setTimeout(() => {
-        updateProfileMutation.reset();
-      }, 1000);
     },
     onError: (error: any) => {
       toast({
@@ -134,9 +129,9 @@ export default function SettingsPage() {
     },
   });
 
-  // Update profile data when user changes, but not if we just updated
+  // Update profile data when user changes
   useEffect(() => {
-    if (user && !updateProfileMutation.isSuccess) {
+    if (user) {
       setProfileData({
         username: user.username || "",
         firstName: user.firstName || "",
@@ -144,7 +139,7 @@ export default function SettingsPage() {
         email: user.email || "",
       });
     }
-  }, [user, updateProfileMutation.isSuccess]);
+  }, [user]);
 
   const changePasswordMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/auth/change-password", data),

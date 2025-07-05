@@ -51,7 +51,7 @@ export default function ReadStoryModal({
   if (!story) return null;
 
     // Determine if the user can request an edit
-    const isAuthor = story?.authorId === user?.id;
+    const isAuthor = story?.creatorId === user?.id;
     const canRequestEdit = !isAuthor;
     const isParticipant = safeParticipants.some((p: any) => p.userId === user?.id);
 

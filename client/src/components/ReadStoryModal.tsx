@@ -93,27 +93,7 @@ export default function ReadStoryModal({
                   </Button>
                 )}
               </div>
-              <div className="mb-3">
-                <div className="relative">
-                  <p className="text-sm text-muted-foreground pr-10">{story?.description || 'No description available'}</p>
-                  {/* Edit prompt button - only for creators */}
-                  {isAuthor && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="absolute top-0 right-0 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
-                      onClick={() => {
-                        setEditingSegment({ id: 'prompt', content: story?.description || '' });
-                        setShowEditRequestModal(true);
-                      }}
-                      title="Edit story prompt"
-                    >
-                      <Edit className="h-3 w-3" />
-                      <span className="sr-only">Edit story prompt</span>
-                    </Button>
-                  )}
-                </div>
-              </div>
+              
 
               {/* Story Stats */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -154,9 +134,29 @@ export default function ReadStoryModal({
               <>
                 {/* Story content - continuous flow */}
                 <div className="story-segment">
-                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                    {story.description}
-                  </p>
+                  {/* Story prompt with subtle styling */}
+                  <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-medium">Story Prompt</div>
+                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                      {story.description}
+                    </p>
+                    {/* Edit prompt button - only for creators */}
+                    {isAuthor && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                        onClick={() => {
+                          setEditingSegment({ id: 'prompt', content: story?.description || '' });
+                          setShowEditRequestModal(true);
+                        }}
+                        title="Edit story prompt"
+                      >
+                        <Edit className="h-3 w-3" />
+                        <span className="sr-only">Edit story prompt</span>
+                      </Button>
+                    )}
+                  </div>
                   {safeSegments
                     .sort((a: any, b: any) => a.turn - b.turn)
                     .map((segment: any, index: number) => (

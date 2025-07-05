@@ -249,7 +249,11 @@ export default function Dashboard() {
           <WritingModal 
             open={writingModal} 
             onOpenChange={closeWritingModal} 
-            storyId={activeStory} 
+            storyId={activeStory}
+            onComplete={() => {
+              // Optional: Handle story completion if needed
+              closeWritingModal();
+            }}
           />
         )}
       </div>

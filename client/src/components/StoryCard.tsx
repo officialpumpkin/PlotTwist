@@ -44,9 +44,19 @@ export default function StoryCard({
 }: StoryCardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [showReadModal, setShowReadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
+
+  // Debug logging to help identify issues
+  console.log('StoryCard render:', { 
+    storyId: story.id, 
+    status, 
+    hasOnContinue: !!onContinue, 
+    userId: user?.id,
+    currentUserId: story.currentUserId 
+  });
 
   // Fetch story participants
   const { data: participants } = useQuery({

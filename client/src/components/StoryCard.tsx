@@ -49,7 +49,7 @@ export default function StoryCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
 
-  
+
 
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -142,6 +142,17 @@ export default function StoryCard({
         description: error.message || "Failed to cancel join request",
       });
     }
+  });
+
+  // Debug logging to help identify issues
+  console.log('StoryCard render:', { 
+    storyId: story.id, 
+    status, 
+    hasOnContinue: !!onContinue, 
+    userId: user?.id,
+    currentUserId: story.currentUserId,
+    isComplete: story.isComplete,
+    shouldShowContinue: status === "Your Turn" && !!onContinue
   });
 
   return (

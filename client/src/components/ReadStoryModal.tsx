@@ -109,6 +109,7 @@ export default function ReadStoryModal({
                       title="Edit story prompt"
                     >
                       <Edit className="h-3 w-3" />
+                      <span className="sr-only">Edit story prompt</span>
                     </Button>
                   )}
                 </div>
@@ -176,9 +177,7 @@ export default function ReadStoryModal({
                           title="Edit your contribution"
                         >
                           <Edit className="h-3 w-3" />
-                          <span className="sr-only">
-                            Edit segment
-                          </span>
+                          <span className="sr-only">Edit your contribution</span>
                         </Button>
                       )}
                     </div>

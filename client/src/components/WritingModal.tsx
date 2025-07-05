@@ -331,6 +331,7 @@ export default function WritingModal({
                     title="Edit story prompt"
                   >
                     <Edit className="h-3 w-3" />
+                    <span className="sr-only">Edit story prompt</span>
                   </Button>
                 )}
               </div>
@@ -354,6 +355,7 @@ export default function WritingModal({
                       title="Edit your contribution"
                     >
                       <Edit className="h-3 w-3" />
+                      <span className="sr-only">Edit your contribution</span>
                     </Button>
                   )}
                 </div>

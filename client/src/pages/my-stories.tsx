@@ -69,9 +69,8 @@ export default function MyStories() {
           return false;
         }
         if (filter === "my-turn") {
-          // Would need to check if it's the user's turn
-          // This would need additional data from API
-          return true;
+          // Check if it's the user's turn
+          return story.currentUserId === user?.id && !story.isComplete;
         }
         if (filter === "authored" && user) {
           // Show only stories where the user is the creator
@@ -234,18 +233,21 @@ export default function MyStories() {
           </div>
         ) : filteredStories.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredStories.map((story) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                status={story.isComplete ? "Completed" : "Active"}
-                showProgress
-                onContinue={() => openWritingModal(story.id)}
-                onComplete={() => openCompleteStoryModal(story.id)}
-                onPrint={() => openPrintModal(story.id)}
-                onRead={() => openReadModal(story.id)}
-              />
-            ))}
+            {filteredStories.map((story) => {
+              const isMyTurn = story.currentUserId === user?.id && !story.isComplete;
+              return (
+                <StoryCard
+                  key={story.id}
+                  story={story}
+                  status={story.isComplete ? "Completed" : isMyTurn ? "Your Turn" : "Active"}
+                  showProgress
+                  onContinue={isMyTurn ? () => openWritingModal(story.id) : undefined}
+                  onComplete={() => openCompleteStoryModal(story.id)}
+                  onPrint={() => openPrintModal(story.id)}
+                  onRead={() => openReadModal(story.id)}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-8 text-center">
@@ -287,7 +289,10 @@ export default function MyStories() {
               open={writingModal} 
               onOpenChange={closeWritingModal} 
               storyId={activeStory}
-              onComplete={() => openCompleteStoryModal(activeStory)}
+              onComplete={() => {
+                // Optional: Handle story completion if needed
+                closeWritingModal();
+              }}
             />
             
             <CompleteStoryModal 

@@ -126,7 +126,9 @@ export default function SettingsPage() {
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
+      // Invalidate both user profile and auth cache
       queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error: any) => {
       toast({

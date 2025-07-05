@@ -2311,6 +2311,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fix story turn assignment when it's corrupted
+  app.post('/api/debug/story/:id/fix-turn', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Only allow story creator or admin to fix turns
+      if (story.creatorId !== userId) {
+        return res.status(403).json({ message: "Only story creator can fix turn assignments" });
+      }
+
+      // Get participants
+      const participants = await storage.getStoryParticipants(storyId);
+      const turn = await storage.getStoryTurn(storyId);
+      
+      console.log(`[DEBUG] Fixing turn for story ${storyId}`);
+      console.log(`[DEBUG] Participants:`, participants.map(p => p.userId));
+      console.log(`[DEBUG] Current turn:`, turn);
+      
+      if (participants.length === 0) {
+        return res.status(400).json({ message: "Story has no participants" });
+      }
+
+      // Check if current turn user is still a participant
+      const currentUserIsParticipant = participants.some(p => p.userId === turn?.currentUserId);
+      
+      if (!currentUserIsParticipant) {
+        // Assign turn to the first participant (usually the creator)
+        const newCurrentUserId = participants[0].userId;
+        
+        if (turn) {
+          await storage.updateStoryTurn(storyId, {
+            currentUserId: newCurrentUserId
+          });
+        } else {
+          await storage.createStoryTurn({
+            storyId,
+            currentTurn: 1,
+            currentUserId: newCurrentUserId
+          });
+        }
+        
+        console.log(`[DEBUG] Fixed turn assignment for story ${storyId} to user ${newCurrentUserId}`);
+        
+        res.json({ 
+          message: "Turn assignment fixed",
+          oldCurrentUserId: turn?.currentUserId,
+          newCurrentUserId,
+          participants: participants.map(p => p.userId)
+        });
+      } else {
+        res.json({ 
+          message: "Turn assignment is already correct",
+          currentUserId: turn?.currentUserId,
+          participants: participants.map(p => p.userId)
+        });
+      }
+      
+    } catch (error) {
+      console.error("Error fixing turn assignment:", error);
+      res.status(500).json({ message: "Failed to fix turn assignment", error: error.message });
+    }
+  });
+
   // Delete user account
   app.delete('/api/users/account', isAuthenticated, async (req: any, res) => {
     try {

@@ -616,6 +616,30 @@ export class DatabaseStorage implements IStorage {
         .set({ updatedAt: new Date() })
         .where(eq(users.id, userId));
     }
+
+    // Check for stories with corrupted turn assignments
+    async findCorruptedStoryTurns(): Promise<Array<{storyId: number, participants: string[], currentUserId: string | null}>> {
+      const allStories = await this.getStories();
+      const corruptedStories = [];
+
+      for (const story of allStories) {
+        const participants = await this.getStoryParticipants(story.id);
+        const turn = await this.getStoryTurn(story.id);
+        
+        if (turn && participants.length > 0) {
+          const currentUserIsParticipant = participants.some(p => p.userId === turn.currentUserId);
+          if (!currentUserIsParticipant) {
+            corruptedStories.push({
+              storyId: story.id,
+              participants: participants.map(p => p.userId),
+              currentUserId: turn.currentUserId
+            });
+          }
+        }
+      }
+
+      return corruptedStories;
+    }
 }
 
 export const storage = new DatabaseStorage();

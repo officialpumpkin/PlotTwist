@@ -1499,9 +1499,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentUserId: nextUserId
         });
 
+        // Get user details for better response
+        const skippedUser = await storage.getUser(turn.currentUserId);
+        const nextUser = await storage.getUser(nextUserId);
+        
         res.json({ 
-          message: "Turn skipped successfully",
+          message: `Skipped ${skippedUser?.username || 'user'}'s turn`,
           nextUserId,
+          nextUsername: nextUser?.username,
           currentTurn: turn.currentTurn + 1
         });
       } else {

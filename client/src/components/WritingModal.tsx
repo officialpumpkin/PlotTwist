@@ -481,14 +481,25 @@ export default function WritingModal({
                     Complete
                   </Button>
                 )}
-                 {isAuthor && (
+                 {isAuthor && turn?.currentUserId !== user?.id && (
+                  <Button
+                    onClick={handleSkipTurn}
+                    size="sm"
+                    variant="outline"
+                    className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
+                    title={`Skip ${turn?.currentUser?.username || 'current user'}'s turn`}
+                  >
+                    Skip {turn?.currentUser?.username}'s Turn
+                  </Button>
+                )}
+                {isAuthor && turn?.currentUserId === user?.id && (
                   <Button
                     onClick={handleSkipTurn}
                     size="sm"
                     variant="outline"
                     className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
                   >
-                    Skip Turn
+                    Skip My Turn
                   </Button>
                 )}
               </div>

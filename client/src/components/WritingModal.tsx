@@ -319,6 +319,20 @@ export default function WritingModal({
                   <p className="font-serif text-foreground leading-relaxed whitespace-pre-wrap">
                     {story?.description}
                   </p>
+                  {/* Edit prompt button - for all participants */}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-2 right-2 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                    onClick={() => {
+                      setEditingSegment({ id: 'prompt', content: story?.description || '' });
+                      setShowEditRequestModal(true);
+                    }}
+                    title={isAuthor ? "Edit story prompt" : "Request to edit story prompt"}
+                  >
+                    <Edit className="h-3 w-3" />
+                    <span className="sr-only">{isAuthor ? "Edit story prompt" : "Request to edit story prompt"}</span>
+                  </Button>
                 </div>
               
 

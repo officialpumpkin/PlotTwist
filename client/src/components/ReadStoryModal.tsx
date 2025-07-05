@@ -55,6 +55,14 @@ export default function ReadStoryModal({
     const canRequestEdit = !isAuthor;
     const isParticipant = safeParticipants.some((p: any) => p.userId === user?.id);
 
+  console.log('ReadStoryModal auth check:', {
+    storyCreatorId: story?.creatorId,
+    userId: user?.id,
+    isAuthor,
+    canRequestEdit,
+    isParticipant
+  });
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -93,7 +101,7 @@ export default function ReadStoryModal({
                   </Button>
                 )}
               </div>
-              
+
 
               {/* Story Stats */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -139,8 +147,8 @@ export default function ReadStoryModal({
                     <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                       {story.description}
                     </p>
-                    {/* Edit prompt button - only for creators */}
-                    {isAuthor && (
+                    {/* Edit prompt button - for authors (direct edit) and participants (request edit) */}
+                    {isParticipant && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -149,10 +157,10 @@ export default function ReadStoryModal({
                           setEditingSegment({ id: 'prompt', content: story?.description || '' });
                           setShowEditRequestModal(true);
                         }}
-                        title="Edit story prompt"
+                        title={isAuthor ? "Edit story prompt" : "Request to edit story prompt"}
                       >
                         <Edit className="h-3 w-3" />
-                        <span className="sr-only">Edit story prompt</span>
+                        <span className="sr-only">{isAuthor ? "Edit story prompt" : "Request to edit story prompt"}</span>
                       </Button>
                     )}
                   </div>

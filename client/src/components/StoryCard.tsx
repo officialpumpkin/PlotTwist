@@ -295,7 +295,7 @@ export default function StoryCard({
                       )}
                     </Avatar>
                   </HoverCardTrigger>
-                  <HoverCardContent className="w-48" side="top" align="center">
+                  <HoverCardContent className="w-48" side="top" align="start" sideOffset={8}>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <Avatar className="w-8 h-8">
@@ -349,7 +349,7 @@ export default function StoryCard({
                     +{participants.length - 3}
                   </div>
                 </HoverCardTrigger>
-                <HoverCardContent className="w-56" side="top" align="center">
+                <HoverCardContent className="w-56" side="top" align="start" sideOffset={8}>
                   <div className="space-y-2">
                     <p className="text-sm font-medium">Additional Participants</p>
                     <div className="space-y-2 max-h-32 overflow-y-auto">

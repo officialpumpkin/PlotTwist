@@ -52,6 +52,8 @@ export default function ReadStoryModal({
     // Determine if the user can request an edit
     const isAuthor = story?.authorId === user?.id;
     const canRequestEdit = !isAuthor;
+    const isParticipant = safeParticipants.some((p: any) => p.userId === user?.id);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -128,7 +130,7 @@ export default function ReadStoryModal({
                       className={`story-segment contributor-text-${index % 5} relative group`}
                       dangerouslySetInnerHTML={{ __html: segment.content || '' }}
                     >
-                    {canRequestEdit && (
+                    {isParticipant && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -137,8 +139,12 @@ export default function ReadStoryModal({
                           setEditingSegment(segment);
                           setShowEditRequestModal(true);
                         }}
+                        title={user?.id === segment.userId ? "Edit your contribution" : "Request edit for this contribution"}
                       >
                         <Edit className="h-3 w-3" />
+                        <span className="sr-only">
+                          {user?.id === segment.userId ? "Edit segment" : "Request edit"}
+                        </span>
                       </Button>
                     )}
                     </div>

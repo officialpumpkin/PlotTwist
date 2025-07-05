@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -85,7 +84,7 @@ export default function EditRequestModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (editType === "segment_content" && proposedContent.trim() === "") {
       toast({
         title: "Error",

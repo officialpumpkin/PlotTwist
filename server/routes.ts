@@ -2002,7 +2002,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create edit request
+  // Create edit request or direct edit
   app.post('/api/stories/:id/edit-requests', isAuthenticated, async (req: any, res) => {
     try {
       const storyId = parseInt(req.params.id);
@@ -2020,9 +2020,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "You are not a participant in this story" });
       }
 
-      // Authors can edit directly, others need approval
+      // Authors can edit directly without approval
       if (story.creatorId === userId) {
-        return res.status(400).json({ message: "Authors can edit directly without requests" });
+        if (editType === "story_metadata") {
+          await storage.updateStory(storyId, {
+            title: proposedTitle,
+            description: proposedDescription,
+            genre: proposedGenre,
+            isEdited: true,
+            lastEditedAt: new Date(),
+            editedBy: userId,
+          });
+          return res.json({ message: "Story metadata updated successfully" });
+        } else if (editType === "segment_content" && segmentId) {
+          await storage.updateSegment(parseInt(segmentId), {
+            content: proposedContent
+          });
+          return res.json({ message: "Segment updated successfully" });
+        }
       }
 
       let originalContent = "";

@@ -235,24 +235,18 @@ export default function MyStories() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => {
               const isMyTurn = story.currentUserId === user?.id && !story.isComplete;
-              const isMyTurnFilter = filter === "my-turn";
               
-              // For "My Turn" filter, ensure all shown stories have "Your Turn" status
-              const status = story.isComplete ? "Completed" : 
-                           (isMyTurn || isMyTurnFilter) ? "Your Turn" : "Active";
-              
-              // Show continue button if it's actually their turn OR if we're on my-turn filter
-              const shouldShowContinue = isMyTurn || (isMyTurnFilter && !story.isComplete);
+              // Determine status based on actual conditions - same logic as dashboard
+              const status = story.isComplete ? "Completed" : isMyTurn ? "Your Turn" : "Active";
               
               // Debug logging
               console.log('My Stories Card:', {
                 storyId: story.id,
                 isMyTurn,
-                isMyTurnFilter,
                 status,
-                shouldShowContinue,
                 currentUserId: story.currentUserId,
-                userId: user?.id
+                userId: user?.id,
+                isComplete: story.isComplete
               });
 
               return (
@@ -261,7 +255,7 @@ export default function MyStories() {
                   story={story}
                   status={status}
                   showProgress
-                  onContinue={shouldShowContinue ? () => openWritingModal(story.id) : undefined}
+                  onContinue={isMyTurn ? () => openWritingModal(story.id) : undefined}
                   onComplete={() => openCompleteStoryModal(story.id)}
                   onPrint={() => openPrintModal(story.id)}
                   onRead={() => openReadModal(story.id)}

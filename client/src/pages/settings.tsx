@@ -120,7 +120,7 @@ export default function SettingsPage() {
 
   // Mutations
   const updateProfileMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/users/profile", "PATCH", data),
+    mutationFn: (data: any) => apiRequest("PATCH", "/api/users/profile", data),
     onSuccess: () => {
       toast({
         title: "Profile updated",
@@ -138,7 +138,7 @@ export default function SettingsPage() {
   });
 
   const changePasswordMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/auth/change-password", "POST", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/auth/change-password", data),
     onSuccess: () => {
       toast({
         title: "Password changed",
@@ -161,7 +161,7 @@ export default function SettingsPage() {
   });
 
   const updateNotificationsMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/users/settings", "PATCH", data),
+    mutationFn: (data: any) => apiRequest("PATCH", "/api/users/settings", data),
     onSuccess: () => {
       toast({
         title: "Notifications updated",
@@ -179,7 +179,7 @@ export default function SettingsPage() {
   });
 
   const updateAppearanceMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/users/settings", "PATCH", data),
+    mutationFn: (data: any) => apiRequest("PATCH", "/api/users/settings", data),
     onSuccess: () => {
       toast({
         title: "Appearance settings saved",
@@ -197,7 +197,7 @@ export default function SettingsPage() {
   });
 
   const deleteAccountMutation = useMutation({
-    mutationFn: () => apiRequest("/api/users/delete", "DELETE"),
+    mutationFn: () => apiRequest("DELETE", "/api/users/account"),
     onSuccess: () => {
       toast({
         title: "Account deleted",

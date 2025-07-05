@@ -679,16 +679,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/my-stories', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
+      console.log(`[DEBUG] Getting stories for user: ${userId}`);
 
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
+      console.log(`[DEBUG] Total stories in database: ${allStories.length}`);
+      
       const participantStories = [];
 
       for (const story of allStories) {
         const isParticipant = await storage.isParticipant(story.id, userId);
+        console.log(`[DEBUG] Story "${story.title}" (ID: ${story.id}): isParticipant = ${isParticipant}`);
+        
         if (isParticipant) {
           // Get turn information for each story
           const turn = await storage.getStoryTurn(story.id);
+          console.log(`[DEBUG] Story "${story.title}" turn info:`, turn);
+          
           participantStories.push({
             ...story,
             currentTurn: turn?.currentTurn || 0,
@@ -697,6 +704,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      console.log(`[DEBUG] Final participant stories for user: ${participantStories.length}`);
       res.json(participantStories);
     } catch (error) {
       console.error("Error fetching user stories:", error);
@@ -708,6 +716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/my-turn', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
+      console.log(`[DEBUG] Getting my-turn stories for user: ${userId}`);
 
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
@@ -720,16 +729,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      console.log(`[DEBUG] User participates in ${participantStories.length} stories`);
+
       // Get turns for these stories where it's the user's turn
       const myTurnStories = [];
 
       for (const story of participantStories) {
         const turn = await storage.getStoryTurn(story.id);
+        console.log(`[DEBUG] Story "${story.title}" (ID: ${story.id}): turn =`, turn, `isComplete = ${story.isComplete}`);
+        
         if (turn && turn.currentUserId === userId && !story.isComplete) {
+          console.log(`[DEBUG] Adding "${story.title}" to my-turn stories`);
           myTurnStories.push(story);
         }
       }
 
+      console.log(`[DEBUG] Final my-turn stories: ${myTurnStories.length}`);
       res.json(myTurnStories);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -2233,6 +2248,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error denying edit request:", error);
       res.status(500).json({ message: "Failed to deny edit request" });
+    }
+  });
+
+  // Debug endpoint for investigating specific stories
+  app.get('/api/debug/story/:titleOrId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      const titleOrId = req.params.titleOrId;
+      
+      console.log(`[DEBUG] Investigating story: ${titleOrId} for user: ${userId}`);
+      
+      // Try to find story by title or ID
+      const allStories = await storage.getStories();
+      let targetStory = null;
+      
+      // Try finding by ID first
+      if (!isNaN(parseInt(titleOrId))) {
+        targetStory = allStories.find(s => s.id === parseInt(titleOrId));
+      }
+      
+      // If not found by ID, try by title
+      if (!targetStory) {
+        targetStory = allStories.find(s => s.title.toLowerCase().includes(titleOrId.toLowerCase()));
+      }
+      
+      if (!targetStory) {
+        return res.status(404).json({ message: "Story not found", searched: titleOrId });
+      }
+      
+      console.log(`[DEBUG] Found story:`, targetStory);
+      
+      // Check participation
+      const isParticipant = await storage.isParticipant(targetStory.id, userId);
+      console.log(`[DEBUG] User is participant: ${isParticipant}`);
+      
+      // Get participants
+      const participants = await storage.getStoryParticipants(targetStory.id);
+      console.log(`[DEBUG] All participants:`, participants);
+      
+      // Get turn info
+      const turn = await storage.getStoryTurn(targetStory.id);
+      console.log(`[DEBUG] Turn info:`, turn);
+      
+      // Get segments
+      const segments = await storage.getStorySegments(targetStory.id);
+      console.log(`[DEBUG] Segments count: ${segments.length}`);
+      
+      res.json({
+        story: targetStory,
+        isParticipant,
+        participants,
+        turn,
+        segmentsCount: segments.length,
+        isMyTurn: turn?.currentUserId === userId,
+        isComplete: targetStory.isComplete
+      });
+      
+    } catch (error) {
+      console.error("Debug endpoint error:", error);
+      res.status(500).json({ message: "Debug failed", error: error.message });
     }
   });
 

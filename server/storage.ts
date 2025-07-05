@@ -263,13 +263,14 @@ export class DatabaseStorage implements IStorage {
 
   // Story participant management
   async isParticipant(storyId: number, userId: string): Promise<boolean> {
-    const participant = await db
+    const participants = await db
       .select()
       .from(storyParticipants)
-      .where(and(eq(storyParticipants.storyId, storyId), eq(storyParticipants.userId, userId)))
-      .limit(1);
+      .where(eq(storyParticipants.storyId, storyId));
 
-    return participant.length > 0;
+    console.log(`[DEBUG] isParticipant - Story ${storyId}, User ${userId}: participants =`, participants.map(p => p.userId));
+
+    return participants.some(p => p.userId === userId);
   }
 
   // Join request functions
@@ -371,14 +372,16 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  // Story turns
   async getStoryTurn(storyId: number): Promise<StoryTurn | undefined> {
-    const [turn] = await db
+    const turns = await db
       .select()
       .from(storyTurns)
-      .where(eq(storyTurns.storyId, storyId));
+      .where(eq(storyTurns.storyId, storyId))
+      .limit(1);
 
-    return turn;
+    console.log(`[DEBUG] getStoryTurn - Story ${storyId}: turns =`, turns);
+
+    return turns[0] || null;
   }
 
   async updateStoryTurn(storyId: number, turnData: Partial<InsertStoryTurn>): Promise<StoryTurn | undefined> {
@@ -606,7 +609,7 @@ export class DatabaseStorage implements IStorage {
       // Get the current user data
       const user = await this.getUser(userId);
       if (!user) return;
-  
+
       // Force refresh of any cached user data by updating the user's updatedAt timestamp
       await db
         .update(users)

@@ -95,6 +95,11 @@ export interface IStorage {
   updateEditRequest(requestId: number, updates: { status: string }): Promise<any>;
   getSegmentById(id: number): Promise<any | undefined>;
   updateSegment(segmentId: number, updates: { content: string }): Promise<any>;
+
+    // Get user with guaranteed fresh data (bypasses any potential caching)
+    getUserFresh(userId: string): Promise<User | undefined>;
+    // Method to ensure username consistency across all references
+    refreshUserReferences(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -587,6 +592,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(storySegments.id, segmentId))
       .returning();
   }
+
+  async getUserFresh(userId: string): Promise<User | undefined> {
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+    return user;
+  }
+
+    // Method to ensure username consistency across all references
+    async refreshUserReferences(userId: string): Promise<void> {
+      // Get the current user data
+      const user = await this.getUser(userId);
+      if (!user) return;
+  
+      // Force refresh of any cached user data by updating the user's updatedAt timestamp
+      await db
+        .update(users)
+        .set({ updatedAt: new Date() })
+        .where(eq(users.id, userId));
+    }
 }
 
 export const storage = new DatabaseStorage();

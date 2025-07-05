@@ -1266,7 +1266,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user details for each participant
       const participantsWithDetails = await Promise.all(
         participants.map(async (p) => {
-          const user = await storage.getUser(p.userId);
+          const user = await storage.getUserFresh(p.userId);
           return {
             ...p,
             user: user ? {
@@ -1444,7 +1444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user details for each segment
       const segmentsWithUserDetails = await Promise.all(
         segments.map(async (seg) => {
-          const user = await storage.getUser(seg.userId);
+          const user = await storage.getUserFresh(seg.userId);
           return {
             ...seg,
             user: user ? {
@@ -1481,7 +1481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get user details for current turn
-      const currentUser = await storage.getUser(turn.currentUserId);
+      const currentUser = await storage.getUserFresh(turn.currentUserId);
 
       res.json({
         ...turn,
@@ -2015,6 +2015,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: user.email,
         emailVerified: user.emailVerified,
       });
+
+      // If username was changed, refresh user references
+      if (username && username !== user.username) {
+        await storage.refreshUserReferences(userId);
+      }
 
       res.json({
         message: "Profile updated successfully",

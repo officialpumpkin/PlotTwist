@@ -383,7 +383,7 @@ export default function SettingsPage() {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Danger Zone</h3>
-                
+
                 <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-4 rounded-lg">
                   <div className="flex justify-between items-start">
                     <div>

@@ -363,11 +363,7 @@ export default function WritingModal({
                 </div>
               ))}
 
-              {segments?.length === 0 && (
-                <p className="text-sm text-muted-foreground italic">
-                  It's time to begin the story! You're the first contributor.
-                </p>
-              )}
+              
             </div>
           </div>
 
@@ -404,7 +400,7 @@ export default function WritingModal({
                       onChange={setContent}
                       modules={modules}
                       formats={formats}
-                      placeholder="Continue the story... Let your imagination flow!"
+                      placeholder={segments?.length === 0 ? "It's time to begin the story! You're the first contributor." : "Continue the story... Let your imagination flow!"}
                       className="font-serif text-foreground h-24"
                       style={{ height: '120px' }}
                     />

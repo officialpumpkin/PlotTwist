@@ -283,7 +283,7 @@ export default function MyStories() {
                   onContinue={isMyTurn ? () => openWritingModal(story.id) : undefined}
                   onComplete={() => openCompleteStoryModal(story.id)}
                   onPrint={() => openPrintModal(story.id)}
-                  onRead={() => openReadModal(story.id)}
+                  onRead={!isMyTurn ? () => openReadModal(story.id) : undefined}
                 />
               );
             })}

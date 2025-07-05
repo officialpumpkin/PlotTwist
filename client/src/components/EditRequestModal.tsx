@@ -41,7 +41,22 @@ export default function EditRequestModal({
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const [proposedContent, setProposedContent] = useState(currentContent);
+  // Helper function to strip HTML tags from content
+  const stripHtmlTags = (html: string) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || '';
+  };
+
+  // Helper function to wrap plain text in paragraph tags
+  const wrapInParagraphs = (text: string) => {
+    if (!text.trim()) return '';
+    // Split by double line breaks to create paragraphs
+    const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
+    return paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+  };
+
+  const [proposedContent, setProposedContent] = useState(stripHtmlTags(currentContent));
   const [proposedTitle, setProposedTitle] = useState(currentTitle);
   const [proposedDescription, setProposedDescription] = useState(currentDescription);
   const [proposedGenre, setProposedGenre] = useState(currentGenre);
@@ -52,7 +67,7 @@ export default function EditRequestModal({
       return await apiRequest("POST", `/api/stories/${storyId}/edit-requests`, {
         editType,
         segmentId,
-        proposedContent: editType === "segment_content" ? proposedContent : undefined,
+        proposedContent: editType === "segment_content" ? wrapInParagraphs(proposedContent) : undefined,
         proposedTitle: editType === "story_metadata" ? proposedTitle : undefined,
         proposedDescription: editType === "story_metadata" ? proposedDescription : undefined,
         proposedGenre: editType === "story_metadata" ? proposedGenre : undefined,
@@ -68,7 +83,7 @@ export default function EditRequestModal({
       onOpenChange(false);
       // Reset form
       setReason("");
-      setProposedContent(currentContent);
+      setProposedContent(stripHtmlTags(currentContent));
       setProposedTitle(currentTitle);
       setProposedDescription(currentDescription);
       setProposedGenre(currentGenre);

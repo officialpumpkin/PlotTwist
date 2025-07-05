@@ -56,6 +56,9 @@ export const stories = pgTable("stories", {
   characterLimit: integer("character_limit").notNull().default(0), // 0 means no character limit
   maxSegments: integer("max_segments").notNull().default(30),
   isComplete: boolean("is_complete").notNull().default(false),
+  isEdited: boolean("is_edited").notNull().default(false),
+  lastEditedAt: timestamp("last_edited_at"),
+  editedBy: varchar("edited_by").references(() => users.id),
   creatorId: varchar("creator_id").notNull().references(() => users.id), // Keep as creatorId to match existing DB
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

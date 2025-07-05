@@ -6,7 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
-import { X as CloseIcon, Book, Users } from "lucide-react";
+import { X as CloseIcon, Book, Users, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ReadStoryModalProps {
@@ -55,6 +55,14 @@ export default function ReadStoryModal({
               <div className="flex items-center gap-2 mb-2">
                 <Book className="h-5 w-5 text-primary" />
                 <h2 className="text-xl font-bold">{story?.title || 'Untitled Story'}</h2>
+                {story?.isEdited && (
+                  <div className="flex items-center gap-1">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                      Story Edited
+                    </span>
+                  </div>
+                )}
               </div>
               <p className="text-sm text-muted-foreground mb-3">{story?.description || 'No description available'}</p>
 

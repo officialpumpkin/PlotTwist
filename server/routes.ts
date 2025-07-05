@@ -1513,6 +1513,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Edit a story
+  app.patch('/api/stories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Only the story creator can edit
+      if (story.creatorId !== userId) {
+        return res.status(403).json({ message: "Only the story creator can edit this story" });
+      }
+
+      // Validate the edit data
+      const { title, description, genre } = req.body;
+      
+      if (!title || !description || !genre) {
+        return res.status(400).json({ message: "Title, description, and genre are required" });
+      }
+
+      // Update the story with edit metadata
+      const updatedStory = await storage.updateStory(storyId, {
+        title,
+        description,
+        genre,
+        isEdited: true,
+        lastEditedAt: new Date(),
+        editedBy: userId,
+      });
+
+      res.json(updatedStory);
+    } catch (error) {
+      console.error("Error editing story:", error);
+      res.status(500).json({ message: "Failed to edit story" });
+    }
+  });
+
   // Mark a story as complete
   app.post('/api/stories/:id/complete', isAuthenticated, async (req: any, res) => {
     try {

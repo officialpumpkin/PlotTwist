@@ -12,7 +12,9 @@ import {
   ArrowRightIcon
 } from "./assets/icons";
 import ReadStoryModal from "./ReadStoryModal";
+import EditStoryModal from "./EditStoryModal";
 import { useState } from "react";
+import { Edit, AlertTriangle } from "lucide-react";
 
 interface StoryCardProps {
   story: any;
@@ -42,6 +44,7 @@ export default function StoryCard({
   const { user } = useAuth();
   const { toast } = useToast();
   const [showReadModal, setShowReadModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -146,8 +149,20 @@ export default function StoryCard({
         status === "Completed" && "bg-accent"
       )}></div>
       <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="font-bold text-lg">{story.title}</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors truncate">{story.title}</h3>
+              {story.isEdited && (
+                <div className="flex items-center gap-1">
+                  <AlertTriangle className="h-4 w-4 text-orange-500" />
+                  <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                    Edited
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
           <span className={cn(
             "text-xs px-2 py-1 rounded-full",
             status === "Your Turn" && "bg-primary/10 text-primary",
@@ -258,6 +273,20 @@ export default function StoryCard({
           </div>
 
           <div className="flex space-x-2">
+            {/* Edit button - only visible for story creators */}
+            {variant !== "explore" && isCreator && (
+              <Button 
+                size="sm"
+                variant="ghost"
+                onClick={() => setShowEditModal(true)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
+            )}
+
+            {/* Continue/Complete buttons - only visible if not exploring and it's user's turn or user is author */}
             {status === "Your Turn" && onContinue && (
               <>
                 <Button size="sm" onClick={onContinue}>Continue</Button>
@@ -370,6 +399,13 @@ export default function StoryCard({
         open={showReadModal}
         onOpenChange={setShowReadModal}
         storyId={story.id}
+      />
+
+            {/* Edit Story Modal */}
+      <EditStoryModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        story={story}
       />
     </div>
   );

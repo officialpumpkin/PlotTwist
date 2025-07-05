@@ -3,7 +3,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useTheme, type Theme } from "@/components/ThemeProvider";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,7 +38,6 @@ import {
   Trash2, 
   User, 
   Bell, 
-  Palette, 
   BookOpen, 
   Clock,
   CheckCircle,
@@ -69,11 +66,6 @@ export default function SettingsPage() {
     invitationNotifications: true,
     completionNotifications: true
   });
-  const [appearanceSettings, setAppearanceSettings] = useState({
-    fontSize: 16,
-    editorHeight: 200,
-    theme: theme || "light"
-  });
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [showEditRequestsModal, setShowEditRequestsModal] = useState(false);
@@ -97,11 +89,6 @@ export default function SettingsPage() {
         turnNotifications: settings.turnNotifications ?? true,
         invitationNotifications: settings.invitationNotifications ?? true,
         completionNotifications: settings.completionNotifications ?? true
-      });
-      setAppearanceSettings({
-        fontSize: settings.fontSize ?? 16,
-        editorHeight: settings.editorHeight ?? 200,
-        theme: settings.theme ?? "light"
       });
     }
   }, [settings]);
@@ -192,23 +179,7 @@ export default function SettingsPage() {
     },
   });
 
-  const updateAppearanceMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("PATCH", "/api/users/settings", data),
-    onSuccess: () => {
-      toast({
-        title: "Appearance settings saved",
-        description: "Your appearance preferences have been updated.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error updating appearance",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  
 
   const deleteAccountMutation = useMutation({
     mutationFn: () => apiRequest("DELETE", "/api/users/account"),
@@ -266,17 +237,7 @@ export default function SettingsPage() {
     updateNotificationsMutation.mutate(newSettings);
   };
 
-  const handleAppearanceChange = (key: keyof typeof appearanceSettings, value: any) => {
-    const newSettings = { ...appearanceSettings, [key]: value };
-    setAppearanceSettings(newSettings);
-    if (key === 'theme') {
-      setTheme(value as Theme);
-    }
-  };
-
-  const saveAppearanceSettings = () => {
-    updateAppearanceMutation.mutate(appearanceSettings);
-  };
+  
 
   const handleDeleteAccount = () => {
     deleteAccountMutation.mutate();
@@ -300,7 +261,6 @@ export default function SettingsPage() {
         <TabsList className="mb-6">
           <TabsTrigger value="account">Account</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
         </TabsList>
 
         <TabsContent value="account">
@@ -545,115 +505,7 @@ export default function SettingsPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="appearance">
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance Settings</CardTitle>
-              <CardDescription>
-                Customize your writing experience
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Editor Preferences</h3>
-
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <Label htmlFor="font-size">Font Size ({appearanceSettings.fontSize}px)</Label>
-                      <span className="text-sm text-neutral-500">
-                        {appearanceSettings.fontSize < 14 ? "Small" : 
-                         appearanceSettings.fontSize > 18 ? "Large" : "Medium"}
-                      </span>
-                    </div>
-                    <Slider
-                      id="font-size"
-                      min={12}
-                      max={24}
-                      step={1}
-                      value={[appearanceSettings.fontSize]}
-                      onValueChange={(value) => handleAppearanceChange('fontSize', value[0])}
-                      className="max-w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <Label htmlFor="editor-height">Editor Height ({appearanceSettings.editorHeight}px)</Label>
-                      <span className="text-sm text-neutral-500">
-                        {appearanceSettings.editorHeight < 150 ? "Compact" : 
-                         appearanceSettings.editorHeight > 250 ? "Expanded" : "Standard"}
-                      </span>
-                    </div>
-                    <Slider
-                      id="editor-height"
-                      min={100}
-                      max={400}
-                      step={10}
-                      value={[appearanceSettings.editorHeight]}
-                      onValueChange={(value) => handleAppearanceChange('editorHeight', value[0])}
-                      className="max-w-full"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="theme">Theme</Label>
-                    <div className="grid grid-cols-3 gap-4 mt-2">
-                      <button
-                        type="button"
-                        className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
-                          appearanceSettings.theme === 'light' 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border bg-card'
-                        }`}
-                        onClick={() => handleAppearanceChange('theme', 'light')}
-                      >
-                        <div className="h-12 w-12 bg-white border border-neutral-200 rounded mb-2"></div>
-                        <span className="text-sm font-medium">Light</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
-                          appearanceSettings.theme === 'dark' 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border bg-card'
-                        }`}
-                        onClick={() => handleAppearanceChange('theme', 'dark')}
-                      >
-                        <div className="h-12 w-12 bg-neutral-800 border border-neutral-700 rounded mb-2"></div>
-                        <span className="text-sm font-medium">Dark</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
-                          appearanceSettings.theme === 'system' 
-                            ? 'border-primary bg-primary/5' 
-                            : 'border-border bg-card'
-                        }`}
-                        onClick={() => handleAppearanceChange('theme', 'system')}
-                      >
-                        <div className="h-12 w-12 bg-gradient-to-r from-white to-neutral-800 border border-neutral-200 rounded mb-2"></div>
-                        <span className="text-sm font-medium">System</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="pt-4">
-                    <Button 
-                      onClick={saveAppearanceSettings}
-                      disabled={updateAppearanceMutation.isPending}
-                    >
-                      {updateAppearanceMutation.isPending ? "Saving..." : "Save Appearance Settings"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        
       </Tabs>
 
       {/* Password Change Dialog */}

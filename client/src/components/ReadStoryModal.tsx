@@ -130,7 +130,7 @@ export default function ReadStoryModal({
                       className={`story-segment contributor-text-${index % 5} relative group`}
                     >
                       <div dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
-                      {isParticipant && (
+                      {isParticipant && user?.id === segment.userId && (
                         <Button
                           size="sm"
                           variant="ghost"
@@ -139,11 +139,11 @@ export default function ReadStoryModal({
                             setEditingSegment(segment);
                             setShowEditRequestModal(true);
                           }}
-                          title={user?.id === segment.userId ? "Edit your contribution" : "Request edit for this contribution"}
+                          title="Edit your contribution"
                         >
                           <Edit className="h-3 w-3" />
                           <span className="sr-only">
-                            {user?.id === segment.userId ? "Edit segment" : "Request edit"}
+                            Edit segment
                           </span>
                         </Button>
                       )}

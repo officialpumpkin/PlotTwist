@@ -136,7 +136,6 @@ export default function ReadStoryModal({
                 <div className="story-segment">
                   {/* Story prompt with subtle styling */}
                   <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 font-medium">Story Prompt</div>
                     <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                       {story.description}
                     </p>

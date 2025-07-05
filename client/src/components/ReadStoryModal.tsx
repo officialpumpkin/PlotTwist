@@ -102,7 +102,7 @@ export default function ReadStoryModal({
                     variant="ghost"
                     className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
                     onClick={() => {
-                      setEditingStoryMetadata(true);
+                      setEditingSegment({ id: 'prompt', content: story?.description || '' });
                       setShowEditRequestModal(true);
                     }}
                     title="Edit story prompt"
@@ -226,11 +226,12 @@ export default function ReadStoryModal({
           }}
           storyId={story.id}
           editType={editingSegment ? "segment_content" : "story_metadata"}
-          segmentId={editingSegment?.id}
+          segmentId={editingSegment?.id === 'prompt' ? null : editingSegment?.id}
           currentContent={editingSegment?.content}
-          currentTitle={editingStoryMetadata ? story?.title : undefined}
-          currentDescription={editingStoryMetadata ? story?.description : undefined}
-          currentGenre={editingStoryMetadata ? story?.genre : undefined}
+          currentTitle={editingStoryMetadata ? story?.title : story?.title}
+          currentDescription={editingStoryMetadata ? story?.description : story?.description}
+          currentGenre={editingStoryMetadata ? story?.genre : story?.genre}
+          isPrompt={editingSegment?.id === 'prompt'}
         />
       )}
       </DialogContent>

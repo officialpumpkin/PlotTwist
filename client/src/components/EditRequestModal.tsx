@@ -25,6 +25,7 @@ interface EditRequestModalProps {
   currentTitle?: string;
   currentDescription?: string;
   currentGenre?: string;
+  isPrompt?: boolean;
 }
 
 export default function EditRequestModal({
@@ -37,6 +38,7 @@ export default function EditRequestModal({
   currentTitle = "",
   currentDescription = "",
   currentGenre = "",
+  isPrompt = false,
 }: EditRequestModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -64,6 +66,17 @@ export default function EditRequestModal({
 
   const createEditRequestMutation = useMutation({
     mutationFn: async () => {
+      // If it's a prompt edit, treat it as story metadata with only description change
+      if (isPrompt) {
+        return await apiRequest("POST", `/api/stories/${storyId}/edit-requests`, {
+          editType: "story_metadata",
+          proposedTitle: currentTitle, // Keep current title
+          proposedDescription: proposedContent, // Update description with new prompt
+          proposedGenre: currentGenre, // Keep current genre
+          reason,
+        });
+      }
+      
       return await apiRequest("POST", `/api/stories/${storyId}/edit-requests`, {
         editType,
         segmentId,
@@ -77,9 +90,12 @@ export default function EditRequestModal({
     onSuccess: () => {
       toast({
         title: "Edit request submitted!",
-        description: "Your edit request has been sent to the story author for approval.",
+        description: isPrompt 
+          ? "Your prompt edit request has been sent to the story author for approval."
+          : "Your edit request has been sent to the story author for approval.",
       });
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });
       onOpenChange(false);
       // Reset form
       setReason("");
@@ -100,7 +116,16 @@ export default function EditRequestModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (editType === "segment_content" && proposedContent.trim() === "") {
+    if (isPrompt && proposedContent.trim() === "") {
+      toast({
+        title: "Error",
+        description: "Proposed prompt cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (editType === "segment_content" && !isPrompt && proposedContent.trim() === "") {
       toast({
         title: "Error",
         description: "Proposed content cannot be empty",
@@ -109,7 +134,7 @@ export default function EditRequestModal({
       return;
     }
 
-    if (editType === "story_metadata" && (!proposedTitle.trim() || !proposedDescription.trim() || !proposedGenre.trim())) {
+    if (editType === "story_metadata" && !isPrompt && (!proposedTitle.trim() || !proposedDescription.trim() || !proposedGenre.trim())) {
       toast({
         title: "Error",
         description: "All story fields are required",
@@ -126,12 +151,26 @@ export default function EditRequestModal({
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            Request Edit: {editType === "story_metadata" ? "Story Details" : "Segment Content"}
+            Request Edit: {isPrompt ? "Story Prompt" : editType === "story_metadata" ? "Story Details" : "Segment Content"}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {editType === "story_metadata" && (
+          {isPrompt && (
+            <div>
+              <Label htmlFor="proposedContent">Proposed Story Prompt</Label>
+              <Textarea
+                id="proposedContent"
+                value={proposedContent}
+                onChange={(e) => setProposedContent(e.target.value)}
+                placeholder="Your proposed changes to the story prompt"
+                rows={6}
+                required
+              />
+            </div>
+          )}
+
+          {editType === "story_metadata" && !isPrompt && (
             <>
               <div>
                 <Label htmlFor="proposedTitle">Proposed Title</Label>
@@ -169,7 +208,7 @@ export default function EditRequestModal({
             </>
           )}
 
-          {editType === "segment_content" && (
+          {editType === "segment_content" && !isPrompt && (
             <div>
               <Label htmlFor="proposedContent">Proposed Content</Label>
               <Textarea

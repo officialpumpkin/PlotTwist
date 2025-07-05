@@ -141,6 +141,16 @@ export default function SettingsPage() {
     }
   }, [user]);
 
+  // Reset mutation state when component mounts to avoid stale success states
+  useEffect(() => {
+    return () => {
+      // Cleanup any lingering mutation states
+      if (updateProfileMutation.isSuccess) {
+        updateProfileMutation.reset();
+      }
+    };
+  }, []);
+
   const changePasswordMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/auth/change-password", data),
     onSuccess: () => {

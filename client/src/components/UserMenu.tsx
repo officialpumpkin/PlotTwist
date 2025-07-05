@@ -54,6 +54,13 @@ export default function UserMenu() {
     return user?.username?.[0]?.toUpperCase() || "U";
   };
 
+  // Debug logging to track user data changes
+  console.log('UserMenu user data:', { 
+    username: user?.username, 
+    firstName: user?.firstName, 
+    lastName: user?.lastName 
+  });
+
   if (isLoading) return null;
 
   if (!isAuthenticated) {

@@ -363,7 +363,7 @@ export default function WritingModal({
                 </div>
               ))}
 
-              {(recentSegments?.length === 0 && segments?.length === 0) && (
+              {segments?.length === 0 && (
                 <p className="text-sm text-muted-foreground italic">
                   It's time to begin the story! You're the first contributor.
                 </p>

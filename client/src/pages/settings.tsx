@@ -106,18 +106,6 @@ export default function SettingsPage() {
     }
   }, [settings]);
 
-  // Update profile data when user changes, but not if we just updated
-  useEffect(() => {
-    if (user && !updateProfileMutation.isSuccess) {
-      setProfileData({
-        username: user.username || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-      });
-    }
-  }, [user, updateProfileMutation.isSuccess]);
-
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => apiRequest("PATCH", "/api/users/profile", data),
@@ -145,6 +133,18 @@ export default function SettingsPage() {
       });
     },
   });
+
+  // Update profile data when user changes, but not if we just updated
+  useEffect(() => {
+    if (user && !updateProfileMutation.isSuccess) {
+      setProfileData({
+        username: user.username || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, updateProfileMutation.isSuccess]);
 
   const changePasswordMutation = useMutation({
     mutationFn: (data: any) => apiRequest("POST", "/api/auth/change-password", data),

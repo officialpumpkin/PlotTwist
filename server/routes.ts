@@ -449,8 +449,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Logout
+  // Logout - POST version for AJAX requests
   app.post("/api/auth/logout", (req: any, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.clearCookie('connect.sid'); // Clear the session cookie
+      res.json({ message: "Logged out successfully" });
+    });
+  });
+
+  // Logout - Handle POST requests for the main logout endpoint as well
+  app.post("/api/logout", (req: any, res) => {
     req.session.destroy((err: any) => {
       if (err) {
         console.error("Session destroy error:", err);

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme, type Theme } from "@/components/ThemeProvider";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -59,6 +60,7 @@ export default function SettingsPage() {
     editorHeight: 200,
     theme: theme || "light"
   });
+  const queryClient = useQueryClient();
 
   // Get user settings
   const { data: settings, isLoading } = useQuery({
@@ -200,7 +202,7 @@ export default function SettingsPage() {
       ...prev,
       [key]: value
     }));
-    
+
     // Update theme immediately when changed in settings
     if (key === 'theme' && typeof value === 'string') {
       setTheme(value as Theme);
@@ -286,7 +288,7 @@ export default function SettingsPage() {
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="appearance">Appearance</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="account">
             <Card>
               <CardHeader>
@@ -295,7 +297,7 @@ export default function SettingsPage() {
                   Manage your account settings and preferences
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Profile Information</h3>
@@ -353,12 +355,12 @@ export default function SettingsPage() {
                     </Button>
                   </form>
                 </div>
-                
+
                 <Separator />
-                
+
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Security</h3>
-                  
+
                   <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
@@ -376,14 +378,14 @@ export default function SettingsPage() {
                         Change Password
                       </Button>
                     </div>
-                    
+
                     {user?.authProvider === "google" && (
                       <div className="mt-2 text-sm text-muted-foreground bg-yellow-950/10 dark:bg-yellow-900/20 p-2 rounded border border-yellow-600/20 dark:border-yellow-500/30">
                         You're using Google to sign in. Password management is handled by Google.
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
@@ -402,7 +404,7 @@ export default function SettingsPage() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="bg-card text-card-foreground border border-border p-4 rounded-lg">
                     <div className="flex justify-between items-center">
                       <div>
@@ -457,7 +459,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="notifications">
             <Card>
               <CardHeader>
@@ -466,11 +468,11 @@ export default function SettingsPage() {
                   Manage how and when we contact you
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Email Notifications</h3>
-                  
+
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
@@ -485,7 +487,7 @@ export default function SettingsPage() {
                         onCheckedChange={() => handleNotificationToggle('turnNotifications')}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="invitation-notifications">Story Invitations</Label>
@@ -499,7 +501,7 @@ export default function SettingsPage() {
                         onCheckedChange={() => handleNotificationToggle('invitationNotifications')}
                       />
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
                         <Label htmlFor="completion-notifications">Story Completions</Label>
@@ -518,7 +520,7 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="appearance">
             <Card>
               <CardHeader>
@@ -527,11 +529,11 @@ export default function SettingsPage() {
                   Customize your writing experience
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Editor Preferences</h3>
-                  
+
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <div className="flex justify-between">
@@ -551,7 +553,7 @@ export default function SettingsPage() {
                         className="max-w-full"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <Label htmlFor="editor-height">Editor Height ({appearanceSettings.editorHeight}px)</Label>
@@ -570,7 +572,7 @@ export default function SettingsPage() {
                         className="max-w-full"
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="theme">Theme</Label>
                       <div className="grid grid-cols-3 gap-4 mt-2">
@@ -586,7 +588,7 @@ export default function SettingsPage() {
                           <div className="h-12 w-12 bg-white border border-neutral-200 rounded mb-2"></div>
                           <span className="text-sm font-medium">Light</span>
                         </button>
-                        
+
                         <button
                           type="button"
                           className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
@@ -599,7 +601,7 @@ export default function SettingsPage() {
                           <div className="h-12 w-12 bg-neutral-800 border border-neutral-700 rounded mb-2"></div>
                           <span className="text-sm font-medium">Dark</span>
                         </button>
-                        
+
                         <button
                           type="button"
                           className={`border-2 rounded-lg p-4 flex flex-col items-center justify-center h-24 ${
@@ -614,7 +616,7 @@ export default function SettingsPage() {
                         </button>
                       </div>
                     </div>
-                    
+
                     <div className="pt-4">
                       <Button 
                         onClick={saveAppearanceSettings}
@@ -629,7 +631,7 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
-        
+
         {/* Password Change Dialog */}
         <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
@@ -639,7 +641,7 @@ export default function SettingsPage() {
                 Enter your current password and a new password below.
               </DialogDescription>
             </DialogHeader>
-            
+
             <form onSubmit={handleSubmitPasswordChange} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
@@ -652,7 +654,7 @@ export default function SettingsPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
                 <Input
@@ -664,7 +666,7 @@ export default function SettingsPage() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
@@ -676,7 +678,7 @@ export default function SettingsPage() {
                   required
                 />
               </div>
-              
+
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsPasswordDialogOpen(false)}>
                   Cancel

@@ -67,12 +67,12 @@ const isAuthenticated = (req: any, res: any, next: any) => {
   if (req.session?.userId && req.session?.user) {
     return next();
   }
-  
+
   // Check passport-based auth
   if (req.user?.claims?.sub) {
     return next();
   }
-  
+
   res.status(401).json({ message: "Unauthorized" });
 };
 
@@ -124,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const userId = req.session?.userId || req.user?.claims?.sub;
         const user = await storage.getUser(userId);
         console.log("Database lookup result:", user);
-        
+
         if (user) {
           // Set session data for consistency
           req.session.userId = userId;
@@ -136,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             lastName: user.lastName,
             profileImageUrl: user.profileImageUrl,
           };
-          
+
           // Save session
           await new Promise<void>((resolve, reject) => {
             req.session.save((err: any) => {
@@ -149,7 +149,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               }
             });
           });
-          
+
           console.log("Returning user from database lookup");
           return res.json({
             id: user.id,
@@ -328,7 +328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Send password reset email
       console.log("Attempting to send password reset email to: " + email);
-      
+
       // Use production domain for email links
       const host = req.get('host');
       let baseUrl;
@@ -340,7 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
           : `${req.protocol}://${host}`;
       }
-      
+
       console.log("Using baseUrl for password reset: " + baseUrl);
       const emailSent = await sendPasswordResetEmail(email, user.username || 'User', resetToken, baseUrl);
       console.log("Password reset email sent result: " + emailSent);
@@ -604,7 +604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get userId from session or OAuth claims
       const userId = req.session?.userId || req.user?.claims?.sub;
-      
+
       if (!userId) {
         return res.status(401).json({ 
           message: "Unauthorized - user not properly authenticated",
@@ -662,12 +662,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user's stories
+  
+  // Get user's stories (both created and participating)
   app.get('/api/my-stories', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      const userStories = await storage.getStoriesByUser(userId);
-      res.json(userStories);
+
+      // Get all stories where user is a participant
+      const allStories = await storage.getStories();
+      const participantStories = [];
+
+      for (const story of allStories) {
+        const isParticipant = await storage.isParticipant(story.id, userId);
+        if (isParticipant) {
+          // Get turn information for each story
+          const turn = await storage.getStoryTurn(story.id);
+          participantStories.push({
+            ...story,
+            currentTurn: turn?.currentTurn || 0,
+            currentUserId: turn?.currentUserId || null
+          });
+        }
+      }
+
+      res.json(participantStories);
     } catch (error) {
       console.error("Error fetching user stories:", error);
       res.status(500).json({ message: "Failed to fetch stories" });
@@ -903,7 +921,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (joinRequest.authorId !== userId) {
-        return res.status(403).json({ message: "Only the story author can deny requests" });
+        return res.status(403).```python
+json({ message: "Only the story author can deny requests" });
       }
 
       if (joinRequest.status !== "pending") {
@@ -1515,7 +1534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Get user details for better response
         const skippedUser = await storage.getUser(turn.currentUserId);
         const nextUser = await storage.getUser(nextUserId);
-        
+
         res.json({ 
           message: `Skipped ${skippedUser?.username || 'user'}'s turn`,
           nextUserId,
@@ -1549,7 +1568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Validate the edit data
       const { title, description, genre } = req.body;
-      
+
       if (!title || !description || !genre) {
         return res.status(400).json({ message: "Title, description, and genre are required" });
       }
@@ -2250,7 +2269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // 8. Handle stories created by user - mark as deleted user rather than cascading delete
       const userStories = await db.select().from(stories).where(eq(stories.creatorId, userId));
-      
+
       // Create a placeholder "deleted user" if needed
       const deletedUserId = `deleted_${Date.now()}`;
       const deletedUser = await storage.upsertUser({

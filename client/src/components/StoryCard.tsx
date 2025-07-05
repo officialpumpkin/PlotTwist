@@ -12,9 +12,8 @@ import {
   ArrowRightIcon
 } from "./assets/icons";
 import ReadStoryModal from "./ReadStoryModal";
-import EditStoryModal from "./EditStoryModal";
 import { useState } from "react";
-import { Edit, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import EditRequestModal from "./EditRequestModal";
 
 interface StoryCardProps {
@@ -46,7 +45,6 @@ export default function StoryCard({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showReadModal, setShowReadModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
 
 
@@ -289,36 +287,17 @@ export default function StoryCard({
           </div>
 
           <div className="flex space-x-2">
-            {/* Edit button - only visible for story creators */}
-            {variant !== "explore" && isCreator && (
-              <Button 
-                size="sm"
-                variant="ghost"
-                onClick={() => setShowEditModal(true)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Edit className="h-4 w-4 mr-1" />
-                Edit
+            {/* Continue Writing button - only visible if it's user's turn */}
+            {status === "Your Turn" && onContinue && (
+              <Button size="sm" onClick={onContinue} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                Continue Writing
               </Button>
             )}
 
-            {/* Continue/Complete buttons - only visible if not exploring and it's user's turn or user is author */}
-            {status === "Your Turn" && onContinue && (
-              <>
-                <Button size="sm" onClick={onContinue} className="bg-primary text-primary-foreground hover:bg-primary/90">
-                  Continue Writing
-                </Button>
-                {onRead && (
-                  <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead}>
-                    Read
-                  </Button>
-                )}
-              </>
-            )}
-
+            {/* Read/Edit button for non-turn stories */}
             {status === "Active" && onRead && (
               <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead}>
-                Read Story
+                Read/Edit
               </Button>
             )}
 
@@ -353,7 +332,7 @@ export default function StoryCard({
                   </Button>
                 )}
               <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
-                Read Story
+                Read/Edit
               </Button>
               </>
             )}
@@ -361,7 +340,7 @@ export default function StoryCard({
             {status === "Completed" && (
               <>
                 <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead || (() => setShowReadModal(true))}>
-                  Read
+                  Read/Edit
                 </Button>
                 {onPrint && (
                   <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={onPrint}>
@@ -449,14 +428,7 @@ export default function StoryCard({
         storyId={story.id}
       />
 
-            {/* Edit Story Modal */}
-      <EditStoryModal 
-        open={showEditModal}
-        onOpenChange={setShowEditModal}
-        story={story}
-      />
-
-      {/* Edit Request Modal */}
+            {/* Edit Request Modal */}
       <EditRequestModal 
         open={showEditRequestModal}
         onOpenChange={setShowEditRequestModal}

@@ -25,8 +25,10 @@ import {
   FlagIcon,
   UserIcon
 } from "./assets/icons";
+import { Edit } from "lucide-react";
 
 import InviteCollaboratorModal from "./InviteCollaboratorModal";
+import EditRequestModal from "./EditRequestModal";
 
 interface WritingModalProps {
   open: boolean;
@@ -47,6 +49,8 @@ export default function WritingModal({
   const [wordCount, setWordCount] = useState(0);
   const [characterCount, setCharacterCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showEditRequestModal, setShowEditRequestModal] = useState(false);
+  const [editingSegment, setEditingSegment] = useState<any>(null);
 
   // Rich text editor reference
   const quillRef = useRef<ReactQuill>(null);
@@ -318,9 +322,25 @@ export default function WritingModal({
                 {recentSegments?.map((segment, index) => (
                   <div 
                     key={segment.id}
-                    className={`story-segment font-serif leading-relaxed contributor-text-${index % 5}`}
-                    dangerouslySetInnerHTML={{ __html: segment.content }}
-                  />
+                    className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative group`}
+                  >
+                    <div dangerouslySetInnerHTML={{ __html: segment.content }} />
+                    {/* Edit button for user's own segments */}
+                    {user?.id === segment.userId && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                        onClick={() => {
+                          setEditingSegment(segment);
+                          setShowEditRequestModal(true);
+                        }}
+                        title="Edit your contribution"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 ))}
                 
                 {recentSegments?.length === 0 && (
@@ -514,6 +534,21 @@ export default function WritingModal({
         onOpenChange={setShowInviteModal}
         storyId={storyId}
       />
+
+      {/* Edit Request Modal */}
+      {editingSegment && (
+        <EditRequestModal 
+          open={showEditRequestModal}
+          onOpenChange={(open) => {
+            setShowEditRequestModal(open);
+            if (!open) setEditingSegment(null);
+          }}
+          storyId={storyId}
+          editType="segment_content"
+          segmentId={editingSegment.id}
+          currentContent={editingSegment.content}
+        />
+      )}
     </Dialog>
   );
 }

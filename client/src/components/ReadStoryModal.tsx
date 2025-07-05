@@ -26,6 +26,7 @@ export default function ReadStoryModal({
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
   const [editingSegment, setEditingSegment] = useState<any>(null);
+  const [editingStoryMetadata, setEditingStoryMetadata] = useState(false);
   const { user } = useAuth();
 
   const { data: story } = useQuery({
@@ -75,6 +76,22 @@ export default function ReadStoryModal({
                     </span>
                   </div>
                 )}
+                {/* Edit story metadata button - only for creators */}
+                {isAuthor && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setEditingStoryMetadata(true);
+                      setShowEditRequestModal(true);
+                    }}
+                    className="ml-2 h-6 text-xs"
+                    title="Edit story details"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Edit Details
+                  </Button>
+                )}
               </div>
               <p className="text-sm text-muted-foreground mb-3">{story?.description || 'No description available'}</p>
 
@@ -94,8 +111,6 @@ export default function ReadStoryModal({
                 )}
               </div>
             </div>
-
-
           </div>
         </div>
 
@@ -182,17 +197,23 @@ export default function ReadStoryModal({
       />
 
       {/* Edit Request Modal */}
-      {editingSegment && (
+      {(editingSegment || editingStoryMetadata) && (
         <EditRequestModal 
           open={showEditRequestModal}
           onOpenChange={(open) => {
             setShowEditRequestModal(open);
-            if (!open) setEditingSegment(null);
+            if (!open) {
+              setEditingSegment(null);
+              setEditingStoryMetadata(false);
+            }
           }}
           storyId={story.id}
-          editType="segment_content"
-          segmentId={editingSegment.id}
-          currentContent={editingSegment.content}
+          editType={editingSegment ? "segment_content" : "story_metadata"}
+          segmentId={editingSegment?.id}
+          currentContent={editingSegment?.content}
+          currentTitle={editingStoryMetadata ? story?.title : undefined}
+          currentDescription={editingStoryMetadata ? story?.description : undefined}
+          currentGenre={editingStoryMetadata ? story?.genre : undefined}
         />
       )}
       </DialogContent>

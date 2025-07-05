@@ -29,7 +29,9 @@ export function useAuth() {
       return failureCount < 2 && !error?.message?.includes('401');
     },
     staleTime: 0, // No cache to ensure fresh data
+    gcTime: 0, // Don't cache in memory
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
     refetchInterval: 5000, // Refetch every 5 seconds to ensure updates
   });
 

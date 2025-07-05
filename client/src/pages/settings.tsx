@@ -103,19 +103,31 @@ export default function SettingsPage() {
         description: "Your profile has been successfully updated.",
       });
       
-      // Clear all user-related cache
-      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Remove all user-related queries from cache completely
+      queryClient.removeQueries({ queryKey: ["/api/users/me"] });
+      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.removeQueries({ queryKey: ["/api/my-stories"] });
+      queryClient.removeQueries({ queryKey: ["/api/users/settings"] });
       
-      // Force immediate refetch of auth user data
-      await queryClient.refetchQueries({ 
+      // Force immediate refetch with fresh data
+      await queryClient.fetchQuery({ 
         queryKey: ["/api/auth/user"],
-        exact: true 
+        queryFn: async () => {
+          const res = await fetch("/api/auth/user", { 
+            credentials: "include",
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (!res.ok) throw new Error('Failed to fetch user');
+          return res.json();
+        },
+        staleTime: 0,
+        gcTime: 0
       });
       
-      // Also clear any cached queries that might have stale user data
-      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
+      // Update local state immediately
+      if (response && response.username) {
+        setProfileData(prev => ({ ...prev, username: response.username }));
+      }
     },
     onError: (error: any) => {
       toast({

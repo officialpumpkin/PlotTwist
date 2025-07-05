@@ -93,7 +93,24 @@ export default function ReadStoryModal({
                   </Button>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mb-3">{story?.description || 'No description available'}</p>
+              <div className="relative group mb-3">
+                <p className="text-sm text-muted-foreground">{story?.description || 'No description available'}</p>
+                {/* Edit prompt button - only for creators */}
+                {isAuthor && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                    onClick={() => {
+                      setEditingStoryMetadata(true);
+                      setShowEditRequestModal(true);
+                    }}
+                    title="Edit story prompt"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
 
               {/* Story Stats */}
               <div className="flex items-center gap-4 text-sm text-muted-foreground">

@@ -314,41 +314,56 @@ export default function WritingModal({
           <div className="overflow-y-auto bg-muted/30 flex-grow">
             <div className="p-4 max-w-3xl mx-auto space-y-4">
               {/* Story content - continuous flow */}
-              <div className="story-segment">
+              <div className="story-segment relative group">
                 <p className="font-serif text-foreground leading-relaxed">
                   {story?.description}
                 </p>
-                
-                {recentSegments?.map((segment, index) => (
-                  <div 
-                    key={segment.id}
-                    className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative group`}
+                {/* Edit prompt button - only for story creators */}
+                {isAuthor && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                    onClick={() => {
+                      setEditingSegment({ id: 'prompt', content: story?.description || '' });
+                      setShowEditRequestModal(true);
+                    }}
+                    title="Edit story prompt"
                   >
-                    <div dangerouslySetInnerHTML={{ __html: segment.content }} />
-                    {/* Edit button for user's own segments */}
-                    {user?.id === segment.userId && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                        onClick={() => {
-                          setEditingSegment(segment);
-                          setShowEditRequestModal(true);
-                        }}
-                        title="Edit your contribution"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-                
-                {recentSegments?.length === 0 && (
-                  <p className="text-sm text-muted-foreground italic">
-                    It's time to begin the story! You're the first contributor.
-                  </p>
+                    <Edit className="h-3 w-3" />
+                  </Button>
                 )}
               </div>
+
+              {recentSegments?.map((segment, index) => (
+                <div 
+                  key={segment.id}
+                  className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative group`}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: segment.content }} />
+                  {/* Edit button for user's own segments */}
+                  {user?.id === segment.userId && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                      onClick={() => {
+                        setEditingSegment(segment);
+                        setShowEditRequestModal(true);
+                      }}
+                      title="Edit your contribution"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+
+              {recentSegments?.length === 0 && (
+                <p className="text-sm text-muted-foreground italic">
+                  It's time to begin the story! You're the first contributor.
+                </p>
+              )}
             </div>
           </div>
 
@@ -545,8 +560,9 @@ export default function WritingModal({
           }}
           storyId={storyId}
           editType="segment_content"
-          segmentId={editingSegment.id}
+          segmentId={editingSegment.id === 'prompt' ? null : editingSegment.id}
           currentContent={editingSegment.content}
+          isPrompt={editingSegment.id === 'prompt'}
         />
       )}
     </Dialog>

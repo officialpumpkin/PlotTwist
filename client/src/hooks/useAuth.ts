@@ -28,7 +28,7 @@ export function useAuth() {
       // Only retry on network errors, not auth errors
       return failureCount < 2 && !error?.message?.includes('401');
     },
-    staleTime: 30 * 1000, // Cache for 30 seconds
+    staleTime: 5 * 1000, // Cache for 5 seconds
     refetchOnWindowFocus: false,
   });
 

@@ -129,6 +129,8 @@ export default function SettingsPage() {
       // Invalidate both user profile and auth cache
       queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Force refetch of auth user data
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error: any) => {
       toast({

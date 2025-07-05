@@ -253,14 +253,15 @@ export default function MyStories() {
               // Use exact same logic as dashboard
               const isMyTurn = story.currentUserId === user?.id && !story.isComplete;
               
-              // Determine status - simplified logic
+              // Determine status - match dashboard logic exactly
               let status: "Your Turn" | "Waiting" | "Active" | "Completed";
               if (story.isComplete) {
                 status = "Completed";
               } else if (isMyTurn) {
                 status = "Your Turn";
               } else {
-                status = "Active";
+                // Use "Waiting" status to match dashboard behavior for skip turn button
+                status = "Waiting";
               }
               
               // Debug logging

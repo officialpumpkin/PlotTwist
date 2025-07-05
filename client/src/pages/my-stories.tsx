@@ -33,6 +33,22 @@ export default function MyStories() {
 
   const closeWritingModal = () => {
     setWritingModal(false);
+    setActiveStory(null);
+  };
+
+  const closeCompleteStoryModal = () => {
+    setCompleteStoryModal(false);
+    setActiveStory(null);
+  };
+
+  const closePrintModal = () => {
+    setPrintModal(false);
+    setActiveStory(null);
+  };
+
+  const closeReadModal = () => {
+    setReadModal(false);
+    setActiveStory(null);
   };
 
   const openCompleteStoryModal = (storyId: number) => {
@@ -311,20 +327,20 @@ export default function MyStories() {
 
             <CompleteStoryModal 
               open={completeStoryModal} 
-              onOpenChange={setCompleteStoryModal}
+              onOpenChange={closeCompleteStoryModal}
               storyId={activeStory}
               onPrint={() => openPrintModal(activeStory)}
             />
 
             <PrintModal 
               open={printModal} 
-              onOpenChange={setPrintModal}
+              onOpenChange={closePrintModal}
               storyId={activeStory}
             />
 
             <ReadStoryModal 
               open={readModal} 
-              onOpenChange={setReadModal}
+              onOpenChange={closeReadModal}
               storyId={activeStory}
             />
           </>

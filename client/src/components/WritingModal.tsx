@@ -79,10 +79,10 @@ export default function WritingModal({
     enabled: open,
   });
 
-  // Check if current user is the author
+  // Check if current user is the author (either by role or by being the creator)
   const isAuthor = participants?.some(p => 
     p.userId === user?.id && p.role === 'author'
-  );
+  ) || story?.creatorId === user?.id;
 
   // Calculate the progress
   const progress = story && segments 
@@ -363,7 +363,7 @@ export default function WritingModal({
                 </div>
               ))}
 
-              {recentSegments?.length === 0 && (
+              {(recentSegments?.length === 0 && segments?.length === 0) && (
                 <p className="text-sm text-muted-foreground italic">
                   It's time to begin the story! You're the first contributor.
                 </p>

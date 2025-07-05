@@ -6,7 +6,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
-import { X as CloseIcon, Book, Users, AlertTriangle } from "lucide-react";
+import { Book, Edit, Users, AlertTriangle, X as CloseIcon } from "lucide-react";
+import PrintModal from "./PrintModal";
+import EditRequestModal from "./EditRequestModal";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface ReadStoryModalProps {
@@ -20,6 +23,9 @@ export default function ReadStoryModal({
   onOpenChange, 
   storyId 
 }: ReadStoryModalProps) {
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showEditRequestModal, setShowEditRequestModal] = useState(false);
+  const [editingSegment, setEditingSegment] = useState<any>(null);
   const { user } = useAuth();
 
   const { data: story } = useQuery({
@@ -42,6 +48,10 @@ export default function ReadStoryModal({
   const safeParticipants = Array.isArray(participants) ? participants : [];
 
   if (!story) return null;
+
+    // Determine if the user can request an edit
+    const isAuthor = story?.authorId === user?.id;
+    const canRequestEdit = !isAuthor;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,10 +125,24 @@ export default function ReadStoryModal({
                     .map((segment: any, index: number) => (
                     <div 
                       key={segment.id}
-                      className={`story-segment contributor-text-${index % 5}`}
+                      className={`story-segment contributor-text-${index % 5} relative group`}
                       dangerouslySetInnerHTML={{ __html: segment.content || '' }}
-                    />
-                  ))}
+                    >
+                    {canRequestEdit && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => {
+                          setEditingSegment(segment);
+                          setShowEditRequestModal(true);
+                        }}
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    </div>
+                    ))}
                 </div>
 
                 {/* Story Status */}
@@ -144,7 +168,27 @@ export default function ReadStoryModal({
           </div>
         </div>
 
+      {/* Print Modal */}
+      <PrintModal 
+        open={showPrintModal}
+        onOpenChange={setShowPrintModal}
+        story={story}
+      />
 
+      {/* Edit Request Modal */}
+      {editingSegment && (
+        <EditRequestModal 
+          open={showEditRequestModal}
+          onOpenChange={(open) => {
+            setShowEditRequestModal(open);
+            if (!open) setEditingSegment(null);
+          }}
+          storyId={story.id}
+          editType="segment_content"
+          segmentId={editingSegment.id}
+          currentContent={editingSegment.content}
+        />
+      )}
       </DialogContent>
     </Dialog>
   );

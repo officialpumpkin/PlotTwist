@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme, type Theme } from "@/components/ThemeProvider";
@@ -34,6 +35,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+import EditRequestsModal from "@/components/EditRequestsModal";
+import { 
+  Trash2, 
+  User, 
+  Bell, 
+  Palette, 
+  BookOpen, 
+  Clock,
+  CheckCircle,
+  XCircle,
+  Edit
+} from "lucide-react";
+
 export default function SettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -61,6 +75,8 @@ export default function SettingsPage() {
     theme: theme || "light"
   });
   const queryClient = useQueryClient();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [showEditRequestsModal, setShowEditRequestsModal] = useState(false);
 
   // Get user settings
   const { data: settings, isLoading } = useQuery({
@@ -80,6 +96,16 @@ export default function SettingsPage() {
         });
       }
     }
+  });
+
+  // Get user profile with stats and settings
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["/api/users/profile"],
+  });
+
+  // Get pending edit requests count
+  const { data: editRequests } = useQuery({
+    queryKey: ["/api/edit-requests/pending"],
   });
 
   // Update notification settings mutation
@@ -460,14 +486,49 @@ export default function SettingsPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="notifications">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
-                <CardDescription>
-                  Manage how and when we contact you
-                </CardDescription>
-              </CardHeader>
+           {/* Edit Requests Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Edit className="h-5 w-5" />
+                Edit Requests
+                {editRequests && editRequests.length > 0 && (
+                  <Badge variant="secondary" className="ml-2">
+                    {editRequests.length}
+                  </Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Manage edit requests from collaborators who want to modify your stories.
+                </p>
+                <Button 
+                  onClick={() => setShowEditRequestsModal(true)}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  View Edit Requests 
+                  {editRequests && editRequests.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {editRequests.length}
+                    </Badge>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notifications Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notification Preferences
+              </CardTitle>
+            </CardHeader>
 
               <CardContent className="space-y-6">
                 <div className="space-y-4">
@@ -690,6 +751,12 @@ export default function SettingsPage() {
             </form>
           </DialogContent>
         </Dialog>
-      </div>
-    );
-  }
+
+      {/* Edit Requests Modal */}
+      <EditRequestsModal 
+        open={showEditRequestsModal}
+        onOpenChange={setShowEditRequestsModal}
+      />
+    </div>
+  );
+}

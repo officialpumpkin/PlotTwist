@@ -15,6 +15,7 @@ import ReadStoryModal from "./ReadStoryModal";
 import EditStoryModal from "./EditStoryModal";
 import { useState } from "react";
 import { Edit, AlertTriangle } from "lucide-react";
+import EditRequestModal from "./EditRequestModal";
 
 interface StoryCardProps {
   story: any;
@@ -45,6 +46,7 @@ export default function StoryCard({
   const { toast } = useToast();
   const [showReadModal, setShowReadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditRequestModal, setShowEditRequestModal] = useState(false);
 
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -432,10 +434,21 @@ export default function StoryCard({
       />
 
             {/* Edit Story Modal */}
-      <EditStoryModal
+      <EditStoryModal 
         open={showEditModal}
         onOpenChange={setShowEditModal}
         story={story}
+      />
+
+      {/* Edit Request Modal */}
+      <EditRequestModal 
+        open={showEditRequestModal}
+        onOpenChange={setShowEditRequestModal}
+        storyId={story.id}
+        editType="story_metadata"
+        currentTitle={story.title}
+        currentDescription={story.description}
+        currentGenre={story.genre}
       />
     </div>
   );

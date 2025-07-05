@@ -6,29 +6,22 @@ import {
   storyTurns,
   storyImages,
   printOrders,
-  userSettings,
   storyInvitations,
   storyJoinRequests,
-  type UpsertUser,
+  storyEditRequests,
+  userSettings,
   type User,
+  type UpsertUser,
   type InsertStory,
-  type Story,
   type InsertStoryParticipant,
-  type StoryParticipant,
   type InsertStorySegment,
-  type StorySegment,
   type InsertStoryTurn,
-  type StoryTurn,
   type InsertStoryImage,
-  type StoryImage,
   type InsertPrintOrder,
-  type PrintOrder,
   type InsertStoryInvitation,
-  type StoryInvitation,
-  type InsertUserSettings,
-  type UserSettings,
   type InsertStoryJoinRequest,
-  type StoryJoinRequest,
+  type InsertStoryEditRequest,
+  type InsertUserSettings,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, sql, inArray, not, or, isNull } from "drizzle-orm";
@@ -94,6 +87,14 @@ export interface IStorage {
   getStoryJoinRequestById(requestId: number): Promise<StoryJoinRequest | null>;
   createStoryJoinRequest(data: any): Promise<StoryJoinRequest>;
   updateStoryJoinRequest(requestId: number, data: any): Promise<StoryJoinRequest>;
+
+  // Edit request methods
+  createEditRequest(data: any): Promise<any>;
+  getEditRequestById(id: number): Promise<any | undefined>;
+  getPendingEditRequestsForAuthor(authorId: string): Promise<any[]>;
+  updateEditRequest(requestId: number, updates: { status: string }): Promise<any>;
+  getSegmentById(id: number): Promise<any | undefined>;
+  updateSegment(segmentId: number, updates: { content: string }): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -233,7 +234,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(stories.updatedAt));
   }
 
-  
+
 
   // Story participants
   async addParticipant(participantData: InsertStoryParticipant & { role?: string }): Promise<StoryParticipant> {
@@ -521,6 +522,70 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(storyInvitations.createdAt));
+  }
+
+  async updateStoryJoinRequest(requestId: number, updates: { status: string }) {
+    return await db
+      .update(storyJoinRequests)
+      .set(updates)
+      .where(eq(storyJoinRequests.id, requestId))
+      .returning();
+  }
+
+  // Edit request methods
+  async createEditRequest(data: any) {
+    const [editRequest] = await db
+      .insert(storyEditRequests)
+      .values(data)
+      .returning();
+    return editRequest;
+  }
+
+  async getEditRequestById(id: number) {
+    const [editRequest] = await db
+      .select()
+      .from(storyEditRequests)
+      .where(eq(storyEditRequests.id, id))
+      .limit(1);
+    return editRequest;
+  }
+
+  async getPendingEditRequestsForAuthor(authorId: string) {
+    return await db
+      .select()
+      .from(storyEditRequests)
+      .where(
+        and(
+          eq(storyEditRequests.authorId, authorId),
+          eq(storyEditRequests.status, "pending")
+        )
+      )
+      .orderBy(desc(storyEditRequests.createdAt));
+  }
+
+  async updateEditRequest(requestId: number, updates: { status: string }) {
+    return await db
+      .update(storyEditRequests)
+      .set(updates)
+      .where(eq(storyEditRequests.id, requestId))
+      .returning();
+  }
+
+  async getSegmentById(id: number) {
+    const [segment] = await db
+      .select()
+      .from(storySegments)
+      .where(eq(storySegments.id, id))
+      .limit(1);
+    return segment;
+  }
+
+  async updateSegment(segmentId: number, updates: { content: string }) {
+    return await db
+      .update(storySegments)
+      .set(updates)
+      .where(eq(storySegments.id, segmentId))
+      .returning();
   }
 }
 

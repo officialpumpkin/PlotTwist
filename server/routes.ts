@@ -23,6 +23,7 @@ import {
   storySegments,
   storyInvitations,
   storyJoinRequests,
+  storyEditRequests,
   printOrders,
   userSettings,
 } from "@shared/schema";
@@ -1998,6 +1999,190 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Create edit request
+  app.post('/api/stories/:id/edit-requests', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      const { editType, segmentId, proposedContent, proposedTitle, proposedDescription, proposedGenre, reason } = req.body;
+
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Check if user is a participant
+      const isParticipant = await storage.isParticipant(storyId, userId);
+      if (!isParticipant) {
+        return res.status(403).json({ message: "You are not a participant in this story" });
+      }
+
+      // Authors can edit directly, others need approval
+      if (story.creatorId === userId) {
+        return res.status(400).json({ message: "Authors can edit directly without requests" });
+      }
+
+      let originalContent = "";
+      if (editType === "story_metadata") {
+        originalContent = JSON.stringify({
+          title: story.title,
+          description: story.description,
+          genre: story.genre
+        });
+      } else if (editType === "segment_content" && segmentId) {
+        const segment = await storage.getSegmentById(parseInt(segmentId));
+        if (!segment) {
+          return res.status(404).json({ message: "Segment not found" });
+        }
+        originalContent = segment.content;
+      } else {
+        return res.status(400).json({ message: "Invalid edit type or missing segment ID" });
+      }
+
+      const editRequest = await storage.createEditRequest({
+        storyId,
+        segmentId: segmentId ? parseInt(segmentId) : null,
+        requesterId: userId,
+        authorId: story.creatorId,
+        editType,
+        originalContent,
+        proposedContent,
+        proposedTitle: proposedTitle || null,
+        proposedDescription: proposedDescription || null,
+        proposedGenre: proposedGenre || null,
+        reason: reason || null,
+        status: "pending"
+      });
+
+      res.status(201).json(editRequest);
+    } catch (error) {
+      console.error("Error creating edit request:", error);
+      res.status(500).json({ message: "Failed to create edit request" });
+    }
+  });
+
+  // Get pending edit requests for author
+  app.get('/api/edit-requests/pending', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const requests = await storage.getPendingEditRequestsForAuthor(userId);
+
+      // Get additional data for each request
+      const requestsWithDetails = await Promise.all(
+        requests.map(async (request) => {
+          const story = await storage.getStoryById(request.storyId);
+          const requester = await storage.getUser(request.requesterId);
+          let segment = null;
+          if (request.segmentId) {
+            segment = await storage.getSegmentById(request.segmentId);
+          }
+
+          return {
+            ...request,
+            story: story ? {
+              id: story.id,
+              title: story.title,
+              description: story.description,
+              genre: story.genre,
+            } : null,
+            requester: requester ? {
+              id: requester.id,
+              username: requester.username || "Unknown",
+              firstName: requester.firstName,
+              lastName: requester.lastName,
+              profileImageUrl: requester.profileImageUrl,
+            } : null,
+            segment: segment ? {
+              id: segment.id,
+              content: segment.content,
+              turn: segment.turn,
+            } : null,
+          };
+        })
+      );
+
+      res.json(requestsWithDetails);
+    } catch (error) {
+      console.error("Error fetching pending edit requests:", error);
+      res.status(500).json({ message: "Failed to fetch edit requests" });
+    }
+  });
+
+  // Approve edit request
+  app.post('/api/edit-requests/:id/approve', isAuthenticated, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const editRequest = await storage.getEditRequestById(requestId);
+      if (!editRequest) {
+        return res.status(404).json({ message: "Edit request not found" });
+      }
+
+      if (editRequest.authorId !== userId) {
+        return res.status(403).json({ message: "Only the story author can approve edit requests" });
+      }
+
+      if (editRequest.status !== "pending") {
+        return res.status(400).json({ message: "Request has already been " + editRequest.status });
+      }
+
+      // Apply the edit
+      if (editRequest.editType === "story_metadata") {
+        await storage.updateStory(editRequest.storyId, {
+          title: editRequest.proposedTitle,
+          description: editRequest.proposedDescription,
+          genre: editRequest.proposedGenre,
+          isEdited: true,
+          lastEditedAt: new Date(),
+          editedBy: editRequest.requesterId,
+        });
+      } else if (editRequest.editType === "segment_content" && editRequest.segmentId) {
+        await storage.updateSegment(editRequest.segmentId, {
+          content: editRequest.proposedContent
+        });
+      }
+
+      // Update request status
+      await storage.updateEditRequest(requestId, { status: "approved" });
+
+      res.json({ message: "Edit request approved and applied successfully" });
+    } catch (error) {
+      console.error("Error approving edit request:", error);
+      res.status(500).json({ message: "Failed to approve edit request" });
+    }
+  });
+
+  // Deny edit request
+  app.post('/api/edit-requests/:id/deny', isAuthenticated, async (req: any, res) => {
+    try {
+      const requestId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const editRequest = await storage.getEditRequestById(requestId);
+      if (!editRequest) {
+        return res.status(404).json({ message: "Edit request not found" });
+      }
+
+      if (editRequest.authorId !== userId) {
+        return res.status(403).json({ message: "Only the story author can deny edit requests" });
+      }
+
+      if (editRequest.status !== "pending") {
+        return res.status(400).json({ message: "Request has already been " + editRequest.status });
+      }
+
+      // Update request status
+      await storage.updateEditRequest(requestId, { status: "denied" });
+
+      res.json({ message: "Edit request denied successfully" });
+    } catch (error) {
+      console.error("Error denying edit request:", error);
+      res.status(500).json({ message: "Failed to deny edit request" });
     }
   });
 

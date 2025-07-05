@@ -474,6 +474,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Keep GET logout for backward compatibility but redirect properly
+  app.get("/api/logout", (req: any, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        console.error("Session destroy error:", err);
+        return res.redirect('/?error=logout_failed');
+      }
+      res.clearCookie('connect.sid');
+      res.redirect('/');
+    });
+  });
+
   // Email verification endpoint
   app.get('/api/auth/verify-email', async (req, res) => {
     try {

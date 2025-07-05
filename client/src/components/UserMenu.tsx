@@ -20,7 +20,30 @@ export default function UserMenu() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      window.location.href = '/api/logout';
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      // Clear query cache
+      queryClient.clear();
+      // Redirect to home page
+      window.location.href = '/';
+    },
+    onError: (error) => {
+      console.error('Logout error:', error);
+      toast({
+        title: "Logout Failed",
+        description: "There was an error logging out. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 

@@ -106,9 +106,9 @@ export default function SettingsPage() {
     }
   }, [settings]);
 
-  // Update profile data when user changes
+  // Update profile data when user changes, but not if we just updated
   useEffect(() => {
-    if (user) {
+    if (user && !updateProfileMutation.isSuccess) {
       setProfileData({
         username: user.username || "",
         firstName: user.firstName || "",
@@ -116,7 +116,7 @@ export default function SettingsPage() {
         email: user.email || "",
       });
     }
-  }, [user]);
+  }, [user, updateProfileMutation.isSuccess]);
 
   // Mutations
   const updateProfileMutation = useMutation({
@@ -131,6 +131,11 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       // Force refetch of auth user data
       queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      
+      // Reset mutation success state after a short delay to allow future updates
+      setTimeout(() => {
+        updateProfileMutation.reset();
+      }, 1000);
     },
     onError: (error: any) => {
       toast({

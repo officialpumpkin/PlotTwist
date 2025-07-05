@@ -921,8 +921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (joinRequest.authorId !== userId) {
-        return res.status(403).```python
-json({ message: "Only the story author can deny requests" });
+        return res.status(403).json({ message: "Only the story author can deny requests" });
       }
 
       if (joinRequest.status !== "pending") {

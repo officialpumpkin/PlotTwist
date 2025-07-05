@@ -60,7 +60,7 @@ export default function MyStories() {
             return false;
           }
         }
-        
+
         // Apply status filter
         if (filter === "active" && story.isComplete) {
           return false;
@@ -76,7 +76,7 @@ export default function MyStories() {
           // Show only stories where the user is the creator
           return story.creatorId === user.id;
         }
-        
+
         return true;
       })
     : [];
@@ -130,7 +130,7 @@ export default function MyStories() {
             </Button>
           </div>
         </div>
-        
+
         {/* Story Filtering & Sorting */}
         <div className="bg-card text-card-foreground rounded-xl shadow-sm border border-border p-4 mb-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -188,7 +188,7 @@ export default function MyStories() {
             </div>
           </div>
         </div>
-        
+
         {/* Story Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -235,11 +235,15 @@ export default function MyStories() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => {
               const isMyTurn = story.currentUserId === user?.id && !story.isComplete;
+
+              // Determine status based on actual conditions
+              const status = story.isComplete ? "Completed" : isMyTurn ? "Your Turn" : "Active";
+
               return (
                 <StoryCard
                   key={story.id}
                   story={story}
-                  status={story.isComplete ? "Completed" : isMyTurn ? "Your Turn" : "Active"}
+                  status={status}
                   showProgress
                   onContinue={isMyTurn ? () => openWritingModal(story.id) : undefined}
                   onComplete={() => openCompleteStoryModal(story.id)}
@@ -282,7 +286,7 @@ export default function MyStories() {
 
         {/* Modals */}
         <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
-        
+
         {activeStory && (
           <>
             <WritingModal 
@@ -294,14 +298,14 @@ export default function MyStories() {
                 closeWritingModal();
               }}
             />
-            
+
             <CompleteStoryModal 
               open={completeStoryModal} 
               onOpenChange={setCompleteStoryModal}
               storyId={activeStory}
               onPrint={() => openPrintModal(activeStory)}
             />
-            
+
             <PrintModal 
               open={printModal} 
               onOpenChange={setPrintModal}

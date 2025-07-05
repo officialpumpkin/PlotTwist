@@ -49,14 +49,7 @@ export default function StoryCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
 
-  // Debug logging to help identify issues
-  console.log('StoryCard render:', { 
-    storyId: story.id, 
-    status, 
-    hasOnContinue: !!onContinue, 
-    userId: user?.id,
-    currentUserId: story.currentUserId 
-  });
+  
 
   // Fetch story participants
   const { data: participants } = useQuery({
@@ -301,7 +294,9 @@ export default function StoryCard({
             {/* Continue/Complete buttons - only visible if not exploring and it's user's turn or user is author */}
             {status === "Your Turn" && onContinue && (
               <>
-                <Button size="sm" onClick={onContinue}>Continue</Button>
+                <Button size="sm" onClick={onContinue} className="bg-primary text-primary-foreground hover:bg-primary/90">
+                  Continue Writing
+                </Button>
                 {onRead && (
                   <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={onRead}>
                     Read

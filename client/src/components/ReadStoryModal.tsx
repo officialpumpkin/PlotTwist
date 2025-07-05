@@ -147,8 +147,8 @@ export default function ReadStoryModal({
                     <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                       {story.description}
                     </p>
-                    {/* Edit prompt button - for authors (direct edit) and participants (request edit) */}
-                    {isParticipant && (
+                    {/* Edit prompt button - only for authors */}
+                    {isAuthor && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -157,10 +157,10 @@ export default function ReadStoryModal({
                           setEditingSegment({ id: 'prompt', content: story?.description || '' });
                           setShowEditRequestModal(true);
                         }}
-                        title={isAuthor ? "Edit story prompt" : "Request to edit story prompt"}
+                        title="Edit story prompt"
                       >
                         <Edit className="h-3 w-3" />
-                        <span className="sr-only">{isAuthor ? "Edit story prompt" : "Request to edit story prompt"}</span>
+                        <span className="sr-only">Edit story prompt</span>
                       </Button>
                     )}
                   </div>

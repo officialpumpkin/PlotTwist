@@ -62,7 +62,7 @@ export default function EditRequestModal({
   const [proposedTitle, setProposedTitle] = useState(currentTitle);
   const [proposedDescription, setProposedDescription] = useState(currentDescription);
   const [proposedGenre, setProposedGenre] = useState(currentGenre);
-  const [reason, setReason] = useState("");
+  
 
   const createEditRequestMutation = useMutation({
     mutationFn: async () => {
@@ -73,7 +73,6 @@ export default function EditRequestModal({
           proposedTitle: currentTitle, // Keep current title
           proposedDescription: proposedContent, // Update description with new prompt
           proposedGenre: currentGenre, // Keep current genre
-          reason,
         });
       }
       
@@ -84,7 +83,6 @@ export default function EditRequestModal({
         proposedTitle: editType === "story_metadata" ? proposedTitle : undefined,
         proposedDescription: editType === "story_metadata" ? proposedDescription : undefined,
         proposedGenre: editType === "story_metadata" ? proposedGenre : undefined,
-        reason,
       });
     },
     onSuccess: () => {
@@ -98,7 +96,6 @@ export default function EditRequestModal({
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });
       onOpenChange(false);
       // Reset form
-      setReason("");
       setProposedContent(stripHtmlTags(currentContent));
       setProposedTitle(currentTitle);
       setProposedDescription(currentDescription);
@@ -222,16 +219,7 @@ export default function EditRequestModal({
             </div>
           )}
 
-          <div>
-            <Label htmlFor="reason">Reason for Edit (Optional)</Label>
-            <Textarea
-              id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Explain why you'd like to make this change..."
-              rows={3}
-            />
-          </div>
+          
 
           <div className="flex justify-end space-x-2 pt-4">
             <Button 

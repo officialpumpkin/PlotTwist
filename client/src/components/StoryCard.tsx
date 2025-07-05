@@ -80,6 +80,15 @@ export default function StoryCard({
   // Check if user is the creator (needed for leave story logic)
   const isCreator = user && story.creatorId === user.id;
 
+    // Check if the user has contributed segments
+    const hasContributed = segments?.some(segment => segment.userId === user?.id);
+
+    // Determine if the user can edit
+    const canEdit = isCreator || hasContributed;
+
+    // Determine the read button text
+    const readButtonText = canEdit ? "Read/Edit" : "Read";
+
   // Mutation for leaving a story
   const leaveStoryMutation = useMutation({
     mutationFn: () => apiRequest("DELETE", `/api/stories/${story.id}/leave`),
@@ -331,8 +340,9 @@ export default function StoryCard({
                     Skip Turn
                   </Button>
                 )}
+              
               <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
-                Read/Edit
+                {readButtonText}
               </Button>
               </>
             )}

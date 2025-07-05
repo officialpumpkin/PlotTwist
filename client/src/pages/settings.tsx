@@ -97,16 +97,25 @@ export default function SettingsPage() {
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => apiRequest("PATCH", "/api/users/profile", data),
-    onSuccess: () => {
+    onSuccess: async (response) => {
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
-      // Invalidate both user profile and auth cache
+      
+      // Clear all user-related cache
       queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      // Force refetch of auth user data
-      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      
+      // Force immediate refetch of auth user data
+      await queryClient.refetchQueries({ 
+        queryKey: ["/api/auth/user"],
+        exact: true 
+      });
+      
+      // Also clear any cached queries that might have stale user data
+      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
     },
     onError: (error: any) => {
       toast({

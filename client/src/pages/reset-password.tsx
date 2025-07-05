@@ -212,9 +212,9 @@ export default function ResetPassword() {
               <Button
                 type="submit"
                 className="group relative w-full flex justify-center"
-                disabled={status === 'resetting'}
+                disabled={status === 'loading'}
               >
-                {status === 'resetting' ? (
+                {status === 'loading' ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     Resetting Password...

@@ -128,25 +128,25 @@ export default function ReadStoryModal({
                     <div 
                       key={segment.id}
                       className={`story-segment contributor-text-${index % 5} relative group`}
-                      dangerouslySetInnerHTML={{ __html: segment.content || '' }}
                     >
-                    {isParticipant && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => {
-                          setEditingSegment(segment);
-                          setShowEditRequestModal(true);
-                        }}
-                        title={user?.id === segment.userId ? "Edit your contribution" : "Request edit for this contribution"}
-                      >
-                        <Edit className="h-3 w-3" />
-                        <span className="sr-only">
-                          {user?.id === segment.userId ? "Edit segment" : "Request edit"}
-                        </span>
-                      </Button>
-                    )}
+                      <div dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
+                      {isParticipant && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            setEditingSegment(segment);
+                            setShowEditRequestModal(true);
+                          }}
+                          title={user?.id === segment.userId ? "Edit your contribution" : "Request edit for this contribution"}
+                        >
+                          <Edit className="h-3 w-3" />
+                          <span className="sr-only">
+                            {user?.id === segment.userId ? "Edit segment" : "Request edit"}
+                          </span>
+                        </Button>
+                      )}
                     </div>
                     ))}
                 </div>

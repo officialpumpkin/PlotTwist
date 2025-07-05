@@ -314,7 +314,7 @@ export default function WritingModal({
           <div className="overflow-y-auto bg-muted/30 flex-grow">
             <div className="p-4 max-w-3xl mx-auto space-y-4">
               {/* Story content - continuous flow */}
-              <div className="story-segment relative group">
+              <div className="story-segment relative group pr-10">
                 <p className="font-serif text-foreground leading-relaxed">
                   {story?.description}
                 </p>
@@ -323,7 +323,7 @@ export default function WritingModal({
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
                     onClick={() => {
                       setEditingSegment({ id: 'prompt', content: story?.description || '' });
                       setShowEditRequestModal(true);
@@ -338,7 +338,7 @@ export default function WritingModal({
               {recentSegments?.map((segment, index) => (
                 <div 
                   key={segment.id}
-                  className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative group`}
+                  className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative group pr-10`}
                 >
                   <div dangerouslySetInnerHTML={{ __html: segment.content }} />
                   {/* Edit button for user's own segments */}
@@ -346,7 +346,7 @@ export default function WritingModal({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                      className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
                       onClick={() => {
                         setEditingSegment(segment);
                         setShowEditRequestModal(true);

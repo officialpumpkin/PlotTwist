@@ -93,23 +93,25 @@ export default function ReadStoryModal({
                   </Button>
                 )}
               </div>
-              <div className="relative group mb-3">
-                <p className="text-sm text-muted-foreground">{story?.description || 'No description available'}</p>
-                {/* Edit prompt button - only for creators */}
-                {isAuthor && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                    onClick={() => {
-                      setEditingSegment({ id: 'prompt', content: story?.description || '' });
-                      setShowEditRequestModal(true);
-                    }}
-                    title="Edit story prompt"
-                  >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                )}
+              <div className="mb-3">
+                <div className="relative group">
+                  <p className="text-sm text-muted-foreground pr-10">{story?.description || 'No description available'}</p>
+                  {/* Edit prompt button - only for creators */}
+                  {isAuthor && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                      onClick={() => {
+                        setEditingSegment({ id: 'prompt', content: story?.description || '' });
+                        setShowEditRequestModal(true);
+                      }}
+                      title="Edit story prompt"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Story Stats */}
@@ -159,14 +161,14 @@ export default function ReadStoryModal({
                     .map((segment: any, index: number) => (
                     <div 
                       key={segment.id}
-                      className={`story-segment contributor-text-${index % 5} relative group`}
+                      className={`story-segment contributor-text-${index % 5} relative group pr-10`}
                     >
                       <div dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
                       {isParticipant && user?.id === segment.userId && (
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
                           onClick={() => {
                             setEditingSegment(segment);
                             setShowEditRequestModal(true);

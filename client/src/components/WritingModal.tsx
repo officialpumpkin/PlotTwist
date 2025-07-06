@@ -232,7 +232,7 @@ export default function WritingModal({
           <div className="p-3 border-b border-border shrink-0 bg-background z-10 h-[100px]">
             <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-lg font-bold text-foreground">{story?.title}</h2>
+                <h2 className="text-lg font-bold text-foreground">{story?.title || 'Untitled Story'}</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   Turn {turn?.currentTurn} of {story?.maxSegments} • {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
                 </p>

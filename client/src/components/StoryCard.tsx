@@ -176,7 +176,7 @@ export default function StoryCard({
         <div className="flex items-center justify-between mb-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors truncate">{story.title}</h3>
+              <h3 className="font-bold text-lg text-foreground group-hover:text-primary transition-colors truncate">{story.title || 'Untitled Story'}</h3>
               {story.isEdited && (
                 <div className="flex items-center gap-1">
                   <AlertTriangle className="h-4 w-4 text-orange-500" />
@@ -232,7 +232,7 @@ export default function StoryCard({
             {participants?.slice(0, 3).map((participant) => {
               const isAuthor = participant.userId === story.creatorId;
               const hasContributed = segments?.some(segment => segment.userId === participant.userId);
-              
+
               return (
                 <HoverCard key={participant.userId}>
                   <HoverCardTrigger asChild>
@@ -311,7 +311,7 @@ export default function StoryCard({
                       {participants.slice(3).map((participant) => {
                         const isAuthor = participant.userId === story.creatorId;
                         const hasContributed = segments?.some(segment => segment.userId === participant.userId);
-                        
+
                         return (
                           <div key={participant.userId} className="flex items-center space-x-2">
                             <Avatar className="w-6 h-6">
@@ -399,7 +399,7 @@ export default function StoryCard({
                     Skip Turn
                   </Button>
                 )}
-              
+
               <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
                 {readButtonText}
               </Button>

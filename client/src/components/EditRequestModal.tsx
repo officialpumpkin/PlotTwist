@@ -101,6 +101,9 @@ export default function EditRequestModal({
       });
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/waiting-turn"] });
       onOpenChange(false);
       // Reset form
       setProposedContent(stripHtmlTags(currentContent));

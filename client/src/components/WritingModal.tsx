@@ -25,7 +25,7 @@ import {
   FlagIcon,
   UserIcon
 } from "./assets/icons";
-import { Edit } from "lucide-react";
+import { Edit, Settings } from "lucide-react";
 
 import InviteCollaboratorModal from "./InviteCollaboratorModal";
 import EditRequestModal from "./EditRequestModal";
@@ -252,7 +252,7 @@ export default function WritingModal({
                     className="ml-2 h-6 text-xs"
                     title="Story controls and settings"
                   >
-                    <Edit className="h-3 w-3 mr-1" />
+                    <Settings className="h-3 w-3 mr-1" />
                     Story Controls
                   </Button>
                 )}

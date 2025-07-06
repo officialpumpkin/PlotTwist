@@ -6,7 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useQuery } from "@tanstack/react-query";
-import { Book, Edit, Users, AlertTriangle, X as CloseIcon } from "lucide-react";
+import { Book, Edit, Users, AlertTriangle, X as CloseIcon, Settings } from "lucide-react";
 import PrintModal from "./PrintModal";
 import EditRequestModal from "./EditRequestModal";
 import StoryControlsModal from "./StoryControlsModal";
@@ -95,7 +95,7 @@ export default function ReadStoryModal({
                     className="ml-2 h-6 text-xs"
                     title="Story controls and settings"
                   >
-                    <Edit className="h-3 w-3 mr-1" />
+                    <Settings className="h-3 w-3 mr-1" />
                     Story Controls
                   </Button>
                 )}

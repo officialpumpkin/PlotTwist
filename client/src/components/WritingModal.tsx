@@ -243,6 +243,19 @@ export default function WritingModal({
                 <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
                   {story?.genre}
                 </span>
+                {/* Story Controls button - only for authors */}
+                {isAuthor && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setShowStoryControls(true)}
+                    className="ml-2 h-6 text-xs"
+                    title="Story controls and settings"
+                  >
+                    <Edit className="h-3 w-3 mr-1" />
+                    Story Controls
+                  </Button>
+                )}
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -482,18 +495,6 @@ export default function WritingModal({
               </div>
 
               <div className="flex items-center gap-2">
-                {isAuthor && !story?.isComplete && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-xs h-7 px-2"
-                    onClick={() => setShowStoryControls(true)}
-                  >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Story Controls
-                  </Button>
-                )}
-
                 {story?.creatorId === user?.id && progress >= 80 && onComplete && (
                   <Button 
                     variant="outline" 
@@ -505,7 +506,6 @@ export default function WritingModal({
                     Complete
                   </Button>
                 )}
- 
               </div>
             </div>
           </div>

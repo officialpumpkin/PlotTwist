@@ -159,9 +159,18 @@ export default function StoryControlsModal({
   // Invite collaborators mutation
   const inviteCollaboratorsMutation = useMutation({
     mutationFn: async (inviteList: string[]) => {
-      return await apiRequest("POST", `/api/stories/${storyId}/invite`, {
-        invites: inviteList
-      });
+      // Send individual invitations
+      const results = await Promise.all(
+        inviteList.map(async (invite) => {
+          // Determine if it's an email or username
+          const isEmail = invite.includes('@');
+          return await apiRequest("POST", `/api/stories/${storyId}/invite`, {
+            inviteType: isEmail ? 'email' : 'username',
+            [isEmail ? 'email' : 'username']: invite
+          });
+        })
+      );
+      return results;
     },
     onSuccess: () => {
       toast({

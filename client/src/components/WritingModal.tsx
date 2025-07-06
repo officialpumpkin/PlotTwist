@@ -29,6 +29,7 @@ import { Edit } from "lucide-react";
 
 import InviteCollaboratorModal from "./InviteCollaboratorModal";
 import EditRequestModal from "./EditRequestModal";
+import StoryControlsModal from "./StoryControlsModal";
 
 interface WritingModalProps {
   open: boolean;
@@ -50,6 +51,7 @@ export default function WritingModal({
   const [characterCount, setCharacterCount] = useState(0);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
+  const [showStoryControls, setShowStoryControls] = useState(false);
   const [editingSegment, setEditingSegment] = useState<any>(null);
 
   // Rich text editor reference
@@ -480,15 +482,15 @@ export default function WritingModal({
               </div>
 
               <div className="flex items-center gap-2">
-                {story?.creatorId === user?.id && !story?.isComplete && (
+                {isAuthor && !story?.isComplete && (
                   <Button 
                     variant="outline" 
                     size="sm"
                     className="text-xs h-7 px-2"
-                    onClick={() => setShowInviteModal(true)}
+                    onClick={() => setShowStoryControls(true)}
                   >
-                    <UserIcon className="h-3 w-3 mr-1" />
-                    Invite
+                    <Edit className="h-3 w-3 mr-1" />
+                    Story Controls
                   </Button>
                 )}
 
@@ -503,37 +505,17 @@ export default function WritingModal({
                     Complete
                   </Button>
                 )}
-                 {isAuthor && turn?.currentUserId !== user?.id && (
-                  <Button
-                    onClick={handleSkipTurn}
-                    size="sm"
-                    variant="outline"
-                    className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
-                    title={`Skip ${turn?.currentUser?.username || 'current user'}'s turn`}
-                  >
-                    Skip {turn?.currentUser?.username}'s Turn
-                  </Button>
-                )}
-                {isAuthor && turn?.currentUserId === user?.id && (
-                  <Button
-                    onClick={handleSkipTurn}
-                    size="sm"
-                    variant="outline"
-                    className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
-                  >
-                    Skip My Turn
-                  </Button>
-                )}
+ 
               </div>
             </div>
           </div>
         </div>
       </DialogContent>
 
-      {/* Invite collaborator modal */}
-      <InviteCollaboratorModal 
-        open={showInviteModal} 
-        onOpenChange={setShowInviteModal}
+      {/* Story Controls Modal */}
+      <StoryControlsModal 
+        open={showStoryControls} 
+        onOpenChange={setShowStoryControls}
         storyId={storyId}
       />
 

@@ -370,40 +370,9 @@ export default function StoryCard({
             )}
 
             {status === "Waiting" && (
-              <>
-              {isCreator && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
-                    onClick={async () => {
-                      try {
-                        await apiRequest("POST", `/api/stories/${story.id}/skip-turn`);
-                        toast({
-                          title: "Turn skipped",
-                          description: "The current turn has been skipped to the next participant",
-                        });
-                        // Refresh the relevant queries
-                        queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
-                        queryClient.invalidateQueries({ queryKey: ["/api/waiting-turn"] });
-                        queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
-                      } catch (error: any) {
-                        toast({
-                          variant: "destructive",
-                          title: "Error",
-                          description: error.message || "Failed to skip turn",
-                        });
-                      }
-                    }}
-                  >
-                    Skip Turn
-                  </Button>
-                )}
-
               <Button size="sm" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" onClick={() => setShowReadModal(true)}>
                 {readButtonText}
               </Button>
-              </>
             )}
 
             {status === "Completed" && (

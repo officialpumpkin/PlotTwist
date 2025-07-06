@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Book, Edit, Users, AlertTriangle, X as CloseIcon } from "lucide-react";
 import PrintModal from "./PrintModal";
 import EditRequestModal from "./EditRequestModal";
+import StoryControlsModal from "./StoryControlsModal";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -25,6 +26,7 @@ export default function ReadStoryModal({
 }: ReadStoryModalProps) {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showEditRequestModal, setShowEditRequestModal] = useState(false);
+  const [showStoryControls, setShowStoryControls] = useState(false);
   const [editingSegment, setEditingSegment] = useState<any>(null);
   const [editingStoryMetadata, setEditingStoryMetadata] = useState(false);
   const { user } = useAuth();
@@ -84,20 +86,17 @@ export default function ReadStoryModal({
                     </span>
                   </div>
                 )}
-                {/* Edit story metadata button - only for creators */}
+                {/* Story Controls button - only for authors */}
                 {isAuthor && (
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => {
-                      setEditingStoryMetadata(true);
-                      setShowEditRequestModal(true);
-                    }}
+                    onClick={() => setShowStoryControls(true)}
                     className="ml-2 h-6 text-xs"
-                    title="Edit story details"
+                    title="Story controls and settings"
                   >
                     <Edit className="h-3 w-3 mr-1" />
-                    Edit Details
+                    Story Controls
                   </Button>
                 )}
               </div>
@@ -242,6 +241,13 @@ export default function ReadStoryModal({
           isPrompt={editingSegment?.id === 'prompt'}
         />
       )}
+
+      {/* Story Controls Modal */}
+      <StoryControlsModal 
+        open={showStoryControls}
+        onOpenChange={setShowStoryControls}
+        storyId={storyId}
+      />
       </DialogContent>
     </Dialog>
   );

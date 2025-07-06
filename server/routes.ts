@@ -1592,22 +1592,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Only the story creator can edit this story" });
       }
 
-      // Validate the edit data
-      const { title, description, genre } = req.body;
+      // Extract and validate the edit data
+      const { title, description, genre, wordLimit, characterLimit } = req.body;
 
-      if (!title || !description || !genre) {
-        return res.status(400).json({ message: "Title, description, and genre are required" });
+      // Build update object dynamically
+      const updateData: any = {};
+
+      // For full story edit (with description and genre), require all three
+      if (description !== undefined || genre !== undefined) {
+        if (!title || !description || !genre) {
+          return res.status(400).json({ message: "Title, description, and genre are required for full story edit" });
+        }
+        updateData.title = title;
+        updateData.description = description;
+        updateData.genre = genre;
+        updateData.isEdited = true;
+        updateData.lastEditedAt = new Date();
+        updateData.editedBy = userId;
+      } else {
+        // For partial updates (title only or limits only)
+        if (title !== undefined) {
+          updateData.title = title;
+        }
+        if (wordLimit !== undefined) {
+          if (wordLimit < 1 || wordLimit > 10000) {
+            return res.status(400).json({ message: "Word limit must be between 1 and 10000" });
+          }
+          updateData.wordLimit = wordLimit;
+        }
+        if (characterLimit !== undefined) {
+          if (characterLimit < 0 || characterLimit > 50000) {
+            return res.status(400).json({ message: "Character limit must be between 0 and 50000" });
+          }
+          updateData.characterLimit = characterLimit;
+        }
       }
 
-      // Update the story with edit metadata
-      const updatedStory = await storage.updateStory(storyId, {
-        title,
-        description,
-        genre,
-        isEdited: true,
-        lastEditedAt: new Date(),
-        editedBy: userId,
-      });
+      // Update the story
+      const updatedStory = await storage.updateStory(storyId, updateData);
 
       res.json(updatedStory);
     } catch (error) {

@@ -212,55 +212,15 @@ export default function StoryCard({
 
         {showProgress && (
           <div className="mt-4 bg-neutral-50 dark:bg-neutral-800 rounded-md p-3">
-            <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center text-sm text-neutral-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 mr-1"
-                >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-                <span>{participants?.length || 0}</span>
-              </div>
-              <div className="flex items-center text-sm text-neutral-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-4 w-4 mr-1"
-                >
-                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                  <polyline points="14,2 14,8 20,8" />
-                </svg>
-                <span>Author: {participants?.find(p => p.role === 'author')?.user?.firstName || participants?.find(p => p.role === 'author')?.user?.username || participants?.find(p => p.userId === story.creatorId)?.user?.firstName || participants?.find(p => p.userId === story.creatorId)?.user?.username || 'Unknown'}</span>
-              </div>
-            </div>
-              <div className="flex items-center">
-                <div className={cn(
-                  "w-2 h-2 rounded-full mr-2",
-                  story.isComplete ? "bg-accent" : "bg-secondary"
-                )}></div>
-                <span className="text-sm text-neutral-600 dark:text-neutral-400">{story.isComplete ? "Final:" : "Progress:"}</span>
-              </div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                {story.isComplete ? "Final:" : "Progress:"}
+              </span>
               <span className="text-sm font-medium">
                 {segments ? `${segments.length}/${story.maxSegments || 30} segments` : '0/0 segments'}
               </span>
             </div>
-            <div className="w-full bg-muted rounded-full h-2 mt-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div 
                 className={cn(
                   "h-2 rounded-full",

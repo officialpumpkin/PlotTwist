@@ -158,7 +158,7 @@ export default function EditRequestModal({
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            Request Edit: {isPrompt ? "Story Prompt" : editType === "story_metadata" ? "Story Details" : "Segment Content"}
+            Edit {isPrompt ? "Story Prompt" : editType === "story_metadata" ? "Story Details" : "Segment Content"}
           </DialogTitle>
         </DialogHeader>
 
@@ -243,7 +243,7 @@ export default function EditRequestModal({
               type="submit"
               disabled={createEditRequestMutation.isPending}
             >
-              {createEditRequestMutation.isPending ? "Submitting..." : "Submit Edit Request"}
+              {createEditRequestMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

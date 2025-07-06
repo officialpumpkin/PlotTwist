@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "@/components/ThemeProvider";
 
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -96,31 +97,16 @@ export default function SettingsPage() {
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => apiRequest("PATCH", "/api/users/profile", data),
-    onSuccess: async (response) => {
+    onSuccess: () => {
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
-      
-      // Use the global user update function for immediate cache update
-      updateUser({
-        username: response.username,
-        firstName: response.firstName,
-        lastName: response.lastName,
-        email: response.email,
-      });
-
-      // Update local state immediately
-      setProfileData({
-        username: response.username || "",
-        firstName: response.firstName || "",
-        lastName: response.lastName || "",
-        email: response.email || "",
-      });
-
-      // Invalidate related queries to trigger fresh fetches
-      queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
+      // Invalidate both user profile and auth cache
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      // Force refetch of auth user data
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error: any) => {
       toast({

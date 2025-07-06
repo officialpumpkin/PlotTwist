@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -14,17 +14,9 @@ import LoginOptions from "./LoginOptions";
 
 export default function UserMenu() {
   const [showLoginOptions, setShowLoginOptions] = useState(false);
-  const [userDisplayName, setUserDisplayName] = useState<string>("");
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  // Update display name when user changes
-  useEffect(() => {
-    if (user?.username) {
-      setUserDisplayName(user.username);
-    }
-  }, [user?.username, user?.firstName, user?.lastName]);
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -109,7 +101,7 @@ export default function UserMenu() {
               </AvatarFallback>
             </Avatar>
             <span className="hidden md:inline text-sm font-medium text-neutral-700 dark:text-neutral-200">
-              {userDisplayName || user?.username || 'User'}
+              {user?.username || 'User'}
             </span>
             <ChevronDown className="h-4 w-4 text-neutral-500" />
           </div>

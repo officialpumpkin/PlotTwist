@@ -1,7 +1,6 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 export function useAuth() {
-  const queryClient = useQueryClient();
   const { data: user, isLoading, isError, refetch } = useQuery({
     queryKey: ["/api/auth/user"],
     // Handle unauthorized errors gracefully
@@ -29,25 +28,15 @@ export function useAuth() {
       // Only retry on network errors, not auth errors
       return failureCount < 2 && !error?.message?.includes('401');
     },
-    staleTime: 30 * 1000, // Cache for 30 seconds - allows setQueryData to work
-    gcTime: 5 * 60 * 1000, // Keep in memory for 5 minutes
+    staleTime: 0, // No cache to ensure fresh data
     refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchInterval: 30 * 1000, // Refetch every 30 seconds (less aggressive)
+    refetchInterval: 5000, // Refetch every 5 seconds to ensure updates
   });
-
-  const updateUser = (updates: Partial<typeof user>) => {
-    queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
-      if (!oldData) return oldData;
-      return { ...oldData, ...updates };
-    });
-  };
 
   return {
     user,
     isLoading: isLoading && !isError, // Only treat as loading if no error occurred
     isAuthenticated: !!user,
     refetch,
-    updateUser, // Export the update function
   };
 }

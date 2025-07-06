@@ -203,11 +203,6 @@ export default function StoryCard({
         <div className="flex items-center mt-4 text-sm text-neutral-500">
           <UserIcon className="mr-1" />
           <span>{participantCount} participants</span>
-          <span className="mx-2">•</span>
-          <TimeIcon className="mr-1" />
-          <span>
-            {segments ? `${segments.length}/${story.maxSegments || 30} segments` : 'Updated recently'}
-          </span>
         </div>
 
         {showProgress && (

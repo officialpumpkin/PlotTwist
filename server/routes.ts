@@ -2084,7 +2084,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json({ message: "Story metadata updated successfully" });
         } else if (editType === "segment_content" && segmentId) {
           await storage.updateSegment(parseInt(segmentId), {
-            content: proposedContent
+            content: proposedContent,
+            isEdited: true,
+            lastEditedAt: new Date(),
+            editedBy: userId,
           });
           return res.json({ message: "Segment updated successfully" });
         }

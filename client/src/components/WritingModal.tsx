@@ -25,7 +25,7 @@ import {
   FlagIcon,
   UserIcon
 } from "./assets/icons";
-import { Edit } from "lucide-react";
+import { Edit, AlertTriangle } from "lucide-react";
 
 import InviteCollaboratorModal from "./InviteCollaboratorModal";
 import EditRequestModal from "./EditRequestModal";
@@ -316,9 +316,21 @@ export default function WritingModal({
               {/* Story content - continuous flow */}
               
                 <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">
-                  <p className="font-serif text-foreground leading-relaxed whitespace-pre-wrap">
-                    {story?.description}
-                  </p>
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1">
+                      <p className="font-serif text-foreground leading-relaxed whitespace-pre-wrap">
+                        {story?.description}
+                      </p>
+                    </div>
+                    {story?.isEdited && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                        <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                          Edited
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   {/* Edit prompt button - only for authors */}
                   {isAuthor && (
                     <Button
@@ -343,7 +355,17 @@ export default function WritingModal({
                   key={segment.id}
                   className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative pr-10`}
                 >
-                  <div dangerouslySetInnerHTML={{ __html: segment.content }} />
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1" dangerouslySetInnerHTML={{ __html: segment.content }} />
+                    {segment?.isEdited && (
+                      <div className="flex items-center gap-1 mt-1">
+                        <AlertTriangle className="h-4 w-4 text-orange-500" />
+                        <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                          Edited
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   {/* Edit button for user's own segments */}
                   {user?.id === segment.userId && (
                     <Button

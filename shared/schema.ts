@@ -84,6 +84,9 @@ export const storySegments = pgTable("story_segments", {
   turn: integer("turn").notNull(),
   wordCount: integer("word_count").notNull(),
   characterCount: integer("character_count").notNull().default(0),
+  isEdited: boolean("is_edited").notNull().default(false),
+  lastEditedAt: timestamp("last_edited_at"),
+  editedBy: varchar("edited_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

@@ -144,9 +144,21 @@ export default function ReadStoryModal({
                 <div className="story-segment">
                   {/* Story prompt with subtle styling */}
                   <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">
-                    <p className="text-foreground leading-relaxed whitespace-pre-wrap">
-                      {story.description}
-                    </p>
+                    <div className="flex items-start gap-2">
+                      <div className="flex-1">
+                        <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+                          {story.description}
+                        </p>
+                      </div>
+                      {story?.isEdited && (
+                        <div className="flex items-center gap-1 mt-1">
+                          <AlertTriangle className="h-4 w-4 text-orange-500" />
+                          <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                            Edited
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     {/* Edit prompt button - only for authors */}
                     {isAuthor && (
                       <Button
@@ -171,7 +183,17 @@ export default function ReadStoryModal({
                       key={segment.id}
                       className={`story-segment contributor-text-${index % 5} relative pr-10`}
                     >
-                      <div dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
+                      <div className="flex items-start gap-2">
+                        <div className="flex-1" dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
+                        {segment?.isEdited && (
+                          <div className="flex items-center gap-1 mt-1">
+                            <AlertTriangle className="h-4 w-4 text-orange-500" />
+                            <span className="text-xs text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded">
+                              Edited
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       {isParticipant && user?.id === segment.userId && (
                         <Button
                           size="sm"

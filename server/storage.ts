@@ -588,7 +588,7 @@ export class DatabaseStorage implements IStorage {
     return segment;
   }
 
-  async updateSegment(segmentId: number, updates: { content: string; isEdited?: boolean; lastEditedAt?: Date; editedBy?: string }) {
+  async updateSegment(segmentId: number, updates: { content: string }) {
     return await db
       .update(storySegments)
       .set(updates)

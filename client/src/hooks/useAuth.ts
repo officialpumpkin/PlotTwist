@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useAuth() {
+  const queryClient = useQueryClient();
   const { data: user, isLoading, isError, refetch } = useQuery({
     queryKey: ["/api/auth/user"],
     // Handle unauthorized errors gracefully

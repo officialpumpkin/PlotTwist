@@ -32,7 +32,7 @@ export function useAuth() {
     gcTime: 0, // Don't cache in memory
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 5000, // Refetch every 5 seconds to ensure updates
+    refetchInterval: 2000, // Refetch every 2 seconds for more responsive updates
   });
 
   return {

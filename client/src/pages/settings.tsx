@@ -110,7 +110,7 @@ export default function SettingsPage() {
       queryClient.removeQueries({ queryKey: ["/api/users/settings"] });
       
       // Force immediate refetch with fresh data
-      await queryClient.fetchQuery({ 
+      const updatedUser = await queryClient.fetchQuery({ 
         queryKey: ["/api/auth/user"],
         queryFn: async () => {
           const res = await fetch("/api/auth/user", { 
@@ -124,9 +124,14 @@ export default function SettingsPage() {
         gcTime: 0
       });
       
-      // Update local state immediately
-      if (response && response.username) {
-        setProfileData(prev => ({ ...prev, username: response.username }));
+      // Update local state immediately with the fresh data
+      if (updatedUser) {
+        setProfileData({
+          username: updatedUser.username || "",
+          firstName: updatedUser.firstName || "",
+          lastName: updatedUser.lastName || "",
+          email: updatedUser.email || "",
+        });
       }
     },
     onError: (error: any) => {

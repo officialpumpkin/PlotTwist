@@ -86,11 +86,18 @@ export default function EditRequestModal({
       });
     },
     onSuccess: () => {
+      // Check if this is a direct edit (user editing their own content) or a request
+      const isDirectEdit = true; // Since we only allow users to edit their own content now
+      
       toast({
-        title: "Edit request submitted!",
-        description: isPrompt 
-          ? "Your prompt edit request has been sent to the story author for approval."
-          : "Your edit request has been sent to the story author for approval.",
+        title: isDirectEdit ? "Edit applied!" : "Edit request submitted!",
+        description: isDirectEdit 
+          ? (isPrompt 
+              ? "Your story prompt has been successfully updated."
+              : "Your contribution has been successfully updated.")
+          : (isPrompt 
+              ? "Your prompt edit request has been sent to the story author for approval."
+              : "Your edit request has been sent to the story author for approval."),
       });
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/segments`] });

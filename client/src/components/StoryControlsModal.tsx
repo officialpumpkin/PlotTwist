@@ -31,12 +31,12 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Settings, SkipForward, UserPlus, Edit } from "lucide-react";
+import { Settings, SkipForward, UserPlus, Edit, CheckCircle } from "lucide-react";
 
 const storyControlsSchema = z.object({
   title: z.string().min(1, "Title is required"),
   wordLimit: z.number().min(1, "Word limit must be at least 1"),
-  characterLimit: z.number().min(1, "Character limit must be at least 1"),
+  characterLimit: z.number().min(0, "Character limit must be at least 0"),
 });
 
 interface StoryControlsModalProps {
@@ -53,6 +53,7 @@ export default function StoryControlsModal({
   const { toast } = useToast();
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
+  const [inviteSuccess, setInviteSuccess] = useState(false);
 
   // Get story details
   const { data: story } = useQuery({
@@ -169,6 +170,9 @@ export default function StoryControlsModal({
       });
       setInvites([]);
       setInviteEmail("");
+      setInviteSuccess(true);
+      // Reset success state after 3 seconds
+      setTimeout(() => setInviteSuccess(false), 3000);
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}/participants`] });
     },
     onError: (error: any) => {
@@ -278,14 +282,23 @@ export default function StoryControlsModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Word Limit</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="1"
-                          {...field}
-                          onChange={e => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
+                      <Select 
+                        onValueChange={(value) => field.onChange(parseInt(value))} 
+                        value={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select word limit" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="item-aligned" sideOffset={4}>
+                          <SelectItem value="50">50 words</SelectItem>
+                          <SelectItem value="100">100 words</SelectItem>
+                          <SelectItem value="150">150 words</SelectItem>
+                          <SelectItem value="200">200 words</SelectItem>
+                          <SelectItem value="250">250 words</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -296,14 +309,24 @@ export default function StoryControlsModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Character Limit</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          min="1"
-                          {...field}
-                          onChange={e => field.onChange(parseInt(e.target.value))}
-                        />
-                      </FormControl>
+                      <Select 
+                        onValueChange={(value) => field.onChange(parseInt(value))} 
+                        value={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select character limit" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent position="item-aligned" sideOffset={4}>
+                          <SelectItem value="0">No limit</SelectItem>
+                          <SelectItem value="280">280 characters (Tweet length)</SelectItem>
+                          <SelectItem value="500">500 characters</SelectItem>
+                          <SelectItem value="1000">1000 characters</SelectItem>
+                          <SelectItem value="1500">1500 characters</SelectItem>
+                          <SelectItem value="2000">2000 characters</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -402,6 +425,14 @@ export default function StoryControlsModal({
                 >
                   {inviteCollaboratorsMutation.isPending ? "Sending..." : "Send Invitations"}
                 </Button>
+              </div>
+            )}
+
+            {/* Success feedback */}
+            {inviteSuccess && (
+              <div className="flex items-center gap-2 text-green-600 text-sm">
+                <CheckCircle className="h-4 w-4" />
+                <span>Invitations sent successfully!</span>
               </div>
             )}
           </div>

@@ -28,17 +28,25 @@ export function useAuth() {
       // Only retry on network errors, not auth errors
       return failureCount < 2 && !error?.message?.includes('401');
     },
-    staleTime: 0, // No cache to ensure fresh data
-    gcTime: 0, // Don't cache in memory
+    staleTime: 30 * 1000, // Cache for 30 seconds - allows setQueryData to work
+    gcTime: 5 * 60 * 1000, // Keep in memory for 5 minutes
     refetchOnWindowFocus: true,
     refetchOnMount: true,
-    refetchInterval: 2000, // Refetch every 2 seconds for more responsive updates
+    refetchInterval: 30 * 1000, // Refetch every 30 seconds (less aggressive)
   });
+
+  const updateUser = (updates: Partial<typeof user>) => {
+    queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
+      if (!oldData) return oldData;
+      return { ...oldData, ...updates };
+    });
+  };
 
   return {
     user,
     isLoading: isLoading && !isError, // Only treat as loading if no error occurred
     isAuthenticated: !!user,
     refetch,
+    updateUser, // Export the update function
   };
 }

@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
@@ -103,36 +103,25 @@ export default function SettingsPage() {
         description: "Your profile has been successfully updated.",
       });
       
-      // Remove all user-related queries from cache completely
-      queryClient.removeQueries({ queryKey: ["/api/users/me"] });
-      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.removeQueries({ queryKey: ["/api/my-stories"] });
-      queryClient.removeQueries({ queryKey: ["/api/users/settings"] });
-      
-      // Force immediate refetch with fresh data
-      const updatedUser = await queryClient.fetchQuery({ 
-        queryKey: ["/api/auth/user"],
-        queryFn: async () => {
-          const res = await fetch("/api/auth/user", { 
-            credentials: "include",
-            headers: { 'Content-Type': 'application/json' }
-          });
-          if (!res.ok) throw new Error('Failed to fetch user');
-          return res.json();
-        },
-        staleTime: 0,
-        gcTime: 0
+      // Use the global user update function for immediate cache update
+      updateUser({
+        username: response.username,
+        firstName: response.firstName,
+        lastName: response.lastName,
+        email: response.email,
       });
-      
-      // Update local state immediately with the fresh data
-      if (updatedUser) {
-        setProfileData({
-          username: updatedUser.username || "",
-          firstName: updatedUser.firstName || "",
-          lastName: updatedUser.lastName || "",
-          email: updatedUser.email || "",
-        });
-      }
+
+      // Update local state immediately
+      setProfileData({
+        username: response.username || "",
+        firstName: response.firstName || "",
+        lastName: response.lastName || "",
+        email: response.email || "",
+      });
+
+      // Invalidate related queries to trigger fresh fetches
+      queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
     },
     onError: (error: any) => {
       toast({

@@ -204,8 +204,8 @@ body.theme-fade::before {
   position: relative;
 }
 
-/* Add horizontal line separator between segments */
-.story-segment:not(:last-child)::after {
+/* Add horizontal line separator between different contributions only */
+.story-segment:not(:last-child):not(.story-prompt)::after {
   content: "";
   display: block;
   width: 75%;
@@ -215,8 +215,13 @@ body.theme-fade::before {
   opacity: 0.6;
 }
 
+/* Don't show separator after the last segment */
+.story-segment:last-child::after {
+  display: none;
+}
+
 /* Dark mode separator */
-.dark .story-segment:not(:last-child)::after {
+.dark .story-segment:not(:last-child):not(.story-prompt)::after {
   background-color: hsl(240, 8%, 40%);
 }
 

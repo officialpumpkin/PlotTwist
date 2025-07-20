@@ -201,6 +201,23 @@ body.theme-fade::before {
   margin: 0 0 2em 0;
   padding: 0;
   line-height: 1.5;
+  position: relative;
+}
+
+/* Add horizontal line separator between segments */
+.story-segment:not(:last-child)::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 1px;
+  background-color: hsl(240, 8%, 70%);
+  margin: 2em auto;
+  opacity: 0.6;
+}
+
+/* Dark mode separator */
+.dark .story-segment:not(:last-child)::after {
+  background-color: hsl(240, 8%, 40%);
 }
 
 .writing-modal-content {

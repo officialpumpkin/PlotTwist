@@ -208,7 +208,7 @@ body.theme-fade::before {
 .story-segment:not(:last-child)::after {
   content: "";
   display: block;
-  width: 60px;
+  width: 75%;
   height: 1px;
   background-color: hsl(240, 8%, 70%);
   margin: 2em auto;

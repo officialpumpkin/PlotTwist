@@ -12,6 +12,16 @@ import {
   userSettings,
   type User,
   type UpsertUser,
+  type Story,
+  type StoryParticipant,
+  type StorySegment,
+  type StoryTurn,
+  type StoryImage,
+  type PrintOrder,
+  type UserSettings,
+  type StoryInvitation,
+  type StoryJoinRequest,
+  type StoryEditRequest,
   type InsertStory,
   type InsertStoryParticipant,
   type InsertStorySegment,
@@ -150,7 +160,8 @@ export class DatabaseStorage implements IStorage {
     await db.update(users)
       .set({ 
         emailVerified: true, 
-        emailVerificationToken: null 
+        emailVerificationToken: null,
+        emailVerificationExpires: null
       })
       .where(eq(users.id, id));
   }

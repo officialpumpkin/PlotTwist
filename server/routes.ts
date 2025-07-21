@@ -203,6 +203,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate email verification token
       const verificationToken = nanoid(32);
+      // Set expiration to 24 hours from now
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       // Create user with unverified email
       const newUser = await storage.upsertUser({
@@ -212,6 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         emailVerified: false,
         emailVerificationToken: verificationToken,
+        emailVerificationExpires: verificationExpires,
       });
 
       // Send verification email (async, don't wait for it)
@@ -269,11 +272,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Generate new verification token
       const verificationToken = nanoid(32);
+      // Set new expiration to 24 hours from now
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
       // Update user with new token
       await storage.upsertUser({
         ...user,
         emailVerificationToken: verificationToken,
+        emailVerificationExpires: verificationExpires,
       });
 
       // Send verification email
@@ -499,6 +505,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUserByVerificationToken(token);
       if (!user) {
         return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+
+      // Check if token has expired
+      if (!user.emailVerificationExpires || new Date() > user.emailVerificationExpires) {
+        return res.status(400).json({ message: "Verification token has expired. Please request a new verification email." });
       }
 
       // Update user to be verified

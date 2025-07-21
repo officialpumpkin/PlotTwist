@@ -60,9 +60,9 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
     });
     console.log(`Email sent successfully to ${params.to}: ${params.subject}`);
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('SendGrid email error:', error);
-    if (error.response && error.response.body && error.response.body.errors) {
+    if (error?.response?.body?.errors) {
       console.error('SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
     }
     return false;
@@ -257,7 +257,7 @@ You received this because an account was created with this email address.`;
 
   return await sendEmail({
     to: userEmail,
-    from:  `PlotTwist <${process.env.SENDGRID_VERIFIED_SENDER}>`,
+    from: process.env.SENDGRID_VERIFIED_SENDER || 'noreply@plottwist.com',
     subject,
     text,
     html
@@ -333,7 +333,7 @@ If you did not request this password reset, please ignore this email.`;
 
   return await sendEmail({
     to: userEmail,
-    from:  `PlotTwist <${process.env.SENDGRID_VERIFIED_SENDER}>`,
+    from: process.env.SENDGRID_VERIFIED_SENDER || 'noreply@plottwist.com',
     subject,
     text,
     html

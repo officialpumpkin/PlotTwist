@@ -39,6 +39,7 @@ export const users = pgTable("users", {
   authProvider: varchar("auth_provider").default('local'),
   emailVerified: boolean("email_verified").default(false),
   emailVerificationToken: varchar("email_verification_token"),
+  emailVerificationExpires: timestamp("email_verification_expires"),
   passwordResetToken: varchar("password_reset_token"),
   passwordResetExpires: timestamp("password_reset_expires"),
   passwordLastChanged: timestamp("password_last_changed"),

@@ -10,12 +10,32 @@ export default function VerifyEmail() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Use window.location.search to get query parameters
+    // Try multiple methods to extract the token
+    let token = null;
+    
+    // Method 1: From URL search parameters
     const searchParams = new URLSearchParams(window.location.search);
-    const token = searchParams.get('token');
+    token = searchParams.get('token');
+    
+    // Method 2: From URL hash/fragment (in case the token is after #)
+    if (!token && window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      token = hashParams.get('token');
+    }
+    
+    // Method 3: Parse the entire URL manually (fallback)
+    if (!token) {
+      const fullUrl = window.location.href;
+      const tokenMatch = fullUrl.match(/[?&]token=([^&#]+)/);
+      if (tokenMatch) {
+        token = tokenMatch[1];
+      }
+    }
 
     console.log('Current location:', location);
     console.log('Window search:', window.location.search);
+    console.log('Window hash:', window.location.hash);
+    console.log('Full URL:', window.location.href);
     console.log('Extracted token:', token);
 
     if (!token) {

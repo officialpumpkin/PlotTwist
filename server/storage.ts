@@ -140,30 +140,48 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getUserByVerificationToken(token: string): Promise<User | undefined> {
-    return db
-      .select()
-      .from(users)
-      .where(eq(users.emailVerificationToken, token))
-      .then(rows => rows[0] || undefined);
-  }
-
   async getUserByPasswordResetToken(token: string): Promise<User | undefined> {
-    return db
+    const results = await db
       .select()
       .from(users)
       .where(eq(users.passwordResetToken, token))
-      .then(rows => rows[0] || undefined);
+      .limit(1);
+
+    return results.length > 0 ? results[0] : null;
   }
 
-  async verifyUserEmail(id: string): Promise<void> {
-    await db.update(users)
-      .set({ 
-        emailVerified: true, 
+  async getUserByVerificationToken(token: string) {
+    console.log(`[DEBUG] Looking for user with verification token: ${token}`);
+    const results = await db
+      .select()
+      .from(users)
+      .where(eq(users.emailVerificationToken, token))
+      .limit(1);
+
+    console.log(`[DEBUG] Found ${results.length} users with verification token`);
+    if (results.length > 0) {
+      const user = results[0];
+      console.log(`[DEBUG] User found: ${user.email}, verified: ${user.emailVerified}, token expires: ${user.emailVerificationExpires}`);
+    }
+
+    return results.length > 0 ? results[0] : null;
+  }
+
+  async verifyUserEmail(userId: string) {
+    console.log(`[DEBUG] Verifying email for userId: ${userId}`);
+    const results = await db
+      .update(users)
+      .set({
+        emailVerified: true,
         emailVerificationToken: null,
-        emailVerificationExpires: null
+        emailVerificationExpires: null,
+        updatedAt: new Date()
       })
-      .where(eq(users.id, id));
+      .where(eq(users.id, userId))
+      .returning();
+
+    console.log(`[DEBUG] Email verification update result:`, results.length > 0 ? "Success" : "Failed");
+    return results[0];
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
@@ -636,7 +654,7 @@ export class DatabaseStorage implements IStorage {
       for (const story of allStories) {
         const participants = await this.getStoryParticipants(story.id);
         const turn = await this.getStoryTurn(story.id);
-        
+
         if (turn && participants.length > 0) {
           const currentUserIsParticipant = participants.some(p => p.userId === turn.currentUserId);
           if (!currentUserIsParticipant) {

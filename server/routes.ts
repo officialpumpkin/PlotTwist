@@ -497,24 +497,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { token } = req.query;
 
+      console.log(`[DEBUG] Email verification attempt with token: ${token}`);
+
       if (!token || typeof token !== 'string') {
-        return res.status(400).json({ message: "Invalid verification token" });
+        console.log("[DEBUG] No token provided or invalid token format");
+        return res.status(400).json({ message: "No verification token provided" });
       }
 
       // Find user by verification token
       const user = await storage.getUserByVerificationToken(token);
       if (!user) {
+        console.log(`[DEBUG] No user found with verification token: ${token}`);
         return res.status(400).json({ message: "Invalid or expired verification token" });
+      }
+
+      console.log(`[DEBUG] User found: ${user.email}, already verified: ${user.emailVerified}`);
+
+      // Check if already verified
+      if (user.emailVerified) {
+        console.log(`[DEBUG] User ${user.email} is already verified`);
+        return res.json({ message: "Email is already verified! You can now log in." });
       }
 
       // Check if token has expired
       if (!user.emailVerificationExpires || new Date() > user.emailVerificationExpires) {
+        console.log(`[DEBUG] Token expired for user ${user.email}. Expires: ${user.emailVerificationExpires}, Now: ${new Date()}`);
         return res.status(400).json({ message: "Verification token has expired. Please request a new verification email." });
       }
 
       // Update user to be verified
+      console.log(`[DEBUG] Verifying email for user: ${user.email}`);
       await storage.verifyUserEmail(user.id);
 
+      console.log(`[DEBUG] Email verification successful for: ${user.email}`);
       res.json({ message: "Email verified successfully! You can now log in." });
     } catch (error) {
       console.error("Error verifying email:", error);

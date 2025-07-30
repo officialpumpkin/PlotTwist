@@ -2353,6 +2353,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug endpoint for checking story access
+  app.get('/api/debug/story-access/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      
+      console.log(`[DEBUG] Checking story access for story ${storyId}, user ${userId}`);
+      
+      const story = await storage.getStoryById(storyId);
+      const isParticipant = story ? await storage.isParticipant(storyId, userId) : false;
+      const participants = story ? await storage.getStoryParticipants(storyId) : [];
+      const segments = story ? await storage.getStorySegments(storyId) : [];
+      
+      res.json({
+        storyExists: !!story,
+        storyTitle: story?.title,
+        userIsParticipant: isParticipant,
+        userId,
+        participantCount: participants.length,
+        segmentCount: segments.length,
+        participants: participants.map(p => p.userId)
+      });
+      
+    } catch (error) {
+      console.error("Story access debug error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Debug endpoint for investigating specific stories
   app.get('/api/debug/story/:titleOrId', isAuthenticated, async (req: any, res) => {
     try {

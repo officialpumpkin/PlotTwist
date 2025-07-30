@@ -31,24 +31,45 @@ export default function ReadStoryModal({
   const [editingStoryMetadata, setEditingStoryMetadata] = useState(false);
   const { user } = useAuth();
 
-  const { data: story } = useQuery({
+  const { data: story, error: storyError } = useQuery({
     queryKey: [`/api/stories/${storyId}`],
-    enabled: open
+    enabled: open,
+    retry: 3
   });
 
-  const { data: segments, isLoading } = useQuery({
+  const { data: segments, isLoading, error: segmentsError } = useQuery({
     queryKey: [`/api/stories/${storyId}/segments`],
-    enabled: open
+    enabled: open && !!story,
+    retry: 3
   });
 
-  const { data: participants } = useQuery({
+  const { data: participants, error: participantsError } = useQuery({
     queryKey: [`/api/stories/${storyId}/participants`],
-    enabled: open
+    enabled: open && !!story,
+    retry: 3
   });
 
   // Type-safe data with fallbacks
   const safeSegments = Array.isArray(segments) ? segments : [];
   const safeParticipants = Array.isArray(participants) ? participants : [];
+
+  // Show error states
+  if (storyError) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <div className="text-center py-8">
+            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium mb-2">Story Not Found</h3>
+            <p className="text-muted-foreground mb-4">
+              Unable to load this story. You may not have permission to view it.
+            </p>
+            <Button onClick={() => onOpenChange(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   if (!story) return null;
 
@@ -124,7 +145,16 @@ export default function ReadStoryModal({
         {/* Story Content */}
         <div className="flex-1 overflow-y-auto bg-muted/30">
           <div className="max-w-3xl mx-auto p-6 space-y-6">
-            {isLoading ? (
+            {segmentsError ? (
+              <div className="text-center py-8">
+                <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">Error Loading Story</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {segmentsError.message || "Failed to load story content. Please try refreshing."}
+                </p>
+                <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+              </div>
+            ) : isLoading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                 <p className="text-sm text-muted-foreground mt-2">Loading story...</p>

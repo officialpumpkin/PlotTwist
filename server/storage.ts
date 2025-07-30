@@ -106,6 +106,10 @@ export interface IStorage {
   getSegmentById(id: number): Promise<any | undefined>;
   updateSegment(segmentId: number, updates: { content: string }): Promise<any>;
 
+  // Invitation status methods
+  getInviteStatus(storyId: number): Promise<{ joined: boolean; invitedAt: string }[]>;
+  sendInviteReminder(storyId: number): Promise<void>;
+
     // Get user with guaranteed fresh data (bypasses any potential caching)
     getUserFresh(userId: string): Promise<User | undefined>;
     // Method to ensure username consistency across all references
@@ -668,6 +672,97 @@ export class DatabaseStorage implements IStorage {
       }
 
       return corruptedStories;
+    }
+
+    // Get invitation status for a story
+    async getInviteStatus(storyId: number): Promise<{ joined: boolean; invitedAt: string }[]> {
+      const invitations = await db
+        .select()
+        .from(storyInvitations)
+        .where(eq(storyInvitations.storyId, storyId))
+        .orderBy(desc(storyInvitations.createdAt));
+
+      if (invitations.length === 0) {
+        throw new Error("NotFound");
+      }
+
+      const inviteStatuses = await Promise.all(
+        invitations.map(async (invitation) => {
+          // Check if the invitee has joined by checking if they are a participant
+          let joined = false;
+          if (invitation.inviteeId) {
+            joined = await this.isParticipant(storyId, invitation.inviteeId);
+          } else if (invitation.inviteeEmail) {
+            // For email invitations, check if someone with that email has joined
+            const user = await this.getUserByEmail(invitation.inviteeEmail);
+            if (user) {
+              joined = await this.isParticipant(storyId, user.id);
+            }
+          }
+
+          return {
+            joined,
+            invitedAt: invitation.createdAt?.toISOString() || new Date().toISOString(),
+            inviteeEmail: invitation.inviteeEmail,
+            inviteeId: invitation.inviteeId,
+            status: invitation.status
+          };
+        })
+      );
+
+      return inviteStatuses;
+    }
+
+    // Send invitation reminder
+    async sendInviteReminder(storyId: number): Promise<void> {
+      const invitations = await db
+        .select()
+        .from(storyInvitations)
+        .where(
+          and(
+            eq(storyInvitations.storyId, storyId),
+            eq(storyInvitations.status, "pending")
+          )
+        );
+
+      if (invitations.length === 0) {
+        throw new Error("NotFound");
+      }
+
+      const story = await this.getStoryById(storyId);
+      if (!story) {
+        throw new Error("Story not found");
+      }
+
+      const inviter = await this.getUser(story.creatorId);
+      if (!inviter) {
+        throw new Error("Story creator not found");
+      }
+
+      // Send reminders for all pending invitations
+      for (const invitation of invitations) {
+        try {
+          if (invitation.inviteeEmail) {
+            // Import the email service dynamically to avoid circular imports
+            const { sendStoryInvitationEmail } = await import('./emailService');
+            
+            const success = await sendStoryInvitationEmail(
+              invitation.inviteeEmail,
+              invitation.inviteeEmail.split('@')[0], // Use email prefix as name fallback
+              inviter.username || 'A collaborator',
+              story.title,
+              story.description || ''
+            );
+
+            if (!success) {
+              throw new Error(`Failed to send reminder email to ${invitation.inviteeEmail}`);
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to send reminder for invitation ${invitation.id}:`, error);
+          throw error;
+        }
+      }
     }
 }
 

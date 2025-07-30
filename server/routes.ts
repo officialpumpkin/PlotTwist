@@ -2299,6 +2299,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get invitation status for a story
+  app.get('/api/stories/:id/invite-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Only allow story creator to check invite status
+      if (story.creatorId !== userId) {
+        return res.status(403).json({ message: "Only the story creator can check invitation status" });
+      }
+
+      const inviteStatus = await storage.getInviteStatus(storyId);
+      res.json(inviteStatus);
+    } catch (error) {
+      if (error.message === "NotFound") {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      console.error("Error fetching invite status:", error);
+      res.status(500).json({ message: "Failed to fetch invitation status" });
+    }
+  });
+
+  // Send invitation reminder for a story
+  app.post('/api/stories/:id/invite-status/reminder', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Only allow story creator to send reminders
+      if (story.creatorId !== userId) {
+        return res.status(403).json({ message: "Only the story creator can send invitation reminders" });
+      }
+
+      await storage.sendInviteReminder(storyId);
+      res.json({ success: true });
+    } catch (error) {
+      if (error.message === "NotFound") {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+      console.error("Error sending invite reminder:", error);
+      res.status(500).json({ message: "Failed to send invitation reminder" });
+    }
+  });
+
   // Debug endpoint for investigating specific stories
   app.get('/api/debug/story/:titleOrId', isAuthenticated, async (req: any, res) => {
     try {

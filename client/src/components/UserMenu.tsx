@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
@@ -13,10 +13,17 @@ import LoginOptions from "./LoginOptions";
 
 
 export default function UserMenu() {
-  const [showLoginOptions, setShowLoginOptions] = useState(false);
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, refetch, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [profileImageKey, setProfileImageKey] = useState(0);
+
+  // Force re-render when user data changes
+  useEffect(() => {
+    if (user?.profileImageUrl) {
+      setProfileImageKey(prev => prev + 1);
+    }
+  }, [user?.profileImageUrl]);
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
@@ -91,11 +98,11 @@ export default function UserMenu() {
         align={window.innerWidth <= 768 ? "left" : "right"}
         trigger={
           <div className="flex items-center gap-2 cursor-pointer">
-            <Avatar className="h-8 w-8">
-              <AvatarImage
-                src={user?.profileImageUrl || ''}
-                alt={user?.username || 'User'}
-                key={user?.profileImageUrl} // Force re-render when image changes
+            <Avatar className="h-8 w-8" key={profileImageKey}>
+              <AvatarImage 
+                src={user?.profileImageUrl || ''} 
+                alt={user?.username || "User"}
+                key={`${user?.profileImageUrl}-${profileImageKey}`}
               />
               <AvatarFallback>
                 {getInitials()}

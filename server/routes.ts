@@ -1773,6 +1773,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Clear user cache
       await storage.refreshUserReferences(userId);
 
+      // Update session with new profile image URL
+      if (req.session?.user) {
+        req.session.user.profileImageUrl = updatedUser.profileImageUrl;
+        
+        // Save session to ensure it's persisted
+        await new Promise<void>((resolve, reject) => {
+          req.session.save((err: any) => {
+            if (err) {
+              console.error("Session save error after avatar update:", err);
+              reject(err);
+            } else {
+              console.log("Session updated with new avatar URL");
+              resolve();
+            }
+          });
+        });
+      }
+
       res.json({
         message: "Avatar updated successfully",
         profileImageUrl: updatedUser.profileImageUrl,

@@ -76,12 +76,22 @@ export default function AvatarUpload({
         description: "Your profile picture has been updated successfully.",
       });
       
+      // Invalidate all user-related queries to force refresh
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      
+      // Force a complete cache refresh for user data
+      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
       
       onUploadSuccess?.(data.profileImageUrl);
       setIsOpen(false);
       resetUpload();
+      
+      // Force a page refresh of user data after a short delay
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      }, 100);
     },
     onError: (error: any) => {
       toast({

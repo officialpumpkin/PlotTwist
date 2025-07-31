@@ -54,3 +54,27 @@ export async function checkStoryAccess(storyId: number): Promise<{
 }> {
   return apiRequest("GET", `/api/debug/story-access/${storyId}`);
 }
+import { queryClient } from "./queryClient";
+
+// Utility function to invalidate and refetch user-related data
+export const invalidateUserData = async () => {
+  await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+  await queryClient.invalidateQueries({ queryKey: ["/api/users/profile"] });
+  await queryClient.invalidateQueries({ queryKey: ["/api/users/settings"] });
+  
+  // Force refetch immediately
+  await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+};
+
+// Utility function to invalidate story-related data
+export const invalidateStoryData = async () => {
+  await queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
+  await queryClient.invalidateQueries({ queryKey: ["/api/my-turn"] });
+  await queryClient.invalidateQueries({ queryKey: ["/api/waiting-turn"] });
+};
+
+// Utility function to invalidate all user and story data
+export const invalidateAllUserRelatedData = async () => {
+  await invalidateUserData();
+  await invalidateStoryData();
+};

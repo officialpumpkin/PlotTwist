@@ -2148,6 +2148,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailVerified: user.emailVerified,
       });
 
+      // Update session with new user data for consistency
+      if (req.session?.user) {
+        req.session.user = {
+          ...req.session.user,
+          username: updatedUser.username,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+        };
+        
+        // Save session to ensure it's persisted
+        await new Promise<void>((resolve, reject) => {
+          req.session.save((err: any) => {
+            if (err) {
+              console.error("Session save error after profile update:", err);
+              reject(err);
+            } else {
+              console.log("Session updated with new profile data");
+              resolve();
+            }
+          });
+        });
+      }
+
       // If username was changed, refresh user references
       if (username && username !== user.username) {
         await storage.refreshUserReferences(userId);
@@ -2161,6 +2184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
           email: updatedUser.email,
+          profileImageUrl: updatedUser.profileImageUrl,
         },
       });
     } catch (error) {

@@ -25,6 +25,20 @@ export default function UserMenu() {
     }
   }, [user?.profileImageUrl]);
 
+  // Force refetch auth data when user data might have changed
+  useEffect(() => {
+    const handleStorageChange = () => {
+      refetch();
+    };
+
+    // Listen for storage events that might indicate user data changes
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [refetch]);
+
   const logoutMutation = useMutation({
     mutationFn: async () => {
       const response = await fetch('/api/auth/logout', {

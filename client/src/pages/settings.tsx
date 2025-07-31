@@ -130,6 +130,18 @@ export default function SettingsPage() {
     }
   }, [user]);
 
+  // Re-fetch user data after successful profile updates
+  useEffect(() => {
+    const fetchUserData = async () => {
+      await queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+    };
+
+    // Fetch user data again after updates
+    if (updateProfileMutation.isSuccess) {
+      fetchUserData();
+    }
+  }, [updateProfileMutation.isSuccess, queryClient]);
+
   // Reset mutation state when component mounts to avoid stale success states
   useEffect(() => {
     return () => {

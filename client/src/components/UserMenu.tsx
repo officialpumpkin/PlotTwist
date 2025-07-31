@@ -24,11 +24,11 @@ export default function UserMenu() {
         method: 'POST',
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error('Logout failed');
       }
-      
+
       return response.json();
     },
     onSuccess: () => {
@@ -95,6 +95,7 @@ export default function UserMenu() {
               <AvatarImage
                 src={user?.profileImageUrl || ''}
                 alt={user?.username || 'User'}
+                key={user?.profileImageUrl} // Force re-render when image changes
               />
               <AvatarFallback>
                 {getInitials()}

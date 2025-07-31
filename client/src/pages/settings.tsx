@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/dialog";
 
 import EditRequestsModal from "@/components/EditRequestsModal";
+import AvatarUpload from "@/components/AvatarUpload";
 import { 
   Trash2, 
   User, 
@@ -274,6 +275,29 @@ export default function SettingsPage() {
             </CardHeader>
 
             <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Profile Picture</h3>
+                <div className="flex items-center gap-4">
+                  <AvatarUpload
+                    currentImageUrl={user?.profileImageUrl}
+                    username={user?.username}
+                    onUploadSuccess={(newImageUrl) => {
+                      // The cache will be invalidated automatically by the AvatarUpload component
+                      toast({
+                        title: "Profile updated",
+                        description: "Your avatar has been updated successfully.",
+                      });
+                    }}
+                  />
+                  <div className="text-sm text-muted-foreground">
+                    Click on your avatar to change your profile picture.<br />
+                    Supported formats: JPEG, PNG, GIF (max 5MB)
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Profile Information</h3>
                 <form onSubmit={handleSubmitProfileChange} className="space-y-4">

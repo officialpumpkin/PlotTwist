@@ -1732,6 +1732,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Upload avatar
+  app.post('/api/users/avatar', isAuthenticated, upload.single('avatar'), async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      // Get current user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Delete old avatar file if it exists and is not a default/external image
+      if (user.profileImageUrl && user.profileImageUrl.startsWith('/uploads/')) {
+        const oldFilePath = path.join(uploadDir, path.basename(user.profileImageUrl));
+        try {
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        } catch (error) {
+          console.warn("Failed to delete old avatar file:", error);
+        }
+      }
+
+      // Get new image file path
+      const imagePath = "/uploads/" + req.file.filename;
+
+      // Update user profile with new avatar
+      const updatedUser = await storage.upsertUser({
+        id: userId,
+        email: user.email,
+        profileImageUrl: imagePath,
+        emailVerified: user.emailVerified,
+      });
+
+      // Clear user cache
+      await storage.refreshUserReferences(userId);
+
+      res.json({
+        message: "Avatar updated successfully",
+        profileImageUrl: updatedUser.profileImageUrl,
+      });
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      res.status(500).json({ message: "Failed to upload avatar" });
+    }
+  });
+
   // Get images for a story
   app.get('/api/stories/:id/images', async (req, res) => {
     try {
@@ -2615,6 +2666,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
+  });
+
+  // Serve uploaded files
+  app.use('/uploads', (req, res, next) => {
+    // Add CORS headers for uploaded files
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+  });
+
+  app.use('/uploads', (req, res, next) => {
+    const express = require('express');
+    express.static(uploadDir)(req, res, next);
   });
 
   // Create HTTP server

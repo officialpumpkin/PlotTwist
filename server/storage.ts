@@ -189,29 +189,83 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    // Use a proper database upsert with conflict resolution
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: [users.email],
-        set: {
-          id: userData.id,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          username: userData.username,
-          password: userData.password,
-          emailVerified: userData.emailVerified,
-          emailVerificationToken: userData.emailVerificationToken,
-          passwordResetToken: userData.passwordResetToken,
-          passwordResetExpires: userData.passwordResetExpires,
-          passwordLastChanged: userData.passwordLastChanged,
+    // For updates with existing ID, do a targeted update
+    if (userData.id) {
+      const existingUser = await this.getUser(userData.id);
+      
+      if (existingUser) {
+        // User exists, perform update only on provided fields
+        const updateFields: any = {
           updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+        };
+        
+        // Only include fields that are explicitly provided (not undefined)
+        if (userData.firstName !== undefined) updateFields.firstName = userData.firstName;
+        if (userData.lastName !== undefined) updateFields.lastName = userData.lastName;
+        if (userData.profileImageUrl !== undefined) updateFields.profileImageUrl = userData.profileImageUrl;
+        if (userData.username !== undefined) updateFields.username = userData.username;
+        if (userData.password !== undefined) updateFields.password = userData.password;
+        if (userData.emailVerified !== undefined) updateFields.emailVerified = userData.emailVerified;
+        if (userData.emailVerificationToken !== undefined) updateFields.emailVerificationToken = userData.emailVerificationToken;
+        if (userData.emailVerificationExpires !== undefined) updateFields.emailVerificationExpires = userData.emailVerificationExpires;
+        if (userData.passwordResetToken !== undefined) updateFields.passwordResetToken = userData.passwordResetToken;
+        if (userData.passwordResetExpires !== undefined) updateFields.passwordResetExpires = userData.passwordResetExpires;
+        if (userData.passwordLastChanged !== undefined) updateFields.passwordLastChanged = userData.passwordLastChanged;
+        
+        const [user] = await db
+          .update(users)
+          .set(updateFields)
+          .where(eq(users.id, userData.id))
+          .returning();
+          
+        // Clear cache for this user
+        this.getUserCached.clear(user.id);
+        
+        return user;
+      }
+    }
+    
+    // For new users or when updating by email, use upsert behavior
+    const existingUser = await this.getUserByEmail(userData.email!);
+    
+    if (existingUser) {
+      // User exists, perform update only on provided fields
+      const updateFields: any = {
+        updatedAt: new Date(),
+      };
+      
+      // Only include fields that are explicitly provided (not undefined)
+      if (userData.id !== undefined) updateFields.id = userData.id;
+      if (userData.firstName !== undefined) updateFields.firstName = userData.firstName;
+      if (userData.lastName !== undefined) updateFields.lastName = userData.lastName;
+      if (userData.profileImageUrl !== undefined) updateFields.profileImageUrl = userData.profileImageUrl;
+      if (userData.username !== undefined) updateFields.username = userData.username;
+      if (userData.password !== undefined) updateFields.password = userData.password;
+      if (userData.emailVerified !== undefined) updateFields.emailVerified = userData.emailVerified;
+      if (userData.emailVerificationToken !== undefined) updateFields.emailVerificationToken = userData.emailVerificationToken;
+      if (userData.emailVerificationExpires !== undefined) updateFields.emailVerificationExpires = userData.emailVerificationExpires;
+      if (userData.passwordResetToken !== undefined) updateFields.passwordResetToken = userData.passwordResetToken;
+      if (userData.passwordResetExpires !== undefined) updateFields.passwordResetExpires = userData.passwordResetExpires;
+      if (userData.passwordLastChanged !== undefined) updateFields.passwordLastChanged = userData.passwordLastChanged;
+      
+      const [user] = await db
+        .update(users)
+        .set(updateFields)
+        .where(eq(users.email, userData.email!))
+        .returning();
+        
+      // Clear cache for this user
+      this.getUserCached.clear(user.id);
+      
+      return user;
+    } else {
+      // User doesn't exist, create new user
+      const [user] = await db
+        .insert(users)
+        .values(userData)
+        .returning();
+      return user;
+    }
   }
 
   // Story operations

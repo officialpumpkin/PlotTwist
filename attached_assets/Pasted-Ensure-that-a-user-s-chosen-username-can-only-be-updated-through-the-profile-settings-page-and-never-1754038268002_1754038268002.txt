@@ -1,0 +1,37 @@
+Ensure that a user’s chosen username can only be updated through the profile settings page and never during login or OAuth.
+
+Changes required:
+
+    Add an allowUsernameUpdate (or forceUsernameUpdate) flag to the UpsertUser type and to the upsertUser function in server/storage.ts.
+
+        The upsertUser function currently updates username whenever userData.username is provided
+        GitHub
+        . Modify it so that when updating an existing user (userData.id is set) it ignores the username field unless userData.allowUsernameUpdate is true. This means the username will remain unchanged in all other cases.
+
+        Update the type definition of UpsertUser so it optionally includes allowUsernameUpdate?: boolean.
+
+    Update the profile edit route in server/routes.ts so that when calling storage.upsertUser, it passes allowUsernameUpdate: true. For example:
+
+    const updatedUser = await storage.upsertUser({
+      id: userId,
+      ...updateData,
+      email: user.email,
+      emailVerified: user.emailVerified,
+      allowUsernameUpdate: true
+    });
+
+    This ensures the username can still be changed through the settings page.
+
+    Update all other calls to storage.upsertUser (e.g., in server/replitAuth.ts and the generic OIDC upsertUser function) so they do not set allowUsernameUpdate. For existing users, omit the username field entirely or explicitly set username: existingUser.username before calling storage.upsertUser. This prevents the login process from overwriting a custom username.
+
+        In upsertGoogleUser, when updating an existing local user, remove username: username || existingUser.username from the upsertUser call. Instead, set username: existingUser.username and omit allowUsernameUpdate.
+
+        In the OIDC verify function (still in server/replitAuth.ts), keep calling upsertUser(tokens.claims()) but without a username field so it does not get updated.
+
+    Test the change:
+
+        Use an account registered via email/password. Change its username on the profile page, log out, and log back in with the same email/password. The username should stick.
+
+        Repeat with an account originally created via Google or another OAuth provider and then switched to email login. Change the username, log out, and log back in using the original login method. The username should remain unchanged.
+
+By adding this explicit flag, only the profile update route can modify the username. Logging in—whether via email, Google, or Replit Auth—will no longer accidentally derive or revert the username based on the email address or OAuth claims.

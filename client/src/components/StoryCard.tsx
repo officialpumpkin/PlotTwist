@@ -191,21 +191,21 @@ export default function StoryCard({
               <div className="mt-1">
                 {status === "Your Turn" ? (
                   <p className="text-xs text-primary font-medium">
-                    It's your turn to contribute
+                    Your Turn
                   </p>
                 ) : status === "Waiting" && waitingUser ? (
                   <p className="text-xs text-muted-foreground">
-                    Waiting for <span className="font-medium text-foreground">
+                    <span className="font-medium text-foreground">
                       {waitingUser.firstName || waitingUser.username}
-                    </span> to contribute
+                    </span>'s turn
                   </p>
                 ) : status === "Active" && variant === "explore" ? (
                   <p className="text-xs text-muted-foreground">
-                    Story is actively being written
+                    Active story
                   </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">
-                    Waiting for next contribution
+                    Waiting for turn
                   </p>
                 )}
               </div>

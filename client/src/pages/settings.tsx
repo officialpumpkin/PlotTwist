@@ -98,16 +98,39 @@ export default function SettingsPage() {
   // Mutations
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => apiRequest("PATCH", "/api/users/profile", data),
-    onSuccess: () => {
+    onSuccess: (response, variables) => {
+      // Immediately update the profile data state
+      setProfileData(prev => ({
+        ...prev,
+        username: variables.username,
+        firstName: variables.firstName,
+        lastName: variables.lastName,
+        email: variables.email,
+      }));
+
+      // Update the cached user data immediately
+      queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            username: variables.username,
+            firstName: variables.firstName,
+            lastName: variables.lastName,
+            email: variables.email,
+          };
+        }
+        return oldData;
+      });
+
+      // Clear stale queries and force refetch to ensure all components get updated data
+      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
-      // Invalidate both user profile and auth cache
-      queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      // Force refetch of auth user data
-      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
     },
     onError: (error: any) => {
       toast({

@@ -2749,10 +2749,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
-  app.use('/uploads', (req, res, next) => {
-    const express = require('express');
-    express.static(uploadDir)(req, res, next);
-  });
+  app.use('/uploads', express.static(uploadDir));
 
   // Create HTTP server
   const server = createServer(app);

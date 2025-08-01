@@ -258,99 +258,170 @@ export default function StoryCard({
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-5">
-          <div className="flex items-center space-x-1 overflow-x-auto max-w-[200px]">
-            {participants?.map((participant, index) => {
-              const isAuthor = participant.userId === story.creatorId;
-              const hasContributed = segments?.some(segment => segment.userId === participant.userId);
-              const isCurrentTurn = participant.userId === waitingUserId || (status === "Your Turn" && participant.userId === user?.id);
+        {/* Participants Section */}
+        <div className="mt-5">
+          <div className="flex items-center justify-start">
+            <div className="flex items-center space-x-1">
+              {participants && (() => {
+                // Find current turn user
+                const currentTurnUser = participants.find(p => 
+                  p.userId === waitingUserId || (status === "Your Turn" && p.userId === user?.id)
+                );
+                
+                // Filter out current turn user from others
+                const otherParticipants = participants.filter(p => 
+                  p.userId !== currentTurnUser?.userId
+                );
 
-              return (
-                <div key={participant.userId} className="flex items-center space-x-1 flex-shrink-0">
-                  <HoverCard>
-                    <HoverCardTrigger asChild>
-                      <div className="relative">
-                        <Avatar className={cn(
-                          "w-6 h-6 cursor-pointer hover:scale-110 transition-transform border-2",
-                          isCurrentTurn ? "border-primary ring-2 ring-primary/20" : "border-white"
-                        )}>
-                          {participant.user?.profileImageUrl ? (
-                            <AvatarImage 
-                              src={participant.user.profileImageUrl} 
-                              alt={`${participant.user.firstName || participant.user.username}`} 
-                              className="object-cover"
-                            />
-                          ) : (
-                            <AvatarFallback className="text-xs">
-                              {participant.user?.firstName?.[0] || participant.user?.username?.[0] || '?'}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        {isCurrentTurn && (
-                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full flex items-center justify-center">
-                            <ArrowRightIcon className="w-2 h-2 text-white" />
-                          </div>
-                        )}
+                return (
+                  <>
+                    {/* Current turn user - always first (bottom left) */}
+                    {currentTurnUser && (
+                      <div className="flex flex-col items-center space-y-1">
+                        {/* Turn indicator above avatar */}
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                        <HoverCard>
+                          <HoverCardTrigger asChild>
+                            <Avatar className="w-7 h-7 cursor-pointer hover:scale-110 transition-transform border-2 border-primary ring-2 ring-primary/20">
+                              {currentTurnUser.user?.profileImageUrl ? (
+                                <AvatarImage 
+                                  src={currentTurnUser.user.profileImageUrl} 
+                                  alt={`${currentTurnUser.user.firstName || currentTurnUser.user.username}`} 
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <AvatarFallback className="text-xs">
+                                  {currentTurnUser.user?.firstName?.[0] || currentTurnUser.user?.username?.[0] || '?'}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                          </HoverCardTrigger>
+                          <HoverCardContent className="w-48" side="top" align="start" sideOffset={8}>
+                            <div className="space-y-2">
+                              <div className="flex items-center space-x-2">
+                                <Avatar className="w-8 h-8">
+                                  {currentTurnUser.user?.profileImageUrl ? (
+                                    <AvatarImage 
+                                      src={currentTurnUser.user.profileImageUrl} 
+                                      alt={`${currentTurnUser.user.firstName || currentTurnUser.user.username}`} 
+                                      className="object-cover"
+                                    />
+                                  ) : (
+                                    <AvatarFallback className="text-xs">
+                                      {currentTurnUser.user?.firstName?.[0] || currentTurnUser.user?.username?.[0] || '?'}
+                                    </AvatarFallback>
+                                  )}
+                                </Avatar>
+                                <div>
+                                  <p className="text-sm font-medium">
+                                    {currentTurnUser.user?.firstName || currentTurnUser.user?.username || 'Unknown User'}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    @{currentTurnUser.user?.username || 'unknown'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                  Current Turn
+                                </span>
+                                {currentTurnUser.userId === story.creatorId && (
+                                  <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                    Author
+                                  </span>
+                                )}
+                                {segments?.some(segment => segment.userId === currentTurnUser.userId) && (
+                                  <span className="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full">
+                                    Contributor
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </HoverCardContent>
+                        </HoverCard>
                       </div>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-48" side="top" align="start" sideOffset={8}>
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Avatar className="w-8 h-8">
-                            {participant.user?.profileImageUrl ? (
-                              <AvatarImage 
-                                src={participant.user.profileImageUrl} 
-                                alt={`${participant.user.firstName || participant.user.username}`} 
-                                className="object-cover"
-                              />
-                            ) : (
-                              <AvatarFallback className="text-xs">
-                                {participant.user?.firstName?.[0] || participant.user?.username?.[0] || '?'}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-medium">
-                              {participant.user?.firstName || participant.user?.username || 'Unknown User'}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              @{participant.user?.username || 'unknown'}
-                            </p>
-                          </div>
+                    )}
+
+                    {/* Other participants */}
+                    {otherParticipants.map((participant) => {
+                      const isAuthor = participant.userId === story.creatorId;
+                      const hasContributed = segments?.some(segment => segment.userId === participant.userId);
+
+                      return (
+                        <div key={participant.userId} className="ml-2">
+                          <HoverCard>
+                            <HoverCardTrigger asChild>
+                              <Avatar className="w-6 h-6 cursor-pointer hover:scale-110 transition-transform border-2 border-white">
+                                {participant.user?.profileImageUrl ? (
+                                  <AvatarImage 
+                                    src={participant.user.profileImageUrl} 
+                                    alt={`${participant.user.firstName || participant.user.username}`} 
+                                    className="object-cover"
+                                  />
+                                ) : (
+                                  <AvatarFallback className="text-xs">
+                                    {participant.user?.firstName?.[0] || participant.user?.username?.[0] || '?'}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-48" side="top" align="start" sideOffset={8}>
+                              <div className="space-y-2">
+                                <div className="flex items-center space-x-2">
+                                  <Avatar className="w-8 h-8">
+                                    {participant.user?.profileImageUrl ? (
+                                      <AvatarImage 
+                                        src={participant.user.profileImageUrl} 
+                                        alt={`${participant.user.firstName || participant.user.username}`} 
+                                        className="object-cover"
+                                      />
+                                    ) : (
+                                      <AvatarFallback className="text-xs">
+                                        {participant.user?.firstName?.[0] || participant.user?.username?.[0] || '?'}
+                                      </AvatarFallback>
+                                    )}
+                                  </Avatar>
+                                  <div>
+                                    <p className="text-sm font-medium">
+                                      {participant.user?.firstName || participant.user?.username || 'Unknown User'}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      @{participant.user?.username || 'unknown'}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {isAuthor && (
+                                    <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                                      Author
+                                    </span>
+                                  )}
+                                  {hasContributed && (
+                                    <span className="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full">
+                                      Contributor
+                                    </span>
+                                  )}
+                                  {!hasContributed && !isAuthor && (
+                                    <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                      Participant
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </HoverCardContent>
+                          </HoverCard>
                         </div>
-                        <div className="flex flex-wrap gap-1">
-                          {isCurrentTurn && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                              Current Turn
-                            </span>
-                          )}
-                          {isAuthor && (
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                              Author
-                            </span>
-                          )}
-                          {hasContributed && (
-                            <span className="text-xs bg-secondary/10 text-secondary px-2 py-1 rounded-full">
-                              Contributor
-                            </span>
-                          )}
-                          {!hasContributed && !isAuthor && (
-                            <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                              Participant
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </HoverCardContent>
-                  </HoverCard>
-                  {index < participants.length - 1 && (
-                    <ArrowRightIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                  )}
-                </div>
-              );
-            })}
+                      );
+                    })}
+                  </>
+                );
+              })()}
+            </div>
           </div>
+        </div>
 
+        <div className="flex items-center justify-between mt-4">
+          <div></div>
           <div className="flex space-x-2">
             {/* Continue Writing button - only visible if it's user's turn */}
             {status === "Your Turn" && onContinue && (

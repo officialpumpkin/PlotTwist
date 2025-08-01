@@ -225,10 +225,7 @@ body.theme-fade::before {
   background-color: hsl(240, 8%, 40%);
 }
 
-.writing-modal-content {
-  margin: 0;
-  padding: 0;
-}
+/* Modal content styles */
 
 /* Contributor alternating text colors with stronger contrast and varying weights */
 .contributor-text-0 {
@@ -304,10 +301,7 @@ body.theme-fade::before {
   @apply mt-4 gap-2 flex-wrap;
 }
 
-/* Dialog content fix for rich text editor */
-.writing-modal-content {
-  @apply p-0 h-[95vh] overflow-auto;
-}
+/* Dialog content styles for modals */
 
 /* Counter styles */
 .word-counter {

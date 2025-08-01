@@ -224,7 +224,7 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl p-0 h-[95vh] flex flex-col writing-modal-content" aria-describedby="writing-modal-description">
+      <DialogContent className="sm:max-w-4xl p-0 h-[90vh] flex flex-col" aria-describedby="writing-modal-description">
         <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
         <h2 className="sr-only">Story Writing Interface</h2>
 
@@ -326,8 +326,8 @@ export default function WritingModal({
           </div>
 
           {/* Scrollable Story Content - takes remaining space minus header and input form */}
-          <div className="overflow-y-auto bg-muted/30 flex-grow">
-            <div className="p-4 max-w-3xl mx-auto space-y-4">
+          <div className="flex-1 overflow-y-auto bg-muted/30">
+            <div className="max-w-3xl mx-auto p-6 space-y-6">
               {/* Story content - continuous flow */}
               
                 <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">

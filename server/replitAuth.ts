@@ -78,12 +78,17 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  // Check if user already exists to preserve their username
+  const existingUser = await storage.getUserByEmail(claims["email"]);
+  
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
+    // Preserve existing username if user exists, don't set allowUsernameUpdate
+    username: existingUser?.username,
   });
 }
 
@@ -138,6 +143,7 @@ async function upsertGoogleUser(
       lastName: profile.name?.familyName || existingUser.lastName,
       profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,
       emailVerified: true, // Mark as verified since Google verified it
+      // Do not set allowUsernameUpdate - username should not change during OAuth login
     });
     
     return existingUser.id; // Return the existing user ID

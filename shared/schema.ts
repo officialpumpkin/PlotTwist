@@ -309,7 +309,9 @@ export const storyEditRequestsRelations = relations(storyEditRequests, ({ one })
 
 // Insert schemas
 export const upsertUserSchema = createInsertSchema(users);
-export type UpsertUser = z.infer<typeof upsertUserSchema>;
+export type UpsertUser = z.infer<typeof upsertUserSchema> & {
+  allowUsernameUpdate?: boolean;
+};
 export type User = typeof users.$inferSelect;
 
 export const insertStorySchema = createInsertSchema(stories).omit({ id: true });

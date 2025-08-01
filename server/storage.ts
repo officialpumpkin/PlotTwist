@@ -203,7 +203,8 @@ export class DatabaseStorage implements IStorage {
         if (userData.firstName !== undefined) updateFields.firstName = userData.firstName;
         if (userData.lastName !== undefined) updateFields.lastName = userData.lastName;
         if (userData.profileImageUrl !== undefined) updateFields.profileImageUrl = userData.profileImageUrl;
-        if (userData.username !== undefined) updateFields.username = userData.username;
+        // Only update username if explicitly allowed
+        if (userData.username !== undefined && userData.allowUsernameUpdate === true) updateFields.username = userData.username;
         if (userData.password !== undefined) updateFields.password = userData.password;
         if (userData.emailVerified !== undefined) updateFields.emailVerified = userData.emailVerified;
         if (userData.emailVerificationToken !== undefined) updateFields.emailVerificationToken = userData.emailVerificationToken;
@@ -239,7 +240,8 @@ export class DatabaseStorage implements IStorage {
       if (userData.firstName !== undefined) updateFields.firstName = userData.firstName;
       if (userData.lastName !== undefined) updateFields.lastName = userData.lastName;
       if (userData.profileImageUrl !== undefined) updateFields.profileImageUrl = userData.profileImageUrl;
-      if (userData.username !== undefined) updateFields.username = userData.username;
+      // Only update username if explicitly allowed
+      if (userData.username !== undefined && userData.allowUsernameUpdate === true) updateFields.username = userData.username;
       if (userData.password !== undefined) updateFields.password = userData.password;
       if (userData.emailVerified !== undefined) updateFields.emailVerified = userData.emailVerified;
       if (userData.emailVerificationToken !== undefined) updateFields.emailVerificationToken = userData.emailVerificationToken;

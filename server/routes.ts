@@ -280,6 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...user,
         emailVerificationToken: verificationToken,
         emailVerificationExpires: verificationExpires,
+        // Do not set allowUsernameUpdate - email verification should not change username
       });
 
       // Send verification email
@@ -330,6 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...user,
         passwordResetToken: resetToken,
         passwordResetExpires: new Date(Date.now() + 3600000), // 1 hour expiry
+        // Do not set allowUsernameUpdate - password reset token should not change username
       });
 
       // Send password reset email
@@ -598,7 +600,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         password: hashedPassword,
         passwordResetToken: null,
         passwordResetExpires: null,
-        passwordLastChanged: new Date()
+        passwordLastChanged: new Date(),
+        // Do not set allowUsernameUpdate - password reset should not change username
       });
 
       res.json({ message: "Password reset successfully! You can now log in with your new password." });
@@ -1768,6 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: user.email,
         profileImageUrl: imagePath,
         emailVerified: user.emailVerified,
+        // Do not set allowUsernameUpdate - avatar upload should not change username
       });
 
       // Clear user cache
@@ -2146,6 +2150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...updateData,
         email: user.email,
         emailVerified: user.emailVerified,
+        allowUsernameUpdate: true, // Allow username updates only from profile settings
       });
 
       // Update session with new user data for consistency
@@ -2685,6 +2690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         emailVerificationToken: null,
         passwordResetToken: null,
         password: null,
+        allowUsernameUpdate: true, // Allow username change for account deletion
       });
 
       console.log(`Successfully deleted account for user: ${userId}`);

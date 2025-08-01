@@ -188,12 +188,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const host = req.get('host');
       let baseUrl;
       if (host && host.includes('replit.dev')) {
-        baseUrl = 'https://' + host;
+        baseUrl = `https://${host}`;
       } else {
         // Fallback for development or if host is not available
         baseUrl = process.env.REPLIT_DOMAINS 
-          ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] 
-          : req.protocol + '://' + host;
+          ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+          : `${req.protocol}://${host}`;
       }
       console.log("Using baseUrl for verification: " + baseUrl);
       sendEmailVerification(email, username, verificationToken, baseUrl).catch(error => {
@@ -307,12 +307,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const host = req.get('host');
       let baseUrl;
       if (host && host.includes('replit.dev')) {
-        baseUrl = 'https://' + host;
+        baseUrl = `https://${host}`;
       } else {
         // Fallback for development or if host is not available
         baseUrl = process.env.REPLIT_DOMAINS 
-          ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0] 
-          : req.protocol + '://' + host;
+          ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+          : `${req.protocol}://${host}`;
       }
 
       console.log("Using baseUrl for password reset: " + baseUrl);
@@ -473,7 +473,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { token } = req.query;
 
-      console.log('[DEBUG] Email verification attempt with token: ' + token);
+      console.log(`[DEBUG] Email verification attempt with token: ${token}`);
 
       if (!token || typeof token !== 'string') {
         console.log("[DEBUG] No token provided or invalid token format");
@@ -483,29 +483,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Find user by verification token
       const user = await storage.getUserByVerificationToken(token);
       if (!user) {
-        console.log('[DEBUG] No user found with verification token: ' + token);
+        console.log(`[DEBUG] No user found with verification token: ${token}`);
         return res.status(400).json({ message: "Invalid or expired verification token" });
       }
 
-      console.log('[DEBUG] User found: ' + user.email + ', already verified: ' + user.emailVerified);
+      console.log(`[DEBUG] User found: ${user.email}, already verified: ${user.emailVerified}`);
 
       // Check if already verified
       if (user.emailVerified) {
-        console.log('[DEBUG] User ' + user.email + ' is already verified');
+        console.log(`[DEBUG] User ${user.email} is already verified`);
         return res.json({ message: "Email is already verified! You can now log in." });
       }
 
       // Check if token has expired
       if (!user.emailVerificationExpires || new Date() > user.emailVerificationExpires) {
-        console.log('[DEBUG] Token expired for user ' + user.email + '. Expires: ' + user.emailVerificationExpires + ', Now: ' + new Date());
+        console.log(`[DEBUG] Token expired for user ${user.email}. Expires: ${user.emailVerificationExpires}, Now: ${new Date()}`);
         return res.status(400).json({ message: "Verification token has expired. Please request a new verification email." });
       }
 
       // Update user to be verified
-      console.log('[DEBUG] Verifying email for user: ' + user.email);
+      console.log(`[DEBUG] Verifying email for user: ${user.email}`);
       await storage.verifyUserEmail(user.id);
 
-      console.log('[DEBUG] Email verification successful for: ' + user.email);
+      console.log(`[DEBUG] Email verification successful for: ${user.email}`);
       res.json({ message: "Email verified successfully! You can now log in." });
     } catch (error) {
       console.error("Error verifying email:", error);
@@ -682,22 +682,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/my-stories', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      console.log('[DEBUG] Getting stories for user: ' + userId);
+      console.log(`[DEBUG] Getting stories for user: ${userId}`);
 
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
-      console.log('[DEBUG] Total stories in database: ' + allStories.length);
+      console.log(`[DEBUG] Total stories in database: ${allStories.length}`);
 
       const participantStories = [];
 
       for (const story of allStories) {
         const isParticipant = await storage.isParticipant(story.id, userId);
-        console.log('[DEBUG] Story "' + story.title + '" (ID: ' + story.id + '): isParticipant = ' + isParticipant);
+        console.log(`[DEBUG] Story "${story.title}" (ID: ${story.id}): isParticipant = ${isParticipant}`);
 
         if (isParticipant) {
           // Get turn information for each story
           const turn = await storage.getStoryTurn(story.id);
-          console.log('[DEBUG] Story "' + story.title + '" turn info:', turn);
+          console.log(`[DEBUG] Story "${story.title}" turn info:`, turn);
 
           participantStories.push({
             ...story,
@@ -707,7 +707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      console.log('[DEBUG] Final participant stories for user: ' + participantStories.length);
+      console.log(`[DEBUG] Final participant stories for user: ${participantStories.length}`);
       res.json(participantStories);
     } catch (error) {
       console.error("Error fetching user stories:", error);
@@ -719,7 +719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/my-turn', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      console.log('[DEBUG] Getting my-turn stories for user: ' + userId);
+      console.log(`[DEBUG] Getting my-turn stories for user: ${userId}`);
 
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
@@ -732,22 +732,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      console.log('[DEBUG] User participates in ' + participantStories.length + ' stories');
+      console.log(`[DEBUG] User participates in ${participantStories.length} stories`);
 
       // Get turns for these stories where it's the user's turn
       const myTurnStories = [];
 
       for (const story of participantStories) {
         const turn = await storage.getStoryTurn(story.id);
-        console.log('[DEBUG] Story "' + story.title + '" (ID: ' + story.id + '): turn =', turn, 'isComplete = ' + story.isComplete);
+        console.log(`[DEBUG] Story "${story.title}" (ID: ${story.id}): turn =`, turn, `isComplete = ${story.isComplete}`);
 
         if (turn && turn.currentUserId === userId && !story.isComplete) {
-          console.log('[DEBUG] Adding "' + story.title + '" to my-turn stories');
+          console.log(`[DEBUG] Adding "${story.title}" to my-turn stories`);
           myTurnStories.push(story);
         }
       }
 
-      console.log('[DEBUG] Final my-turn stories: ' + myTurnStories.length);
+      console.log(`[DEBUG] Final my-turn stories: ${myTurnStories.length}`);
       res.json(myTurnStories);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -895,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } : null,
           };
         })
-
+```tool_code
       );
 
       res.json(requestsWithDetails);
@@ -1168,16 +1168,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt: expirationDate
           });
 
-          // Send real-time notification
-          const notificationService = req.app.get('notificationService');
-          if (notificationService) {
-            const inviter = await storage.getUser(inviterId);
-            notificationService.sendInvitationNotification(inviteeUser.id, {
-              ...invitation,
-              story: { id: story.id, title: story.title },
-              inviter: { id: inviter?.id, username: inviter?.username }
-            });
-          }
+      // Send real-time notification
+      const notificationService = req.app.get('notificationService');
+      if (notificationService) {
+        const inviter = await storage.getUser(inviterId);
+        notificationService.sendInvitationNotification(inviteeUser.id, {
+          ...invitation,
+          story: { id: story.id, title: story.title },
+          inviter: { id: inviter?.id, username: inviter?.username }
+        });
+      }
 
           // Send invitation email
           const inviter = await storage.getUser(inviterId);
@@ -1186,11 +1186,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const host = req.get('host');
             let baseUrl;
             if (host && host.includes('replit.dev')) {
-              baseUrl = 'https://' + host;
+              baseUrl = `https://${host}`;
             } else {
               baseUrl = process.env.REPLIT_DOMAINS 
-                ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0]
-                : req.protocol + '://' + host;
+                ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+                : `${req.protocol}://${host}`;
             }
 
             sendStoryInvitationEmail(
@@ -1228,11 +1228,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const host = req.get('host');
             let baseUrl;
             if (host && host.includes('replit.dev')) {
-              baseUrl = 'https://' + host;
+              baseUrl = `https://${host}`;
             } else {
               baseUrl = process.env.REPLIT_DOMAINS 
-                ? 'https://' + process.env.REPLIT_DOMAINS.split(',')[0]
-                : req.protocol + '://' + host;
+                ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+                : `${req.protocol}://${host}`;
             }
 
             sendStoryInvitationEmail(
@@ -1288,16 +1288,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expiresAt: expirationDate
         });
 
-        // Send real-time notification
-        const notificationService = req.app.get('notificationService');
-        if (notificationService) {
-          const inviter = await storage.getUser(inviterId);
-          notificationService.sendInvitationNotification(inviteeUser.id, {
-            ...invitation,
-            story: { id: story.id, title: story.title },
-            inviter: { id: inviter?.id, username: inviter?.username }
-          });
-        }
+      // Send real-time notification
+      const notificationService = req.app.get('notificationService');
+      if (notificationService) {
+        const inviter = await storage.getUser(inviterId);
+        notificationService.sendInvitationNotification(inviteeUser.id, {
+          ...invitation,
+          story: { id: story.id, title: story.title },
+          inviter: { id: inviter?.id, username: inviter?.username }
+        });
+      }
 
         res.status(201).json({ 
             message: username + " has been invited to the story",
@@ -1618,7 +1618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const nextUser = await storage.getUser(nextUserId);
 
         res.json({ 
-          message: 'Skipped ' + (skippedUser?.username || 'user') + "'s turn",
+          message: `Skipped ${skippedUser?.username || 'user'}'s turn`,
           nextUserId,
           nextUsername: nextUser?.username,
           currentTurn: turn.currentTurn + 1
@@ -1785,7 +1785,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.unlinkSync(oldFilePath);
           }
         } catch (error) {
-          console.warn("Failed to delete old avatar file:", error);
+          console.warn("Failed to delete old```tool_code
+ avatar file:", error);
         }
       }
 
@@ -2500,7 +2501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const storyId = parseInt(req.params.id);
       const userId = req.session?.userId || req.user?.claims?.sub;
 
-      console.log('[DEBUG] Checking story access for story ' + storyId + ', user ' + userId);
+      console.log(`[DEBUG] Checking story access for story ${storyId}, user ${userId}`);
 
       const story = await storage.getStoryById(storyId);
       const isParticipant = story ? await storage.isParticipant(storyId, userId) : false;
@@ -2529,7 +2530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session?.userId || req.user?.claims?.sub;
       const titleOrId = req.params.titleOrId;
 
-      console.log('[DEBUG] Investigating story: ' + titleOrId + ' for user: ' + userId);
+      console.log(`[DEBUG] Investigating story: ${titleOrId} for user: ${userId}`);
 
       // Try to find story by title or ID
       const allStories = await storage.getStories();
@@ -2549,23 +2550,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Story not found", searched: titleOrId });
       }
 
-      console.log('[DEBUG] Found story:', targetStory);
+      console.log(`[DEBUG] Found story:`, targetStory);
 
       // Check participation
       const isParticipant = await storage.isParticipant(targetStory.id, userId);
-      console.log('[DEBUG] User is participant: ' + isParticipant);
+      console.log(`[DEBUG] User is participant: ${isParticipant}`);
 
       // Get participants
       const participants = await storage.getStoryParticipants(targetStory.id);
-      console.log('[DEBUG] All participants:', participants);
+      console.log(`[DEBUG] All participants:`, participants);
 
       // Get turn info
       const turn = await storage.getStoryTurn(targetStory.id);
-      console.log('[DEBUG] Turn info:', turn);
+      console.log(`[DEBUG] Turn info:`, turn);
 
       // Get segments
       const segments = await storage.getStorySegments(targetStory.id);
-      console.log('[DEBUG] Segments count: ' + segments.length);
+      console.log(`[DEBUG] Segments count: ${segments.length}`);
 
       res.json({
         story: targetStory,
@@ -2603,9 +2604,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const participants = await storage.getStoryParticipants(storyId);
       const turn = await storage.getStoryTurn(storyId);
 
-      console.log('[DEBUG] Fixing turn for story ' + storyId);
-      console.log('[DEBUG] Participants:', participants.map(p => p.userId));
-      console.log('[DEBUG] Current turn:', turn);
+      console.log(`[DEBUG] Fixing turn for story ${storyId}`);
+      console.log(`[DEBUG] Participants:`, participants.map(p => p.userId));
+      console.log(`[DEBUG] Current turn:`, turn);
 
       if (participants.length === 0) {
         return res.status(400).json({ message: "Story has no participants" });
@@ -2630,7 +2631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        console.log('[DEBUG] Fixed turn assignment for story ' + storyId + ' to user ' + newCurrentUserId);
+        console.log(`[DEBUG] Fixed turn assignment for story ${storyId} to user ${newCurrentUserId}`);
 
         res.json({ 
           message: "Turn assignment fixed",
@@ -2666,48 +2667,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      console.log('Starting account deletion for user: ' + userId + ' (' + user.email + ')');
+      console.log(`Starting account deletion for user: ${userId} (${user.email})`);
 
       // Begin transaction-like deletion process
       // 1. Remove from story participants
       await db.delete(storyParticipants).where(eq(storyParticipants.userId, userId));
-      console.log('Removed story participations for user: ' + userId);
+      console.log(`Removed story participations for user: ${userId}`);
 
       // 2. Remove story segments (contributions)
       await db.delete(storySegments).where(eq(storySegments.userId, userId));
-      console.log('Removed story segments for user: ' + userId);
+      console.log(`Removed story segments for user: ${userId}`);
 
       // 3. Update story turns to remove user references
       await db.delete(storyTurns).where(eq(storyTurns.currentUserId, userId));
-      console.log('Removed story turn references for user: ' + userId);
+      console.log(`Removed story turn references for user: ${userId}`);
 
       // 4. Remove story invitations (both sent and received)
       await db.delete(storyInvitations).where(eq(storyInvitations.inviterId, userId));
       await db.delete(storyInvitations).where(eq(storyInvitations.inviteeId, userId));
-      console.log('Removed story invitations for user: ' + userId);
+      console.log(`Removed story invitations for user: ${userId}`);
 
       // 5. Remove join requests (both sent and received)
       await db.delete(storyJoinRequests).where(eq(storyJoinRequests.requesterId, userId));
       await db.delete(storyJoinRequests).where(eq(storyJoinRequests.authorId, userId));
-      console.log('Removed join requests for user: ' + userId);
+      console.log(`Removed join requests for user: ${userId}`);
 
       // 6. Remove print orders
       await db.delete(printOrders).where(eq(printOrders.userId, userId));
-      console.log('Removed print orders for user: ' + userId);
+      console.log(`Removed print orders for user: ${userId}`);
 
       // 7. Remove user settings
       await db.delete(userSettings).where(eq(userSettings.userId, userId));
-      console.log('Removed user settings for user: ' + userId);
+      console.log(`Removed user settings for user: ${userId}`);
 
       // 8. Handle stories created by user - mark as deleted user rather than cascading delete
       const userStories = await db.select().from(stories).where(eq(stories.creatorId, userId));
 
       // Create a placeholder "deleted user" if needed
-      const deletedUserId = 'deleted_' + Date.now();
+      const deletedUserId = `deleted_${Date.now()}`;
       const deletedUser = await storage.upsertUser({
         id: deletedUserId,
-        email: 'deleted_' + Date.now() + '@example.com',
-        username: 'deleted_user_' + Date.now(),
+        email: `deleted_${Date.now()}@example.com`,
+        username: `deleted_user_${Date.now()}`,
         isDeleted: true,
         emailVerified: true,
       });
@@ -2717,14 +2718,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await db.update(stories)
           .set({ creatorId: deletedUserId })
           .where(eq(stories.creatorId, userId));
-        console.log('Transferred ' + userStories.length + ' stories to deleted user placeholder');
+        console.log(`Transferred ${userStories.length} stories to deleted user placeholder`);
       }
 
       // 9. Finally, mark the user as deleted (soft delete)
       await storage.upsertUser({
         ...user,
-        email: 'deleted_' + Date.now() + '@example.com',
-        username: 'deleted_user_' + Date.now(),
+        email: `deleted_${Date.now()}@example.com`,
+        username: `deleted_user_${Date.now()}`,
         firstName: null,
         lastName: null,
         profileImageUrl: null,
@@ -2736,7 +2737,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allowUsernameUpdate: true, // Allow username change for account deletion
       });
 
-      console.log('Successfully deleted account for user: ' + userId);
+      console.log(`Successfully deleted account for user: ${userId}`);
 
       // Clear session
       req.session.destroy((err: any) => {

@@ -14,14 +14,14 @@ export default function Dashboard() {
   const [activeStory, setActiveStory] = useState<number | null>(null);
 
   // Optimized story queries with reduced polling
-  const { data: myTurnStories, isLoading: myTurnLoading } = useQuery({
+  const { data: myTurnStories, isLoading: myTurnLoading } = useQuery<any[]>({
     queryKey: ["/api/my-turn"],
     refetchInterval: 5 * 60 * 1000, // Reduced to every 5 minutes
     staleTime: 2 * 60 * 1000, // Consider data fresh for 2 minutes
     refetchOnWindowFocus: true,
   });
 
-  const { data: waitingStories, isLoading: waitingLoading } = useQuery({
+  const { data: waitingStories, isLoading: waitingLoading } = useQuery<any[]>({
     queryKey: ["/api/waiting-turn"],
     refetchInterval: 5 * 60 * 1000, // Reduced to every 5 minutes
     staleTime: 2 * 60 * 1000,
@@ -74,17 +74,23 @@ export default function Dashboard() {
                 <h2 className="text-xl font-bold text-foreground">
                   Welcome back, {user?.firstName || user?.username || "Storyteller"}!
                 </h2>
-                <p className="text-neutral-600 mt-1">
-                  {myTurnStories?.length 
+                <div className="text-neutral-600 mt-1">
+                  {myTurnLoading ? (
+                    <Skeleton className="h-4 w-64" />
+                  ) : myTurnStories?.length 
                     ? `You have ${myTurnStories.length} stories waiting for your contribution.`
                     : "You don't have any stories waiting for your contribution."}
-                </p>
+                </div>
               </div>
               <div className="mt-4 sm:mt-0 grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
                 <div className="bg-card text-card-foreground rounded-lg p-4 border border-border">
-                  <p className="text-2xl font-bold text-primary">
-                    {(myTurnStories?.length || 0) + (waitingStories?.length || 0)}
-                  </p>
+                  {myTurnLoading || waitingLoading ? (
+                    <Skeleton className="h-8 w-12 mx-auto mb-2" />
+                  ) : (
+                    <p className="text-2xl font-bold text-primary">
+                      {(myTurnStories?.length || 0) + (waitingStories?.length || 0)}
+                    </p>
+                  )}
                   <p className="text-muted-foreground text-sm">Active Stories</p>
                 </div>
                 <div className="bg-card text-card-foreground rounded-lg p-4 border border-border">

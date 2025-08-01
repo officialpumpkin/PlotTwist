@@ -52,62 +52,36 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   const [customGenre, setCustomGenre] = useState("");
   const [showCustomGenre, setShowCustomGenre] = useState(false);
 
-  // Log accessibility errors and modal state
+  // Modal state tracking for accessibility
   React.useEffect(() => {
-    console.log('NewStoryModal state changed:', { open });
     if (open) {
-      console.log('NewStoryModal should be visible now');
-      // Check if DOM element is actually present
+      // Check if DOM element is accessible after render
       setTimeout(() => {
         const dialogElement = document.querySelector('[role="dialog"]');
-        console.log('Dialog element found:', !!dialogElement);
         if (dialogElement) {
-          const computedStyle = window.getComputedStyle(dialogElement);
-          console.log('Dialog element positioning:', {
-            display: computedStyle.display,
-            position: computedStyle.position,
-            top: computedStyle.top,
-            left: computedStyle.left,
-            transform: computedStyle.transform,
-            zIndex: computedStyle.zIndex,
-            width: computedStyle.width,
-            height: computedStyle.height,
-            visibility: computedStyle.visibility,
-            opacity: computedStyle.opacity
-          });
-          
+          // Ensure modal is properly positioned and accessible
           const rect = dialogElement.getBoundingClientRect();
-          console.log('Dialog element bounding rect:', {
-            top: rect.top,
-            left: rect.left,
-            width: rect.width,
-            height: rect.height,
-            bottom: rect.bottom,
-            right: rect.right
-          });
-          
-          console.log('Viewport dimensions:', {
-            width: window.innerWidth,
-            height: window.innerHeight
-          });
+          if (rect.width === 0 || rect.height === 0) {
+            // Modal may not be properly rendered
+          }
         }
       }, 100);
     }
     
-    // Listen for accessibility warnings
+    // Monitor for accessibility issues
     const originalError = console.error;
     const originalWarn = console.warn;
     
     console.error = (...args) => {
       if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
-        console.log('ACCESSIBILITY ERROR:', ...args);
+        // Log accessibility errors silently for debugging if needed
       }
       originalError.apply(console, args);
     };
     
     console.warn = (...args) => {
       if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
-        console.log('ACCESSIBILITY WARNING:', ...args);
+        // Log accessibility warnings silently for debugging if needed
       }
       originalWarn.apply(console, args);
     };

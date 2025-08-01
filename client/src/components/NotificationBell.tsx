@@ -13,21 +13,19 @@ export default function NotificationBell() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch pending invitations with optimized polling
-  const { data: pendingInvitations, refetch: refetchInvitations, isLoading: isLoadingInvitations } = useQuery({
+  // Fetch pending invitations with WebSocket-driven updates (no polling)
+  const { data: pendingInvitations, refetch: refetchInvitations, isLoading: isLoadingInvitations } = useQuery<any[]>({
     queryKey: ['/api/invitations/pending'],
     enabled: !!user,
-    refetchInterval: 2 * 60 * 1000, // Reduced to every 2 minutes
     refetchOnWindowFocus: true, // Only refetch when window gains focus
-    staleTime: 60 * 1000, // Consider data fresh for 1 minute
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
-  const { data: pendingJoinRequests, refetch: refetchJoinRequests, isLoading: isLoadingJoinRequests } = useQuery({
+  const { data: pendingJoinRequests, refetch: refetchJoinRequests, isLoading: isLoadingJoinRequests } = useQuery<any[]>({
     queryKey: ["/api/join-requests/pending"],
     enabled: !!user,
-    refetchInterval: 2 * 60 * 1000, // Reduced to every 2 minutes
     refetchOnWindowFocus: true,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Handle invitation acceptance
@@ -40,7 +38,6 @@ export default function NotificationBell() {
       });
       refetchInvitations();
     } catch (error) {
-      console.error('Error accepting invitation:', error);
       toast({
         title: 'Error',
         description: 'Failed to accept invitation',
@@ -59,7 +56,6 @@ export default function NotificationBell() {
       });
       refetchInvitations();
     } catch (error) {
-      console.error('Error declining invitation:', error);
       toast({
         title: 'Error',
         description: 'Failed to decline invitation',

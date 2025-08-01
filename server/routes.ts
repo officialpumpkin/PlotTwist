@@ -1,5 +1,6 @@
 import express, { type Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./replitAuth";
 import { sendWelcomeEmail, sendStoryInvitationEmail, sendEmailVerification, sendPasswordResetEmail } from "./emailService";
@@ -2745,6 +2746,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create HTTP server
   const server = createServer(app);
+
+  // WebSocket server for real-time notifications
+  const wss = new WebSocketServer({ server, path: '/ws' });
+  
+  // Store connected users with their WebSocket connections
+  const connectedUsers = new Map<string, WebSocket>();
+
+  wss.on('connection', (ws, req) => {
+    console.log('WebSocket connection established');
+    
+    // Extract user ID from session or authentication
+    let userId: string | null = null;
+
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        if (data.type === 'authenticate' && data.userId) {
+          userId = data.userId;
+          connectedUsers.set(userId, ws);
+          console.log('User authenticated via WebSocket:', userId);
+          
+          // Send confirmation
+          ws.send(JSON.stringify({ type: 'authenticated', userId }));
+        }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      if (userId) {
+        connectedUsers.delete(userId);
+        console.log('WebSocket connection closed for user:', userId);
+      }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+  });
+
+  // Helper function to broadcast notifications
+  const broadcastNotification = (userId: string, notification: any) => {
+    const userSocket = connectedUsers.get(userId);
+    if (userSocket && userSocket.readyState === WebSocket.OPEN) {
+      userSocket.send(JSON.stringify({
+        type: 'notification',
+        data: notification
+      }));
+    }
+  };
+
+  // Export broadcast function for use in other routes
+  (server as any).broadcastNotification = broadcastNotification;
 
   return server;
 }

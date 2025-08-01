@@ -60,7 +60,6 @@ export default function UserMenu() {
       window.location.href = '/';
     },
     onError: (error) => {
-      console.error('Logout error:', error);
       toast({
         title: "Logout Failed",
         description: "There was an error logging out. Please try again.",

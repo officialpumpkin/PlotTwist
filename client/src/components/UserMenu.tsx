@@ -17,6 +17,7 @@ export default function UserMenu() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [profileImageKey, setProfileImageKey] = useState(0);
+  const [showLoginOptions, setShowLoginOptions] = useState(false);
 
   // Force re-render when user data changes
   useEffect(() => {
@@ -74,13 +75,6 @@ export default function UserMenu() {
     }
     return user?.username?.[0]?.toUpperCase() || "U";
   };
-
-  // Debug logging to track user data changes
-  console.log('UserMenu user data:', { 
-    username: user?.username, 
-    firstName: user?.firstName, 
-    lastName: user?.lastName 
-  });
 
   if (isLoading) return null;
 

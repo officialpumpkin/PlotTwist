@@ -317,7 +317,12 @@ export default function SettingsPage() {
                     currentImageUrl={user?.profileImageUrl}
                     username={user?.username}
                     onUploadSuccess={(newImageUrl) => {
-                      // The cache will be invalidated automatically by the AvatarUpload component
+                      // Update local profile state immediately
+                      setProfileData(prev => ({
+                        ...prev,
+                        profileImageUrl: newImageUrl
+                      }));
+                      
                       toast({
                         title: "Profile updated",
                         description: "Your avatar has been updated successfully.",

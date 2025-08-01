@@ -119,9 +119,14 @@ async function upsertGoogleUser(
       // Check if the new username conflicts with another user
       const usernameConflict = await storage.getUserByUsername(username);
       if (usernameConflict && usernameConflict.id !== existingUser.id) {
-        // Username is taken by another user, keep the existing username
-        console.log("Username conflict detected, keeping existing username:", existingUser.username);
-        username = existingUser.username;
+        // Username is taken by another user, generate a unique one
+        let counter = 1;
+        let baseUsername = username;
+        do {
+          username = `${baseUsername}_${counter}`;
+          counter++;
+        } while (await storage.getUserByUsername(username));
+        console.log("Generated unique username for existing user:", username);
       }
     }
     

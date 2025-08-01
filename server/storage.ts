@@ -822,7 +822,11 @@ export class DatabaseStorage implements IStorage {
               invitation.inviteeEmail.split('@')[0], // Use email prefix as name fallback
               inviter.username || 'A collaborator',
               story.title,
-              story.description || ''
+              story.description || '',
+              storyId,
+              process.env.REPLIT_DOMAINS 
+                ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+                : 'https://plottwist.replit.dev'
             );
 
             if (!success) {

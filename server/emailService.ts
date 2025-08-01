@@ -125,9 +125,14 @@ export async function sendStoryInvitationEmail(
   recipientName: string, 
   inviterName: string, 
   storyTitle: string, 
-  storyDescription: string
+  storyDescription: string,
+  storyId?: number,
+  baseUrl?: string
 ): Promise<boolean> {
   const subject = `${inviterName} invited you to collaborate on "${storyTitle}"`;
+  
+  // Generate story link if storyId and baseUrl are provided
+  const storyLink = storyId && baseUrl ? `${baseUrl}/story/${storyId}` : null;
   
   const text = `Hello ${recipientName},
 
@@ -135,10 +140,12 @@ ${inviterName} has invited you to collaborate on a story called "${storyTitle}" 
 
 Story Description: ${storyDescription}
 
+${storyLink ? `View the story: ${storyLink}` : ''}
+
 PlotTwist is a collaborative storytelling platform where you and your friends can take turns writing parts of a story together. Each contributor adds their own creative touch while building on what others have written.
 
 To accept this invitation and start writing:
-1. Log in to your PlotTwist account
+1. Log in to your PlotTwist account${storyLink ? ` or visit the story link above` : ''}
 2. Check your notifications for pending invitations
 3. Accept the invitation to join the story
 
@@ -160,12 +167,20 @@ The PlotTwist Team`;
         <p style="color: #374151; margin-bottom: 0;">${storyDescription}</p>
       </div>
       
+      ${storyLink ? `
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="${storyLink}" style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+          View Story
+        </a>
+      </div>
+      ` : ''}
+      
       <p>PlotTwist is a collaborative storytelling platform where you and your friends can take turns writing parts of a story together. Each contributor adds their own creative touch while building on what others have written.</p>
       
       <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
         <h3 style="color: #1e40af; margin-top: 0;">To accept this invitation and start writing:</h3>
         <ol style="color: #374151;">
-          <li>Log in to your PlotTwist account</li>
+          <li>Log in to your PlotTwist account${storyLink ? ` or click the "View Story" button above` : ''}</li>
           <li>Check your notifications for pending invitations</li>
           <li>Accept the invitation to join the story</li>
         </ol>

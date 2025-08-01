@@ -1173,12 +1173,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Send invitation email
           const inviter = await storage.getUser(inviterId);
           if (inviter && inviteeUser.email) {
+            // Get base URL for story links
+            const host = req.get('host');
+            let baseUrl;
+            if (host && host.includes('replit.dev')) {
+              baseUrl = `https://${host}`;
+            } else {
+              baseUrl = process.env.REPLIT_DOMAINS 
+                ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+                : `${req.protocol}://${host}`;
+            }
+            
             sendStoryInvitationEmail(
               inviteeUser.email,
               inviteeUser.username || 'there',
               inviter.username || 'A collaborator',
               story.title,
-              story.description || ''
+              story.description || '',
+              storyId,
+              baseUrl
             ).catch(error => {
               console.error('Failed to send invitation email:', error);
             });
@@ -1202,12 +1215,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Send invitation email to non-user
           const inviter = await storage.getUser(inviterId);
           if (inviter) {
+            // Get base URL for story links
+            const host = req.get('host');
+            let baseUrl;
+            if (host && host.includes('replit.dev')) {
+              baseUrl = `https://${host}`;
+            } else {
+              baseUrl = process.env.REPLIT_DOMAINS 
+                ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
+                : `${req.protocol}://${host}`;
+            }
+            
             sendStoryInvitationEmail(
               email,
               'there',
               inviter.username || 'A collaborator',
               story.title,
-              story.description || ''
+              story.description || '',
+              storyId,
+              baseUrl
             ).catch(error => {
               console.error('Failed to send invitation email:', error);
             });

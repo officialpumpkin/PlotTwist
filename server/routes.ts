@@ -390,6 +390,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const foundUser = user[0];
 
+      // LOG: User found in database during login
+      console.log("🔐 LOGIN USER FOUND:", {
+        foundUserId: foundUser.id,
+        foundUsername: foundUser.username,
+        email: foundUser.email
+      });
+
       // Check if email is verified
       if (!foundUser.emailVerified) {
         return res.status(401).json({
@@ -416,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         profileImageUrl: foundUser.profileImageUrl,
       };
 
-      console.log("Setting session data:", {
+      console.log("🔐 LOGIN SETTING SESSION DATA:", {
         userId: req.session.userId,
         user: req.session.user
       });
@@ -428,11 +435,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.error("Session save error:", err);
             reject(err);
           } else {
-            console.log("Session saved successfully");
+            console.log("✅ LOGIN SESSION SAVED SUCCESSFULLY:");
             console.log("Session ID:", req.sessionID);
-            console.log("Session after save:", {
+            console.log("🔐 LOGIN SESSION AFTER SAVE:", {
               userId: req.session.userId,
-              user: req.session.user
+              sessionUsername: req.session.user?.username,
+              fullSessionUser: req.session.user
             });
             resolve();
           }
@@ -2124,6 +2132,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
+      // LOG: Profile update start
+      console.log("🔄 PROFILE UPDATE START:", {
+        userId: userId,
+        currentUsernameInDB: user.username,
+        incomingUsername: username,
+        sessionUsernameBefore: req.session?.user?.username
+      });
+
       // Check if username is changing and if it's unique
       if (username && username !== user.username) {
         // Validate username
@@ -2153,6 +2169,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         allowUsernameUpdate: true, // Allow username updates only from profile settings
       });
 
+      // LOG: After upsertUser
+      console.log("✅ PROFILE UPDATE AFTER UPSERT:", {
+        updatedUsername: updatedUser.username,
+        sessionUserBeforeUpdate: req.session?.user
+      });
+
       // Update session with new user data for consistency
       if (req.session?.user) {
         req.session.user = {
@@ -2169,7 +2191,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.error("Session save error after profile update:", err);
               reject(err);
             } else {
-              console.log("Session updated with new profile data");
+              console.log("✅ PROFILE UPDATE SESSION SAVED:", {
+                sessionUserAfterUpdate: req.session.user
+              });
               resolve();
             }
           });

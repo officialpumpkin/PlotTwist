@@ -194,6 +194,14 @@ export class DatabaseStorage implements IStorage {
       const existingUser = await this.getUser(userData.id);
       
       if (existingUser) {
+        // LOG: Before updating existing user
+        console.log("📝 STORAGE UPSERT - EXISTING USER:", {
+          userId: userData.id,
+          existingUsername: existingUser.username,
+          incomingUsername: userData.username,
+          allowUsernameUpdate: userData.allowUsernameUpdate
+        });
+
         // User exists, perform update only on provided fields
         const updateFields: any = {
           updatedAt: new Date(),
@@ -212,6 +220,13 @@ export class DatabaseStorage implements IStorage {
         if (userData.passwordResetToken !== undefined) updateFields.passwordResetToken = userData.passwordResetToken;
         if (userData.passwordResetExpires !== undefined) updateFields.passwordResetExpires = userData.passwordResetExpires;
         if (userData.passwordLastChanged !== undefined) updateFields.passwordLastChanged = userData.passwordLastChanged;
+
+        // LOG: Final update fields
+        console.log("📝 STORAGE UPSERT - UPDATE FIELDS:", {
+          finalUsernameToUpdate: updateFields.username,
+          willUpdateUsername: updateFields.username !== undefined,
+          allUpdateFields: Object.keys(updateFields)
+        });
         
         const [user] = await db
           .update(users)

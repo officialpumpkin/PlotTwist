@@ -198,6 +198,15 @@ export async function setupAuth(app: Express) {
       if (serializedUser && serializedUser.claims && serializedUser.claims.sub) {
         // Optionally verify the user still exists in the database
         const dbUser = await storage.getUser(serializedUser.claims.sub);
+        
+        // LOG: Passport deserialization details
+        console.log("🎫 PASSPORT DESERIALIZE:", {
+          userId: serializedUser.claims.sub,
+          dbUserExists: !!dbUser,
+          dbUsername: dbUser?.username,
+          serializedEmail: serializedUser.claims.email
+        });
+        
         if (dbUser) {
           done(null, serializedUser);
         } else {

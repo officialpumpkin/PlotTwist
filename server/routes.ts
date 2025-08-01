@@ -895,6 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             } : null,
           };
         })
+```tool_code
       );
 
       res.json(requestsWithDetails);
@@ -1167,8 +1168,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             expiresAt: expirationDate
           });
 
-          // Note: Real-time notifications would be implemented here with WebSocket/SSE
-          console.log(`Invitation notification would be sent to user ${inviteeUser.id}`);
+      // Send real-time notification
+      const notificationService = req.app.get('notificationService');
+      if (notificationService) {
+        const inviter = await storage.getUser(inviterId);
+        notificationService.sendInvitationNotification(inviteeUser.id, {
+          ...invitation,
+          story: { id: story.id, title: story.title },
+          inviter: { id: inviter?.id, username: inviter?.username }
+        });
+      }
 
           // Send invitation email
           const inviter = await storage.getUser(inviterId);
@@ -1183,7 +1192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
                 : `${req.protocol}://${host}`;
             }
-            
+
             sendStoryInvitationEmail(
               inviteeUser.email,
               inviteeUser.username || 'there',
@@ -1225,7 +1234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` 
                 : `${req.protocol}://${host}`;
             }
-            
+
             sendStoryInvitationEmail(
               email,
               'there',
@@ -1279,8 +1288,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expiresAt: expirationDate
         });
 
-        // Note: Real-time notifications would be implemented here with WebSocket/SSE
-        console.log(`Invitation notification would be sent to user ${inviteeUser.id}`);
+      // Send real-time notification
+      const notificationService = req.app.get('notificationService');
+      if (notificationService) {
+        const inviter = await storage.getUser(inviterId);
+        notificationService.sendInvitationNotification(inviteeUser.id, {
+          ...invitation,
+          story: { id: story.id, title: story.title },
+          inviter: { id: inviter?.id, username: inviter?.username }
+        });
+      }
 
         res.status(201).json({ 
             message: username + " has been invited to the story",
@@ -1453,6 +1470,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currentTurn: turn.currentTurn + 1,
           currentUserId: nextUserId
         });
+
+        // Send real-time turn notification
+        const notificationService = req.app.get('notificationService');
+        if (notificationService) {
+          notificationService.sendTurnNotification(nextUserId, {
+            id: story.id,
+            title: story.title,
+            currentTurn: turn.currentTurn + 1
+          });
+        }
       } else {
         // If only one participant, they keep the turn but increment turn number
         await storage.updateStoryTurn(storyId, {
@@ -1758,7 +1785,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             fs.unlinkSync(oldFilePath);
           }
         } catch (error) {
-          console.warn("Failed to delete old avatar file:", error);
+          console.warn("Failed to delete old```tool_code
+ avatar file:", error);
         }
       }
 
@@ -2662,7 +2690,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 5. Remove join requests (both sent and received)
       await db.delete(storyJoinRequests).where(eq(storyJoinRequests.requesterId, userId));
       await db.delete(storyJoinRequests).where(eq(storyJoinRequests.authorId, userId));
-      console.log(`Removed join requests for user: ${userId}`);
+```tool_code
+console.log(`Removed join requests for user: ${userId}`);
 
       // 6. Remove print orders
       await db.delete(printOrders).where(eq(printOrders.userId, userId));

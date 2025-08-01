@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import "./db";
 import { setupHealthCheck } from "./health";
+import { setupWebSocket } from "./websocket";
 import fs from "fs";
 import path from "path";
 
@@ -34,6 +35,12 @@ app.use((req, res, next) => {
 
 (async () => {
   const server = await registerRoutes(app);
+
+  // Setup WebSocket for real-time notifications
+  const { io, notificationService } = setupWebSocket(server);
+  
+  // Make notification service available to routes
+  app.set('notificationService', notificationService);
 
   // Setup health check and monitoring endpoints
   setupHealthCheck(app);

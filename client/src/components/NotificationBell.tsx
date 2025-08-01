@@ -1,6 +1,7 @@
 import { Bell } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 import CustomDropdown from '@/components/CustomDropdown';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,22 +13,21 @@ export default function NotificationBell() {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { counts, markAsRead } = useNotifications();
 
-  // Fetch pending invitations with optimized polling
+  // Fetch pending invitations (no polling, updated via WebSocket)
   const { data: pendingInvitations, refetch: refetchInvitations, isLoading: isLoadingInvitations } = useQuery({
     queryKey: ['/api/invitations/pending'],
     enabled: !!user,
-    refetchInterval: 2 * 60 * 1000, // Reduced to every 2 minutes
-    refetchOnWindowFocus: true, // Only refetch when window gains focus
-    staleTime: 60 * 1000, // Consider data fresh for 1 minute
+    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   const { data: pendingJoinRequests, refetch: refetchJoinRequests, isLoading: isLoadingJoinRequests } = useQuery({
     queryKey: ["/api/join-requests/pending"],
     enabled: !!user,
-    refetchInterval: 2 * 60 * 1000, // Reduced to every 2 minutes
     refetchOnWindowFocus: true,
-    staleTime: 60 * 1000,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Handle invitation acceptance
@@ -138,7 +138,7 @@ export default function NotificationBell() {
 
   if (!isAuthenticated) return null;
 
-  const totalNotifications = (pendingInvitations?.length || 0) + (pendingJoinRequests?.length || 0);
+  const totalNotifications = counts.total + (pendingInvitations?.length || 0) + (pendingJoinRequests?.length || 0);
 
   const isLoading = isLoadingInvitations || isLoadingJoinRequests;
 
@@ -149,6 +149,13 @@ export default function NotificationBell() {
           <CustomDropdown
             align="left"
             className="w-64"
+            onOpenChange={(open) => {
+              if (open) {
+                // Mark notifications as read when dropdown opens
+                markAsRead('invitations');
+                markAsRead('joinRequests');
+              }
+            }}
             trigger={
               <Button 
                 variant="ghost" 

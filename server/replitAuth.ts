@@ -110,18 +110,25 @@ async function upsertGoogleUser(
       email: email
     });
     
-    // Check if the new username conflicts with another user
-    const usernameConflict = await storage.getUserByUsername(username);
-    if (usernameConflict && usernameConflict.id !== existingUser.id) {
-      // Username is taken by another user, keep the existing username
-      console.log("Username conflict detected, keeping existing username:", existingUser.username);
+    // If existing user has a username, preserve it and skip username derivation
+    if (existingUser.username) {
       username = existingUser.username;
+      console.log("Preserving existing username:", existingUser.username);
+    } else {
+      // Only derive username if existing user doesn't have one
+      // Check if the new username conflicts with another user
+      const usernameConflict = await storage.getUserByUsername(username);
+      if (usernameConflict && usernameConflict.id !== existingUser.id) {
+        // Username is taken by another user, keep the existing username
+        console.log("Username conflict detected, keeping existing username:", existingUser.username);
+        username = existingUser.username;
+      }
     }
     
     // Update the existing local user with Google profile information
     await storage.upsertUser({
       ...existingUser,
-      username: username || existingUser.username, // Use safe username
+      username: existingUser.username, // Always use the existing username
       firstName: profile.name?.givenName || existingUser.firstName,
       lastName: profile.name?.familyName || existingUser.lastName,
       profileImageUrl: profile.photos?.[0]?.value || existingUser.profileImageUrl,

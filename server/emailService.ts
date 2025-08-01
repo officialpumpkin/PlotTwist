@@ -49,7 +49,11 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
         'X-Priority': '3',
         'X-MSMail-Priority': 'Normal',
         'X-Mailer': 'PlotTwist Email Service',
-        'List-Unsubscribe': '<mailto:unsubscribe@plottwist.com>'
+        'List-Unsubscribe': '<mailto:unsubscribe@plottwist.com>',
+        'Message-ID': `<${Date.now()}-${Math.random().toString(36)}@plottwist.com>`,
+        'X-Auto-Response-Suppress': 'All',
+        'Precedence': 'bulk',
+        'X-Entity-Ref-ID': Math.random().toString(36)
       },
       categories: ['transactional', 'plottwist'],
       customArgs: {
@@ -205,7 +209,7 @@ The PlotTwist Team`;
 export async function sendEmailVerification(userEmail: string, userName: string, verificationToken: string, baseUrl: string): Promise<boolean> {
   console.log(`Attempting to send verification email to: ${userEmail}`);
   console.log(`Base URL being used: ${baseUrl}`);
-  const subject = "Verify Your PlotTwist Account";
+  const subject = "Please Verify Your PlotTwist Account";
   const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`;
   console.log(`Generated verification URL: ${verificationUrl}`);
   
@@ -281,69 +285,117 @@ You received this because an account was created with this email address.`;
 
 export async function sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string, baseUrl: string): Promise<boolean> {
   console.log(`Attempting to send password reset email to: ${userEmail}`);
-  const subject = "Reset Your PlotTwist Password";
+  const subject = "Your PlotTwist Password Reset Request";
   const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
   console.log(`Generated password reset URL: ${resetUrl}`);
   
   const text = `Hello ${userName},
 
-You requested to reset your password for your PlotTwist account. If you didn't make this request, you can safely ignore this email.
+We received a request to reset the password for your PlotTwist account (${userEmail}).
 
-To reset your password, click the link below:
+To create a new password, please visit:
 ${resetUrl}
 
-This link will expire in 1 hour for security purposes.
+Important security information:
+• This link expires in 1 hour
+• Only use this link if you requested the password reset
+• If you didn't request this, please ignore this email
 
-If you have any questions, please contact our support team.
+Need help? Contact our support team at support@plottwist.com
 
 Best regards,
 The PlotTwist Team
 
----
-This email was sent from PlotTwist, a collaborative storytelling platform.
-If you did not request this password reset, please ignore this email.`;
+PlotTwist - Collaborative Storytelling Platform
+This is an automated security email from PlotTwist.`;
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #2563eb; font-size: 24px; margin: 0;">PlotTwist</h1>
-        <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Collaborative Storytelling Platform</p>
-      </div>
-      
-      <h2 style="color: #1f2937; text-align: center; margin-bottom: 30px;">Reset Your Password</h2>
-      
-      <p style="color: #374151; line-height: 1.5;">Hello ${userName},</p>
-      
-      <p style="color: #374151; line-height: 1.5;">You requested to reset your password for your PlotTwist account. If you didn't make this request, you can safely ignore this email.</p>
-      
-      <div style="text-align: center; margin: 40px 0;">
-        <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
-          Reset Your Password
-        </a>
-      </div>
-      
-      <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 30px 0;">
-        <p style="color: #6b7280; font-size: 14px; margin: 0 0 10px 0; font-weight: 600;">Can't click the button? Copy and paste this link:</p>
-        <p style="word-break: break-all; color: #2563eb; font-size: 14px; margin: 0;">${resetUrl}</p>
-      </div>
-      
-      <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 40px;">
-        <p style="color: #6b7280; font-size: 12px; line-height: 1.4;">
-          <strong>Security Notice:</strong> This link will expire in 1 hour for security purposes. If you have any questions, please contact our support team.
-        </p>
-        
-        <p style="color: #6b7280; font-size: 12px; line-height: 1.4; margin-top: 20px;">
-          If you did not request this password reset, please ignore this email. Your account remains secure.
-        </p>
-      </div>
-      
-      <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-        <p style="color: #374151; margin: 0;">Best regards,<br><strong>The PlotTwist Team</strong></p>
-        <p style="color: #9ca3af; font-size: 12px; margin: 10px 0 0 0;">
-          This email was sent from PlotTwist, a collaborative storytelling platform.
-        </p>
-      </div>
-    </div>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>PlotTwist Password Reset</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f8fafc;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tr>
+          <td align="center" style="padding: 40px 20px;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+              
+              <!-- Header -->
+              <tr>
+                <td style="padding: 40px 40px 20px; text-align: center; border-bottom: 1px solid #e5e7eb;">
+                  <h1 style="color: #2563eb; font-size: 28px; margin: 0; font-weight: bold;">PlotTwist</h1>
+                  <p style="color: #6b7280; font-size: 14px; margin: 8px 0 0 0;">Collaborative Storytelling Platform</p>
+                </td>
+              </tr>
+              
+              <!-- Main Content -->
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="color: #1f2937; font-size: 24px; margin: 0 0 24px 0; text-align: center;">Password Reset Request</h2>
+                  
+                  <p style="color: #374151; line-height: 1.6; margin: 0 0 20px 0; font-size: 16px;">Hello ${userName},</p>
+                  
+                  <p style="color: #374151; line-height: 1.6; margin: 0 0 20px 0; font-size: 16px;">
+                    We received a request to reset the password for your PlotTwist account: <strong>${userEmail}</strong>
+                  </p>
+                  
+                  <p style="color: #374151; line-height: 1.6; margin: 0 0 32px 0; font-size: 16px;">
+                    To create a new password, please click the button below:
+                  </p>
+                  
+                  <!-- CTA Button -->
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td align="center" style="padding: 20px 0;">
+                        <a href="${resetUrl}" style="background-color: #2563eb; color: #ffffff; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; font-size: 16px; line-height: 1;">
+                          Reset Your Password
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <!-- Alternative Link -->
+                  <div style="background-color: #f8fafc; padding: 24px; border-radius: 6px; margin: 32px 0; border-left: 4px solid #2563eb;">
+                    <p style="color: #374151; font-size: 14px; margin: 0 0 12px 0; font-weight: 600;">Can't click the button? Copy and paste this link:</p>
+                    <p style="word-break: break-all; color: #2563eb; font-size: 14px; margin: 0; font-family: monospace;">${resetUrl}</p>
+                  </div>
+                  
+                  <!-- Security Info -->
+                  <div style="background-color: #fef3c7; padding: 20px; border-radius: 6px; margin: 24px 0; border-left: 4px solid #f59e0b;">
+                    <p style="color: #92400e; font-size: 14px; margin: 0 0 12px 0; font-weight: 600;">Important Security Information:</p>
+                    <ul style="color: #92400e; font-size: 14px; margin: 0; padding-left: 20px;">
+                      <li>This link expires in 1 hour for your security</li>
+                      <li>Only use this link if you requested the password reset</li>
+                      <li>If you didn't request this, you can safely ignore this email</li>
+                    </ul>
+                  </div>
+                  
+                  <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin: 24px 0 0 0;">
+                    Need help? Contact our support team at <a href="mailto:support@plottwist.com" style="color: #2563eb; text-decoration: none;">support@plottwist.com</a>
+                  </p>
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 40px; background-color: #f8fafc; border-top: 1px solid #e5e7eb; text-align: center; border-radius: 0 0 8px 8px;">
+                  <p style="color: #374151; margin: 0 0 8px 0; font-size: 16px;">Best regards,<br><strong>The PlotTwist Team</strong></p>
+                  <p style="color: #9ca3af; font-size: 12px; margin: 0; line-height: 1.4;">
+                    This is an automated security email from PlotTwist.<br>
+                    PlotTwist - Collaborative Storytelling Platform
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 
   return await sendEmail({

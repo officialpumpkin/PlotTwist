@@ -186,6 +186,30 @@ export default function StoryCard({
                 </div>
               )}
             </div>
+            {/* Turn information details */}
+            {!story.isComplete && (
+              <div className="mt-1">
+                {status === "Your Turn" ? (
+                  <p className="text-xs text-primary font-medium">
+                    It's your turn to contribute
+                  </p>
+                ) : status === "Waiting" && waitingUser ? (
+                  <p className="text-xs text-muted-foreground">
+                    Waiting for <span className="font-medium text-foreground">
+                      {waitingUser.firstName || waitingUser.username}
+                    </span> to contribute
+                  </p>
+                ) : status === "Active" && variant === "explore" ? (
+                  <p className="text-xs text-muted-foreground">
+                    Story is actively being written
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Waiting for next contribution
+                  </p>
+                )}
+              </div>
+            )}
           </div>
           <span className={cn(
             "text-xs px-2 py-1 rounded-full",
@@ -200,9 +224,16 @@ export default function StoryCard({
 
         <p className="text-muted-foreground text-sm line-clamp-3">{story.description}</p>
 
-        <div className="flex items-center mt-4 text-sm text-neutral-500">
-          <UserIcon className="mr-1" />
-          <span>{participantCount} participants</span>
+        <div className="flex items-center justify-between mt-4 text-sm text-neutral-500">
+          <div className="flex items-center">
+            <UserIcon className="mr-1" />
+            <span>{participantCount} participants</span>
+          </div>
+          {!story.isComplete && segments && (
+            <div className="text-xs text-muted-foreground">
+              Turn {segments.length + 1} of {story.maxSegments || 30}
+            </div>
+          )}
         </div>
 
         {showProgress && (

@@ -373,7 +373,7 @@ export async function setupAuth(app: Express) {
         prompt: 'select_account'
       });
 
-      authenticator(req, res, (err) => {
+      authenticator(req, res, (err: any) => {
         if (err) {
           console.error("Google OAuth authentication error:", err);
           console.error("Error details:", {
@@ -433,8 +433,8 @@ export async function setupAuth(app: Express) {
         req.session.userId = user.claims.sub;
         req.session.user = {
           id: dbUser.id,
-          email: dbUser.email,
-          username: dbUser.username, // Use database username, not derived username
+          email: dbUser.email || '',
+          username: dbUser.username || '', // Use database username, not derived username
           firstName: dbUser.firstName,
           lastName: dbUser.lastName,
           profileImageUrl: dbUser.profileImageUrl,
@@ -469,8 +469,8 @@ export async function setupAuth(app: Express) {
               req.session.userId = user.claims.sub;
               req.session.user = {
                 id: dbUser.id,
-                email: dbUser.email,
-                username: dbUser.username,
+                email: dbUser.email || '',
+                username: dbUser.username || '',
                 firstName: dbUser.firstName,
                 lastName: dbUser.lastName,
                 profileImageUrl: dbUser.profileImageUrl,
@@ -494,14 +494,14 @@ export async function setupAuth(app: Express) {
   // Note: Local auth registration is handled in routes.ts to support email verification
 
   app.post("/api/auth/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
         return next(err);
       }
       if (!user) {
         return res.status(401).json({ message: info.message || "Login failed" });
       }
-      req.login(user, (err) => {
+      req.login(user, async (err) => {
         if (err) {
           return next(err);
         }

@@ -890,7 +890,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: requester.id,
               username: requester.username || "Unknown",
               firstName: requester.firstName,
-              lastName: requester<previous_generation>
               lastName: requester.lastName,
               profileImageUrl: requester.profileImageUrl,
             } : null,
@@ -2336,9 +2335,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Apply the edit
       if (editRequest.editType === "story_metadata") {
         await storage.updateStory(editRequest.storyId, {
-          title: editRequest.proposedTitle,
-          description: editRequest.proposedDescription,
-          genre: editRequest.proposedGenre,
+          title: editRequest.proposedTitle || undefined,
+          description: editRequest.proposedDescription || undefined,
+          genre: editRequest.proposedGenre || undefined,
           isEdited: true,
           lastEditedAt: new Date(),
           editedBy: editRequest.requesterId,
@@ -2407,7 +2406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const inviteStatus = await storage.getInviteStatus(storyId);
       res.json(inviteStatus);
     } catch (error) {
-      if (error.message === "NotFound") {
+      if (error instanceof Error && error.message === "NotFound") {
         return res.status(404).json({ message: "Invitation not found" });
       }
       console.error("Error fetching invite status:", error);
@@ -2434,7 +2433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.sendInviteReminder(storyId);
       res.json({ success: true });
     } catch (error) {
-      if (error.message === "NotFound") {
+      if (error instanceof Error && error.message === "NotFound") {
         return res.status(404).json({ message: "Invitation not found" });
       }
       console.error("Error sending invite reminder:", error);
@@ -2467,7 +2466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Story access debug error:", error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -2527,7 +2526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Debug endpoint error:", error);
-      res.status(500).json({ message: "Debug failed", error: error.message });
+      res.status(500).json({ message: "Debug failed", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
@@ -2596,7 +2595,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error("Error fixing turn assignment:", error);
-      res.status(500).json({ message: "Failed to fix turn assignment", error: error.message });
+      res.status(500).json({ message: "Failed to fix turn assignment", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

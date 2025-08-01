@@ -105,71 +105,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Auth routes
   // Get current user
-  app.get("/api/auth/user", async (req: any, res) => {
-    // Check for local auth session first
-    if (req.session?.userId && req.session?.user) {
-      return res.json({
-        id: req.session.user.id,
-        email: req.session.user.email,
-        username: req.session.user.username,
-        firstName: req.session.user.firstName,
-        lastName: req.session.user.lastName,
-        profileImageUrl: req.session.user.profileImageUrl,
-      });
-    }
+  app.get("/api/auth/user", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
 
-    // Check for passport-based auth (Replit Auth and Google Auth)
-    if (req.user?.claims?.sub) {
-      try {
-        const userId = req.session?.userId || req.user?.claims?.sub;
-        const user = await storage.getUser(userId);
-        console.log("Database lookup result:", user);
+      // Get fresh user data from database to ensure we have the latest username
+      const dbUser = await storage.getUser(user.claims.sub);
 
-        if (user) {
-          // Set session data for consistency
-          req.session.userId = userId;
-          req.session.user = {
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl,
-          };
-
-          // Save session
-          await new Promise<void>((resolve, reject) => {
-            req.session.save((err: any) => {
-              if (err) {
-                console.error("Session save error in auth/user:", err);
-                reject(err);
-              } else {
-                console.log("Session saved in auth/user endpoint");
-                resolve();
-              }
-            });
-          });
-
-          console.log("Returning user from database lookup");
-          return res.json({
-            id: user.id,
-            email: user.email,
-            username: user.username,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl,
-          });
-        } else {
-          console.log("No user found in database for ID:", userId);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        return res.status(500).json({ message: "Internal server error" });
+      if (!dbUser) {
+        return res.status(404).json({ message: "User not found" });
       }
-    }
 
-    console.log("No valid authentication found, returning 401");
-    return res.status(401).json({ message: "Unauthorized" });
+      // Log for debugging username issues
+      console.log("🔍 GET /api/auth/user - User data:", {
+        userId: user.claims.sub,
+        sessionUsername: user.claims.username,
+        dbUsername: dbUser.username,
+        email: dbUser.email
+      });
+
+      res.json({
+        id: dbUser.id,
+        email: dbUser.email,
+        username: dbUser.username, // Always use database username
+        firstName: dbUser.firstName,
+        lastName: dbUser.lastName,
+        profileImageUrl: dbUser.profileImageUrl,
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 
   // Email-based registration
@@ -711,7 +677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  
+
   // Get user's stories (both created and participating)
   app.get('/api/my-stories', isAuthenticated, async (req: any, res) => {
     try {
@@ -721,18 +687,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all stories where user is a participant
       const allStories = await storage.getStories();
       console.log(`[DEBUG] Total stories in database: ${allStories.length}`);
-      
+
       const participantStories = [];
 
       for (const story of allStories) {
         const isParticipant = await storage.isParticipant(story.id, userId);
         console.log(`[DEBUG] Story "${story.title}" (ID: ${story.id}): isParticipant = ${isParticipant}`);
-        
+
         if (isParticipant) {
           // Get turn information for each story
           const turn = await storage.getStoryTurn(story.id);
           console.log(`[DEBUG] Story "${story.title}" turn info:`, turn);
-          
+
           participantStories.push({
             ...story,
             currentTurn: turn?.currentTurn || 0,
@@ -774,7 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (const story of participantStories) {
         const turn = await storage.getStoryTurn(story.id);
         console.log(`[DEBUG] Story "${story.title}" (ID: ${story.id}): turn =`, turn, `isComplete = ${story.isComplete}`);
-        
+
         if (turn && turn.currentUserId === userId && !story.isComplete) {
           console.log(`[DEBUG] Adding "${story.title}" to my-turn stories`);
           myTurnStories.push(story);
@@ -924,6 +890,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: requester.id,
               username: requester.username || "Unknown",
               firstName: requester.firstName,
+              lastName: requester<previous_generation>
               lastName: requester.lastName,
               profileImageUrl: requester.profileImageUrl,
             } : null,
@@ -1788,7 +1755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update session with new profile image URL
       if (req.session?.user) {
         req.session.user.profileImageUrl = updatedUser.profileImageUrl;
-        
+
         // Save session to ensure it's persisted
         await new Promise<void>((resolve, reject) => {
           req.session.save((err: any) => {
@@ -2183,7 +2150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           firstName: updatedUser.firstName,
           lastName: updatedUser.lastName,
         };
-        
+
         // Save session to ensure it's persisted
         await new Promise<void>((resolve, reject) => {
           req.session.save((err: any) => {
@@ -2480,14 +2447,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const storyId = parseInt(req.params.id);
       const userId = req.session?.userId || req.user?.claims?.sub;
-      
+
       console.log(`[DEBUG] Checking story access for story ${storyId}, user ${userId}`);
-      
+
       const story = await storage.getStoryById(storyId);
       const isParticipant = story ? await storage.isParticipant(storyId, userId) : false;
       const participants = story ? await storage.getStoryParticipants(storyId) : [];
       const segments = story ? await storage.getStorySegments(storyId) : [];
-      
+
       res.json({
         storyExists: !!story,
         storyTitle: story?.title,
@@ -2497,7 +2464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         segmentCount: segments.length,
         participants: participants.map(p => p.userId)
       });
-      
+
     } catch (error) {
       console.error("Story access debug error:", error);
       res.status(500).json({ error: error.message });
@@ -2509,45 +2476,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
       const titleOrId = req.params.titleOrId;
-      
+
       console.log(`[DEBUG] Investigating story: ${titleOrId} for user: ${userId}`);
-      
+
       // Try to find story by title or ID
       const allStories = await storage.getStories();
       let targetStory = null;
-      
+
       // Try finding by ID first
       if (!isNaN(parseInt(titleOrId))) {
         targetStory = allStories.find(s => s.id === parseInt(titleOrId));
       }
-      
+
       // If not found by ID, try by title
       if (!targetStory) {
         targetStory = allStories.find(s => s.title.toLowerCase().includes(titleOrId.toLowerCase()));
       }
-      
+
       if (!targetStory) {
         return res.status(404).json({ message: "Story not found", searched: titleOrId });
       }
-      
+
       console.log(`[DEBUG] Found story:`, targetStory);
-      
+
       // Check participation
       const isParticipant = await storage.isParticipant(targetStory.id, userId);
       console.log(`[DEBUG] User is participant: ${isParticipant}`);
-      
+
       // Get participants
       const participants = await storage.getStoryParticipants(targetStory.id);
       console.log(`[DEBUG] All participants:`, participants);
-      
+
       // Get turn info
       const turn = await storage.getStoryTurn(targetStory.id);
       console.log(`[DEBUG] Turn info:`, turn);
-      
+
       // Get segments
       const segments = await storage.getStorySegments(targetStory.id);
       console.log(`[DEBUG] Segments count: ${segments.length}`);
-      
+
       res.json({
         story: targetStory,
         isParticipant,
@@ -2557,7 +2524,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isMyTurn: turn?.currentUserId === userId,
         isComplete: targetStory.isComplete
       });
-      
+
     } catch (error) {
       console.error("Debug endpoint error:", error);
       res.status(500).json({ message: "Debug failed", error: error.message });
@@ -2569,7 +2536,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const storyId = parseInt(req.params.id);
       const userId = req.session?.userId || req.user?.claims?.sub;
-      
+
       const story = await storage.getStoryById(storyId);
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
@@ -2583,22 +2550,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get participants
       const participants = await storage.getStoryParticipants(storyId);
       const turn = await storage.getStoryTurn(storyId);
-      
+
       console.log(`[DEBUG] Fixing turn for story ${storyId}`);
       console.log(`[DEBUG] Participants:`, participants.map(p => p.userId));
       console.log(`[DEBUG] Current turn:`, turn);
-      
+
       if (participants.length === 0) {
         return res.status(400).json({ message: "Story has no participants" });
       }
 
       // Check if current turn user is still a participant
       const currentUserIsParticipant = participants.some(p => p.userId === turn?.currentUserId);
-      
+
       if (!currentUserIsParticipant) {
         // Assign turn to the first participant (usually the creator)
         const newCurrentUserId = participants[0].userId;
-        
+
         if (turn) {
           await storage.updateStoryTurn(storyId, {
             currentUserId: newCurrentUserId
@@ -2610,9 +2577,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             currentUserId: newCurrentUserId
           });
         }
-        
+
         console.log(`[DEBUG] Fixed turn assignment for story ${storyId} to user ${newCurrentUserId}`);
-        
+
         res.json({ 
           message: "Turn assignment fixed",
           oldCurrentUserId: turn?.currentUserId,
@@ -2626,7 +2593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           participants: participants.map(p => p.userId)
         });
       }
-      
+
     } catch (error) {
       console.error("Error fixing turn assignment:", error);
       res.status(500).json({ message: "Failed to fix turn assignment", error: error.message });

@@ -429,12 +429,12 @@ export async function setupAuth(app: Express) {
           return res.redirect('/login?error=user_not_found');
         }
 
-        // Set session data
+        // Set session data with current database values
         req.session.userId = user.claims.sub;
         req.session.user = {
           id: dbUser.id,
           email: dbUser.email,
-          username: dbUser.username,
+          username: dbUser.username, // Use database username, not derived username
           firstName: dbUser.firstName,
           lastName: dbUser.lastName,
           profileImageUrl: dbUser.profileImageUrl,
@@ -506,12 +506,18 @@ export async function setupAuth(app: Express) {
           return next(err);
         }
 
+        // Get fresh user data from database to ensure correct username
+        const dbUser = await storage.getUser(user.claims.sub);
+        
         // Set session data for consistent access
         req.session.userId = user.claims.sub;
         req.session.user = {
           id: user.claims.sub,
           email: user.claims.email,
-          username: user.claims.username || user.claims.email.split('@')[0]
+          username: dbUser?.username || user.claims.email.split('@')[0],
+          firstName: dbUser?.firstName,
+          lastName: dbUser?.lastName,
+          profileImageUrl: dbUser?.profileImageUrl,
         };
 
         return res.json({ 

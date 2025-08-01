@@ -1,12 +1,9 @@
-Adding toast notification for join request approvals and incorporating necessary imports and useEffect hook.
-```
-```replit_final_file
 import React, { useEffect } from 'react';
 import Navbar from './Navbar';
 import { useWebSocketNotifications } from '@/hooks/useWebSocketNotifications';
 import { Toaster } from '@/components/ui/toaster';
 import { useToast } from '@/hooks/use-toast';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import MobileNav from "./MobileNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 

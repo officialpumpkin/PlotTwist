@@ -230,7 +230,7 @@ export const storySegmentsRelations = relations(storySegments, ({ one }) => ({
   }),
   user: one(users, {
     fields: [storySegments.userId],
-    references: [stories.id],
+    references: [users.id],
   }),
 }));
 

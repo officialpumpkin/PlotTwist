@@ -92,21 +92,21 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
     };
   }, [open]);
 
-  const form = useForm<z.infer<typeof storyFormSchema>>({
+  const form = useForm({
     resolver: zodResolver(storyFormSchema),
     defaultValues: {
       title: "",
       description: "",
       genre: "",
       wordLimit: 100,
-      characterLimit: 0, // 0 means no character limit
+      characterLimit: 0,
       maxSegments: 30,
       firstChapterAssignment: "author",
     },
   });
 
   const createStoryMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof storyFormSchema>) => {
+    mutationFn: async (values: any) => {
       console.log('Creating story with values:', values);
       // Create the story first
       const story = await apiRequest<Story>("POST", "/api/stories", values);
@@ -178,7 +178,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
     setInvites(invites.filter(i => i !== invite));
   };
 
-  function onSubmit(values: z.infer<typeof storyFormSchema>) {
+  function onSubmit(values: any) {
     console.log('Form submitted with values:', values);
     createStoryMutation.mutate(values);
   }

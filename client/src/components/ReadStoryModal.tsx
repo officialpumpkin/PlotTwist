@@ -159,19 +159,10 @@ export default function ReadStoryModal({
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                 <p className="text-sm text-muted-foreground mt-2">Loading story...</p>
               </div>
-            ) : safeSegments.length === 0 ? (
-              <div className="text-center py-12">
-                <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">Story Just Started</h3>
-                <p className="text-muted-foreground">
-                  This story is waiting for its first contribution.
-                </p>
-              </div>
             ) : (
               <>
-                {/* Story content - continuous flow */}
+                {/* Always show the story prompt */}
                 <div className="story-segment">
-                  {/* Story prompt with subtle styling */}
                   <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">
                     <p className="text-foreground leading-relaxed whitespace-pre-wrap">
                       {story.description}
@@ -193,31 +184,42 @@ export default function ReadStoryModal({
                       </Button>
                     )}
                   </div>
-                  {safeSegments
-                    .sort((a: any, b: any) => a.turn - b.turn)
-                    .map((segment: any, index: number) => (
-                    <div 
-                      key={segment.id}
-                      className={`story-segment contributor-text-${index % 5} relative pr-10`}
-                    >
-                      <div dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
-                      {isParticipant && user?.id === segment.userId && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="absolute top-0 right-0 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
-                          onClick={() => {
-                            setEditingSegment(segment);
-                            setShowEditRequestModal(true);
-                          }}
-                          title="Edit your contribution"
-                        >
-                          <Edit className="h-3 w-3" />
-                          <span className="sr-only">Edit your contribution</span>
-                        </Button>
-                      )}
+
+                  {safeSegments.length === 0 ? (
+                    <div className="text-center py-12">
+                      <Book className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-medium mb-2">Story Just Started</h3>
+                      <p className="text-muted-foreground">
+                        This story is waiting for its first contribution.
+                      </p>
                     </div>
-                    ))}
+                  ) : (
+                    safeSegments
+                      .sort((a: any, b: any) => a.turn - b.turn)
+                      .map((segment: any, index: number) => (
+                      <div 
+                        key={segment.id}
+                        className={`story-segment contributor-text-${index % 5} relative pr-10`}
+                      >
+                        <div dangerouslySetInnerHTML={{ __html: segment.content || '' }} />
+                        {isParticipant && user?.id === segment.userId && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="absolute top-0 right-0 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                            onClick={() => {
+                              setEditingSegment(segment);
+                              setShowEditRequestModal(true);
+                            }}
+                            title="Edit your contribution"
+                          >
+                            <Edit className="h-3 w-3" />
+                            <span className="sr-only">Edit your contribution</span>
+                          </Button>
+                        )}
+                      </div>
+                      ))
+                  )}
                 </div>
 
                 {/* Story Status */}

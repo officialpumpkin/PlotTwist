@@ -1,16 +1,13 @@
-The code has been modified to include username auto-completion for inviting collaborators to stories, with changes to the backend endpoint, a reusable auto-complete component, and integration in the NewStoryModal.
-```
-
-```replit_final_file
 import { useState } from "react";
+import * as React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Book, Users, FileText, Zap, UserPlus } from "lucide-react";
-import UsernameAutocomplete from "./UsernameAutocomplete";
+import { useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { storyFormSchema, Story } from "@shared/schema";
+import { z } from "zod";
 
 import {
   Dialog,
@@ -78,7 +75,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
             visibility: computedStyle.visibility,
             opacity: computedStyle.opacity
           });
-
+          
           const rect = dialogElement.getBoundingClientRect();
           console.log('Dialog element bounding rect:', {
             top: rect.top,
@@ -88,7 +85,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
             bottom: rect.bottom,
             right: rect.right
           });
-
+          
           console.log('Viewport dimensions:', {
             width: window.innerWidth,
             height: window.innerHeight
@@ -96,25 +93,25 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
         }
       }, 100);
     }
-
+    
     // Listen for accessibility warnings
     const originalError = console.error;
     const originalWarn = console.warn;
-
+    
     console.error = (...args) => {
       if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
         console.log('ACCESSIBILITY ERROR:', ...args);
       }
       originalError.apply(console, args);
     };
-
+    
     console.warn = (...args) => {
       if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
         console.log('ACCESSIBILITY WARNING:', ...args);
       }
       originalWarn.apply(console, args);
     };
-
+    
     return () => {
       console.error = originalError;
       console.warn = originalWarn;
@@ -188,10 +185,18 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   });
 
   const addInvite = () => {
-    const username = inviteEmail.trim();
-    if (username && !invites.includes(username)) {
-      setInvites([...invites, username]);
+    if (!inviteEmail.trim()) return;
+
+    // Simple validation for email or username
+    if (!invites.includes(inviteEmail)) {
+      setInvites([...invites, inviteEmail.trim()]);
       setInviteEmail("");
+    } else {
+      toast({
+        title: "Duplicate invite",
+        description: "This person has already been added to the invite list.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -420,11 +425,26 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
             <div className="space-y-3">
               <FormLabel>Invite Contributors (Optional)</FormLabel>
-              <UsernameAutocomplete
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e)}
-                onSelect={addInvite}
-              />
+              <div className="flex space-x-2">
+                <Input 
+                  placeholder="Enter email or username" 
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addInvite();
+                    }
+                  }}
+                />
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={addInvite}
+                >
+                  Add
+                </Button>
+              </div>
 
               {invites.length > 0 && (
                 <div className="mt-2">

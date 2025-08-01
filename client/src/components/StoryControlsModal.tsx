@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Settings, SkipForward, UserPlus, Edit, CheckCircle } from "lucide-react";
-import UsernameAutocomplete from "./UsernameAutocomplete";
 
 const storyControlsSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -232,7 +231,7 @@ export default function StoryControlsModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="story-controls-description">
         <div className="sr-only" id="story-controls-description">Story controls and settings</div>
-
+        
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -384,21 +383,36 @@ export default function StoryControlsModal({
               <UserPlus className="h-4 w-4" />
               <h3 className="text-sm font-medium">Invite Contributors (Optional)</h3>
             </div>
-
-            {/* Username Autocomplete */}
-            <UsernameAutocomplete
-              onSelect={(username) => {
-                setInvites([...invites, username]);
-              }}
-            />
+            
+            <div className="flex space-x-2">
+              <Input 
+                placeholder="Enter email or username" 
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addInvite();
+                  }
+                }}
+              />
+              <Button 
+                type="button" 
+                variant="outline"
+                size="sm"
+                onClick={addInvite}
+              >
+                Add
+              </Button>
+            </div>
 
             {invites.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">Invitees:</p>
                 <div className="flex flex-wrap gap-2">
                   {invites.map((invite, index) => (
-                    <div
-                      key={index}
+                    <div 
+                      key={index} 
                       className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full flex items-center"
                     >
                       <span>{invite}</span>
@@ -412,7 +426,7 @@ export default function StoryControlsModal({
                     </div>
                   ))}
                 </div>
-                <Button
+                <Button 
                   size="sm"
                   onClick={handleSendInvites}
                   disabled={inviteCollaboratorsMutation.isPending}

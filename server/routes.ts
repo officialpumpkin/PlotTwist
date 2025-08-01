@@ -9,7 +9,7 @@ import { nanoid } from "nanoid";
 import { db } from "./db";
 import { users } from "@shared/schema";
 import { logger } from "./logger";
-import { eq, and, ilike, isNotNull } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import {
   storyFormSchema,
   serverStorySchema,
@@ -2622,43 +2622,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fixing turn assignment:", error);
       res.status(500).json({ message: "Failed to fix turn assignment", error: error instanceof Error ? error.message : 'Unknown error' });
-    }
-  });
-
-  // Search usernames for auto-complete
-  app.get('/api/users/search', isAuthenticated, async (req, res) => {
-    try {
-      const { q } = req.query;
-      
-      if (!q || typeof q !== 'string' || q.length < 2) {
-        return res.json([]);
-      }
-      
-      const searchTerm = q.toLowerCase();
-      
-      // Search for active users by username (not deleted accounts)
-      const matchingUsers = await db
-        .select({
-          id: users.id,
-          username: users.username,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-        })
-        .from(users)
-        .where(
-          and(
-            ilike(users.username, `%${searchTerm}%`),
-            eq(users.isDeleted, false),
-            isNotNull(users.username)
-          )
-        )
-        .limit(10);
-      
-      res.json(matchingUsers);
-    } catch (error) {
-      console.error("Error searching usernames:", error);
-      res.status(500).json({ message: "Failed to search usernames" });
     }
   });
 

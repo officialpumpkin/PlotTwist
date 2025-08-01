@@ -34,7 +34,7 @@ export default function UserMenu() {
 
     // Listen for storage events that might indicate user data changes
     window.addEventListener('storage', handleStorageChange);
-
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };

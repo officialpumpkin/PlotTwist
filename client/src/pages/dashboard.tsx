@@ -244,7 +244,7 @@ export default function Dashboard() {
 
         {/* Modals */}
         <NewStoryModal open={newStoryModal} onOpenChange={setNewStoryModal} />
-
+        
         {activeStory && (
           <WritingModal 
             open={writingModal} 

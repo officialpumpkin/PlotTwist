@@ -44,6 +44,15 @@ export function useWebSocketNotifications() {
             case 'notification':
               console.log('Received notification:', message.data);
               
+              // Show toast notification for join request approval
+              if (message.data.type === 'join_request_approved') {
+                // We need to import toast here, but since we can't import hooks inside hooks,
+                // we'll trigger a custom event that can be caught by components
+                window.dispatchEvent(new CustomEvent('joinRequestApproved', {
+                  detail: message.data
+                }));
+              }
+              
               // Invalidate relevant queries to refresh data
               if (message.data.type === 'invitation') {
                 queryClient.invalidateQueries({ queryKey: ['/api/invitations/pending'] });
@@ -52,6 +61,11 @@ export function useWebSocketNotifications() {
                 queryClient.invalidateQueries({ queryKey: ['/api/waiting-turn'] });
               } else if (message.data.type === 'join_request') {
                 queryClient.invalidateQueries({ queryKey: ['/api/join-requests/pending'] });
+              } else if (message.data.type === 'join_request_approved') {
+                // Refresh user's stories since they now have access to a new story
+                queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/waiting-turn'] });
               }
               break;
               

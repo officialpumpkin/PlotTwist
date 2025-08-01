@@ -924,6 +924,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Request has already been " + joinRequest.status });
       }
 
+      // Get story details for notification
+      const story = await storage.getStoryById(joinRequest.storyId);
+      const author = await storage.getUser(userId);
+
       // Update request status
       await storage.updateStoryJoinRequest(requestId, { status: "approved" });
 
@@ -932,6 +936,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storyId: joinRequest.storyId,
         userId: joinRequest.requesterId
       });
+
+      // Send real-time notification to the requester
+      if (story && author && (server as any).broadcastNotification) {
+        (server as any).broadcastNotification(joinRequest.requesterId, {
+          type: 'join_request_approved',
+          title: 'Join Request Approved!',
+          message: `Your request to join "${story.title}" has been approved by ${author.username || 'the author'}`,
+          storyId: story.id,
+          storyTitle: story.title,
+          timestamp: new Date().toISOString()
+        });
+      }
 
       res.json({ message: "Join request approved successfully" });
     } catch (error) {

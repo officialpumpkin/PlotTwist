@@ -32,6 +32,8 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Settings, SkipForward, UserPlus, Edit, CheckCircle } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import api from "@/lib/api";
 
 const storyControlsSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -43,17 +45,20 @@ interface StoryControlsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   storyId: number;
+  onClose: () => void;
 }
 
 export default function StoryControlsModal({ 
   open, 
   onOpenChange, 
-  storyId 
+  storyId,
+  onClose
 }: StoryControlsModalProps) {
   const { toast } = useToast();
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
   const [inviteSuccess, setInviteSuccess] = useState(false);
+  const { user } = useUser();
 
   // Get story details
   const { data: story } = useQuery({
@@ -193,6 +198,49 @@ export default function StoryControlsModal({
     }
   });
 
+  const completeMutation = useMutation({
+    mutationFn: () => api.post(`/api/stories/${storyId}/complete`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/waiting-turn'] });
+      toast({
+        title: "Story completed!",
+        description: "The story has been marked as complete.",
+      });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to complete story",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/api/stories/${storyId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/waiting-turn'] });
+      toast({
+        title: "🔥 Story burned!",
+        description: "The story has been deleted. All participants have been notified and received the story content via email.",
+        duration: 7000,
+      });
+      onClose();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.response?.data?.message || "Failed to delete story",
+        variant: "destructive",
+      });
+    },
+  });
+
   const addInvite = () => {
     const email = inviteEmail.trim();
     if (email && !invites.includes(email)) {
@@ -225,13 +273,25 @@ export default function StoryControlsModal({
     }
   };
 
+  const handleCompleteStory = () => {
+    if (confirm("Are you sure you want to mark this story as complete? This action cannot be undone.")) {
+      completeMutation.mutate();
+    }
+  };
+
+  const handleDeleteStory = () => {
+    if (confirm(`Are you sure you want to BURN "${story?.title}"? This will permanently delete the story and send the complete story to all participants via email. This action cannot be undone!`)) {
+      deleteMutation.mutate();
+    }
+  };
+
   if (!story) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" aria-describedby="story-controls-description">
         <div className="sr-only" id="story-controls-description">Story controls and settings</div>
-        
+
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
@@ -383,7 +443,7 @@ export default function StoryControlsModal({
               <UserPlus className="h-4 w-4" />
               <h3 className="text-sm font-medium">Invite Contributors (Optional)</h3>
             </div>
-            
+
             <div className="flex space-x-2">
               <Input 
                 placeholder="Enter email or username" 
@@ -445,6 +505,29 @@ export default function StoryControlsModal({
               </div>
             )}
           </div>
+
+          <Separator />
+
+           <div className="flex justify-end gap-2">
+              <Button 
+                variant="destructive" 
+                onClick={handleCompleteStory}
+                disabled={completeMutation.isPending}
+              >
+                {completeMutation.isPending ? "Completing..." : "Mark as Complete"}
+              </Button>
+
+              {story?.creatorId === user?.id && (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDeleteStory}
+                  disabled={deleteMutation.isPending}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {deleteMutation.isPending ? "Burning..." : "🔥 Burn the Book (Delete)"}
+                </Button>
+              )}
+            </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -784,6 +784,38 @@ export class DatabaseStorage implements IStorage {
       return inviteStatuses;
     }
 
+    // Delete story and all related data
+    async deleteStory(storyId: number): Promise<void> {
+      // Delete in order to respect foreign key constraints
+      
+      // Delete story segments
+      await db.delete(storySegments).where(eq(storySegments.storyId, storyId));
+      
+      // Delete story participants
+      await db.delete(storyParticipants).where(eq(storyParticipants.storyId, storyId));
+      
+      // Delete story turns
+      await db.delete(storyTurns).where(eq(storyTurns.storyId, storyId));
+      
+      // Delete story images
+      await db.delete(storyImages).where(eq(storyImages.storyId, storyId));
+      
+      // Delete story invitations
+      await db.delete(storyInvitations).where(eq(storyInvitations.storyId, storyId));
+      
+      // Delete join requests
+      await db.delete(storyJoinRequests).where(eq(storyJoinRequests.storyId, storyId));
+      
+      // Delete edit requests
+      await db.delete(storyEditRequests).where(eq(storyEditRequests.storyId, storyId));
+      
+      // Delete print orders
+      await db.delete(printOrders).where(eq(printOrders.storyId, storyId));
+      
+      // Finally, delete the story itself
+      await db.delete(stories).where(eq(stories.id, storyId));
+    }
+
     // Send invitation reminder
     async sendInviteReminder(storyId: number): Promise<void> {
       const invitations = await db

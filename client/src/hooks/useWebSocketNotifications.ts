@@ -66,6 +66,15 @@ export function useWebSocketNotifications() {
                 queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
                 queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
                 queryClient.invalidateQueries({ queryKey: ['/api/waiting-turn'] });
+              } else if (message.data.type === 'story_deleted') {
+                // Show toast notification for story deletion
+                window.dispatchEvent(new CustomEvent('storyDeleted', {
+                  detail: message.data
+                }));
+                // Refresh all story lists since a story was deleted
+                queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
+                queryClient.invalidateQueries({ queryKey: ['/api/waiting-turn'] });
               }
               break;
               

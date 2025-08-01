@@ -283,6 +283,113 @@ You received this because an account was created with this email address.`;
   });
 }
 
+export async function sendStoryDeletionEmail(
+  recipientEmail: string,
+  recipientName: string,
+  authorName: string,
+  storyTitle: string,
+  storyContent: string,
+  storyDescription: string
+): Promise<boolean> {
+  const subject = `📚🔥 "${storyTitle}" has been burned...Fahrenheit 451 style`;
+  
+  const text = `Hello ${recipientName},
+
+The author ${authorName} has decided to burn the story "${storyTitle}"...Fahrenheit 451 style! 🔥
+
+But don't worry - before it vanished into digital smoke, we've preserved the complete story for you below.
+
+STORY: ${storyTitle}
+${storyDescription ? `DESCRIPTION: ${storyDescription}` : ''}
+
+--- THE COMPLETE STORY ---
+
+${storyContent}
+
+--- END OF STORY ---
+
+Though this collaborative tale has come to an abrupt end, the words you all created together live on in this email. Perhaps one day, like the books in Bradbury's classic, this story might rise from the ashes to inspire new tales.
+
+Thank you for being part of this collaborative writing journey on PlotTwist.
+
+In memory of burned books and deleted stories,
+The PlotTwist Team`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+      
+      <!-- Header with fire theme -->
+      <div style="text-align: center; margin-bottom: 30px; background: linear-gradient(135deg, #ff6b35, #ff8e53); padding: 30px; border-radius: 12px; color: white;">
+        <h1 style="color: white; font-size: 28px; margin: 0 0 10px 0;">📚🔥 Story Burned!</h1>
+        <p style="color: #fff2e6; font-size: 16px; margin: 0;">Fahrenheit 451 Style</p>
+      </div>
+      
+      <div style="background-color: #fef7f0; padding: 25px; border-radius: 8px; border-left: 4px solid #ff6b35; margin-bottom: 30px;">
+        <h2 style="color: #c63317; margin: 0 0 15px 0; font-size: 20px;">Hello ${recipientName},</h2>
+        <p style="color: #8b3a1e; line-height: 1.6; margin: 0;">
+          The author <strong>${authorName}</strong> has decided to burn the story <strong>"${storyTitle}"</strong>...Fahrenheit 451 style! 🔥
+        </p>
+      </div>
+      
+      <p style="color: #374151; line-height: 1.6; font-size: 16px;">
+        But don't worry - before it vanished into digital smoke, we've preserved the complete story for you below.
+      </p>
+      
+      <!-- Story Details -->
+      <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e2e8f0;">
+        <h3 style="color: #1e40af; margin: 0 0 10px 0; font-size: 18px;">📖 ${storyTitle}</h3>
+        ${storyDescription ? `<p style="color: #64748b; font-style: italic; margin: 0; line-height: 1.5;">${storyDescription}</p>` : ''}
+      </div>
+      
+      <!-- Story Content -->
+      <div style="background-color: #1f2937; color: #f9fafb; padding: 30px; border-radius: 8px; margin: 30px 0; font-family: 'Georgia', serif;">
+        <h3 style="color: #fbbf24; text-align: center; margin: 0 0 20px 0; font-size: 20px; border-bottom: 2px solid #374151; padding-bottom: 15px;">
+          📜 THE COMPLETE STORY
+        </h3>
+        <div style="line-height: 1.8; font-size: 16px; white-space: pre-line;">
+${storyContent}
+        </div>
+        <div style="text-align: center; margin-top: 20px; padding-top: 15px; border-top: 2px solid #374151;">
+          <em style="color: #9ca3af; font-size: 14px;">~ End of Story ~</em>
+        </div>
+      </div>
+      
+      <!-- Closing Message -->
+      <div style="background-color: #ecfdf5; padding: 25px; border-radius: 8px; border-left: 4px solid #10b981; margin: 30px 0;">
+        <p style="color: #047857; line-height: 1.6; margin: 0 0 15px 0;">
+          Though this collaborative tale has come to an abrupt end, the words you all created together live on in this email. 
+        </p>
+        <p style="color: #047857; line-height: 1.6; margin: 0;">
+          Perhaps one day, like the books in Bradbury's classic, this story might rise from the ashes to inspire new tales.
+        </p>
+      </div>
+      
+      <p style="color: #374151; line-height: 1.6; margin: 25px 0;">
+        Thank you for being part of this collaborative writing journey on <strong>PlotTwist</strong>.
+      </p>
+      
+      <!-- Footer -->
+      <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+        <p style="color: #6b7280; font-style: italic; margin: 0;">
+          In memory of burned books and deleted stories,<br>
+          <strong style="color: #374151;">The PlotTwist Team</strong>
+        </p>
+        <p style="color: #9ca3af; font-size: 12px; margin: 10px 0 0 0;">
+          "It was a pleasure to burn" - Ray Bradbury, Fahrenheit 451
+        </p>
+      </div>
+    </div>
+  `;
+
+  return await sendEmail({
+    to: recipientEmail,
+    from: process.env.SENDGRID_VERIFIED_SENDER!,
+    subject,
+    text,
+    html
+  });
+}
+
 export async function sendPasswordResetEmail(userEmail: string, userName: string, resetToken: string, baseUrl: string): Promise<boolean> {
   console.log(`Attempting to send password reset email to: ${userEmail}`);
   const subject = "Your PlotTwist Password Reset Request";

@@ -2484,6 +2484,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete story (authors only)
+  app.delete('/api/stories/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const storyId = parseInt(req.params.id);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      const story = await storage.getStoryById(storyId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Only the story creator can delete
+      if (story.creatorId !== userId) {
+        return res.status(403).json({ message: "Only the story creator can delete this story" });
+      }
+
+      // Get all participants before deletion
+      const participants = await storage.getStoryParticipants(storyId);
+      const segments = await storage.getStorySegments(storyId);
+      const author = await storage.getUser(userId);
+
+      // Compile the full story text
+      const storyContent = segments
+        .sort((a, b) => a.turn - b.turn)
+        .map(segment => segment.content)
+        .join('\n\n');
+
+      // Get participant emails
+      const participantEmails = await Promise.all(
+        participants.map(async (p) => {
+          const user = await storage.getUser(p.userId);
+          return user ? { email: user.email, username: user.username || 'Collaborator' } : null;
+        })
+      );
+
+      const validParticipants = participantEmails.filter(p => p !== null);
+
+      // Send story content to all participants
+      if (validParticipants.length > 0) {
+        const { sendStoryDeletionEmail } = await import('./emailService');
+        
+        for (const participant of validParticipants) {
+          try {
+            await sendStoryDeletionEmail(
+              participant.email,
+              participant.username,
+              author?.username || 'The author',
+              story.title,
+              storyContent,
+              story.description || ''
+            );
+          } catch (error) {
+            console.error(`Failed to send story deletion email to ${participant.email}:`, error);
+          }
+        }
+      }
+
+      // Delete the story and all related data
+      await storage.deleteStory(storyId);
+
+      // Send real-time notifications to all participants
+      if ((server as any).broadcastNotification) {
+        for (const participant of participants) {
+          if (participant.userId !== userId) { // Don't notify the deleter
+            (server as any).broadcastNotification(participant.userId, {
+              type: 'story_deleted',
+              title: 'Story Burned! 🔥',
+              message: `"${story.title}" has been burned by the author...Fahrenheit 451 style. Check your email for the complete story.`,
+              storyId: story.id,
+              storyTitle: story.title,
+              timestamp: new Date().toISOString()
+            });
+          }
+        }
+      }
+
+      res.json({ message: "Story deleted successfully. All participants have been notified and received the story content via email." });
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      res.status(500).json({ message: "Failed to delete story" });
+    }
+  });
+
   // Debug endpoint for checking story access
   app.get('/api/debug/story-access/:id', isAuthenticated, async (req: any, res) => {
     try {

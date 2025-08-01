@@ -28,10 +28,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       });
     };
 
+    const handleStoryDeleted = (event: CustomEvent) => {
+      const notification = event.detail;
+      toast({
+        title: notification.title,
+        description: notification.message,
+        duration: 7000,
+        variant: "destructive"
+      });
+    };
+
     window.addEventListener('joinRequestApproved', handleJoinRequestApproved as EventListener);
+    window.addEventListener('storyDeleted', handleStoryDeleted as EventListener);
 
     return () => {
       window.removeEventListener('joinRequestApproved', handleJoinRequestApproved as EventListener);
+      window.removeEventListener('storyDeleted', handleStoryDeleted as EventListener);
     };
   }, [toast]);
 

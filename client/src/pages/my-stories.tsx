@@ -284,6 +284,7 @@ export default function MyStories() {
                   story={story}
                   status={status}
                   showProgress
+                  waitingUserId={status === "Waiting" ? story.currentUserId : undefined}
                   onContinue={isMyTurn ? () => openWritingModal(story.id) : undefined}
                   onComplete={() => openCompleteStoryModal(story.id)}
                   onPrint={() => openPrintModal(story.id)}

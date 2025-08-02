@@ -187,30 +187,6 @@ export default function StoryCard({
                 </div>
               )}
             </div>
-            {/* Turn information details */}
-            {!story.isComplete && (
-              <div className="mt-1">
-                {status === "Your Turn" ? (
-                  <p className="text-xs text-primary font-medium">
-                    Your Turn
-                  </p>
-                ) : status === "Waiting" && waitingUser ? (
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-medium text-foreground">
-                      {waitingUser.firstName || waitingUser.username}
-                    </span>'s turn
-                  </p>
-                ) : status === "Active" && variant === "explore" ? (
-                  <p className="text-xs text-muted-foreground">
-                    Active story
-                  </p>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Waiting for turn
-                  </p>
-                )}
-              </div>
-            )}
           </div>
           <span className={cn(
             "text-xs px-2 py-1 rounded-full",

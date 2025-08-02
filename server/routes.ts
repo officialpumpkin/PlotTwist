@@ -10,7 +10,7 @@ import { nanoid } from "nanoid";
 import { db } from "./db";
 import { users } from "@shared/schema";
 import { logger } from "./logger";
-import { eq } from "drizzle-orm";
+import { eq, or, sql } from "drizzle-orm";
 import {
   storyFormSchema,
   serverStorySchema,

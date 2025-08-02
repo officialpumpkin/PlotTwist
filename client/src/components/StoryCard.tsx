@@ -199,7 +199,11 @@ export default function StoryCard({
           </span>
         </div>
 
-        <p className="text-muted-foreground text-sm line-clamp-3">{story.description}</p>
+        <div className="h-10 flex items-start">
+          <p className="text-muted-foreground text-sm line-clamp-2 leading-5">
+            {story.description || '\u00A0'}
+          </p>
+        </div>
 
         <div className="flex items-center justify-between mt-4 text-sm text-neutral-500">
           <div className="flex items-center">

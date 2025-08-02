@@ -200,7 +200,13 @@ export default function StoryCard({
         </div>
 
         <div className="h-10 flex items-start">
-          <p className="text-muted-foreground text-sm line-clamp-2 leading-5">
+          <p className="text-muted-foreground text-sm leading-5 overflow-hidden" style={{
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            minHeight: '2.5rem', // Equivalent to 2 lines at leading-5 (1.25rem per line)
+            maxHeight: '2.5rem'
+          }}>
             {story.description || '\u00A0'}
           </p>
         </div>

@@ -2760,7 +2760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search users for invitation autocomplete
   app.get('/api/users/search', isAuthenticated, async (req, res) => {
     try {
-      const query = req.query.q as string;
+      const query = (req.query.q || req.query.query) as string;
       
       if (!query || query.length < 2) {
         return res.json([]);

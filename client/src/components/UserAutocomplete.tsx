@@ -38,7 +38,7 @@ export default function UserAutocomplete({
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/users/search', value],
     queryFn: async () => {
-      const response = await fetch(`/api/users/search?query=${encodeURIComponent(value)}`, {
+      const response = await fetch(`/api/users/search?q=${encodeURIComponent(value)}`, {
         credentials: 'include'
       });
       if (!response.ok) {

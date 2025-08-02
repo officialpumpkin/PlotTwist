@@ -2521,43 +2521,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validParticipants = participantEmails.filter(p => p !== null);
 
-      // Send story content to all participants
+      // Delete the story and all related data first
+      await storage.deleteStory(storyId);
+
+      // Send story content to all participants (after deletion to ensure story is deleted even if emails fail)
       if (validParticipants.length > 0) {
-        const { sendStoryDeletionEmail } = await import('./emailService');
-        
-        for (const participant of validParticipants) {
-          try {
-            await sendStoryDeletionEmail(
-              participant.email,
-              participant.username,
-              author?.username || 'The author',
-              story.title,
-              storyContent,
-              story.description || ''
-            );
-          } catch (error) {
-            console.error(`Failed to send story deletion email to ${participant.email}:`, error);
-          }
+        try {
+          const { sendStoryDeletionEmail } = await import('./emailService');
+          
+          const emailPromises = validParticipants.map(async (participant) => {
+            try {
+              await sendStoryDeletionEmail(
+                participant.email,
+                participant.username,
+                author?.username || 'The author',
+                story.title,
+                storyContent,
+                story.description || ''
+              );
+            } catch (error) {
+              console.error(`Failed to send story deletion email to ${participant.email}:`, error);
+              // Don't throw - we want to continue with other emails
+            }
+          });
+
+          // Wait for all email attempts to complete, but don't fail if some emails fail
+          await Promise.allSettled(emailPromises);
+        } catch (error) {
+          console.error('Error in email sending process:', error);
+          // Don't throw - story is already deleted
         }
       }
 
-      // Delete the story and all related data
-      await storage.deleteStory(storyId);
-
       // Send real-time notifications to all participants
-      if ((server as any).broadcastNotification) {
-        for (const participant of participants) {
-          if (participant.userId !== userId) { // Don't notify the deleter
-            (server as any).broadcastNotification(participant.userId, {
-              type: 'story_deleted',
-              title: 'Story Burned! 🔥',
-              message: `"${story.title}" has been burned by the author...Fahrenheit 451 style. Check your email for the complete story.`,
-              storyId: story.id,
-              storyTitle: story.title,
-              timestamp: new Date().toISOString()
-            });
+      try {
+        if ((server as any).broadcastNotification) {
+          for (const participant of participants) {
+            if (participant.userId !== userId) { // Don't notify the deleter
+              try {
+                (server as any).broadcastNotification(participant.userId, {
+                  type: 'story_deleted',
+                  title: 'Story Burned! 🔥',
+                  message: `"${story.title}" has been burned by the author...Fahrenheit 451 style. Check your email for the complete story.`,
+                  storyId: story.id,
+                  storyTitle: story.title,
+                  timestamp: new Date().toISOString()
+                });
+              } catch (notificationError) {
+                console.error(`Failed to send notification to user ${participant.userId}:`, notificationError);
+                // Continue with other notifications
+              }
+            }
           }
         }
+      } catch (error) {
+        console.error('Error in notification sending process:', error);
+        // Don't throw - story is already deleted
       }
 
       res.json({ message: "Story deleted successfully. All participants have been notified and received the story content via email." });

@@ -178,7 +178,7 @@ export default function InviteCollaboratorModal({
                         <UserAutocomplete
                           placeholder="Type to search by email or username..."
                           value={autocompleteValue}
-                          onChange={(value) => {
+                          onValueChange={(value) => {
                             setAutocompleteValue(value);
                             // Update form value if user types directly
                             if (value.includes('@')) {
@@ -227,7 +227,7 @@ export default function InviteCollaboratorModal({
                         <UserAutocomplete
                           placeholder="Type to search by username or email..."
                           value={autocompleteValue}
-                          onChange={(value) => {
+                          onValueChange={(value) => {
                             setAutocompleteValue(value);
                             // Update form value if user types directly
                             if (!value.includes('@')) {

@@ -19,7 +19,8 @@ interface UserAutocompleteProps {
   placeholder?: string;
   onSelect: (user: User) => void;
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  onValueChange?: (value: string) => void;
   disabled?: boolean;
 }
 
@@ -28,10 +29,14 @@ export default function UserAutocomplete({
   onSelect,
   value,
   onChange,
+  onValueChange,
   disabled = false
 }: UserAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [debouncedValue, setDebouncedValue] = useState(value);
+
+  // Use either onChange or onValueChange prop
+  const handleValueChange = onChange || onValueChange || (() => {});
 
   // Debounce the search query
   useEffect(() => {
@@ -56,8 +61,21 @@ export default function UserAutocomplete({
   };
 
   const handleInputChange = (newValue: string) => {
-    onChange(newValue);
+    handleValueChange(newValue);
     setOpen(newValue.length >= 2);
+  };
+
+  const handleInputFocus = () => {
+    if (value.length >= 2) {
+      setOpen(true);
+    }
+  };
+
+  const handleInputBlur = () => {
+    // Delay closing to allow for clicks on dropdown items
+    setTimeout(() => {
+      setOpen(false);
+    }, 200);
   };
 
   return (
@@ -67,25 +85,34 @@ export default function UserAutocomplete({
           placeholder={placeholder}
           value={value}
           onChange={(e) => handleInputChange(e.target.value)}
+          onFocus={handleInputFocus}
+          onBlur={handleInputBlur}
           disabled={disabled}
-          onFocus={() => value.length >= 2 && setOpen(true)}
+          autoComplete="off"
         />
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+      <PopoverContent 
+        className="w-[var(--radix-popover-trigger-width)] p-0 max-h-[200px] overflow-hidden" 
+        align="start"
+        side="bottom"
+        sideOffset={4}
+      >
         <Command>
-          <CommandList>
+          <CommandList className="max-h-[200px] overflow-y-auto">
             {isLoading ? (
               <CommandEmpty>Searching...</CommandEmpty>
-            ) : users.length === 0 ? (
+            ) : users.length === 0 && debouncedValue.length >= 2 ? (
               <CommandEmpty>No users found.</CommandEmpty>
+            ) : debouncedValue.length < 2 ? (
+              <CommandEmpty>Type at least 2 characters to search</CommandEmpty>
             ) : (
               <CommandGroup>
                 {users.map((user: User) => (
                   <CommandItem
                     key={user.id}
-                    value={user.displayText}
+                    value={`${user.username} ${user.email}`}
                     onSelect={() => handleSelect(user)}
-                    className="flex items-center gap-2 cursor-pointer"
+                    className="flex items-center gap-2 cursor-pointer hover:bg-accent"
                   >
                     <Avatar className="h-6 w-6">
                       <AvatarImage 

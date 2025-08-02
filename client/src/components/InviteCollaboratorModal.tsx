@@ -5,6 +5,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import UserAutocomplete from "@/components/UserAutocomplete";
 
 import {
   Dialog,
@@ -53,6 +54,7 @@ export default function InviteCollaboratorModal({
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"email" | "username">("email");
   const [error, setError] = useState<string | null>(null);
+  const [autocompleteValue, setAutocompleteValue] = useState("");
 
   // Email form
   const emailForm = useForm<InviteByEmailInput>({
@@ -114,6 +116,17 @@ export default function InviteCollaboratorModal({
     },
   });
 
+  // Handle user selection from autocomplete
+  const handleUserSelect = (user: { username: string; email: string }) => {
+    if (activeTab === "email") {
+      emailForm.setValue("email", user.email);
+      setAutocompleteValue(user.email);
+    } else {
+      usernameForm.setValue("username", user.username);
+      setAutocompleteValue(user.username);
+    }
+  };
+
   // Handle form submission based on active tab
   function onSubmit(data: InviteByEmailInput | InviteByUsernameInput) {
     setError(null);
@@ -142,7 +155,11 @@ export default function InviteCollaboratorModal({
           </Alert>
         )}
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "email" | "username")} className="mt-4">
+        <Tabs value={activeTab} onValueChange={(value) => { 
+          setActiveTab(value as "email" | "username");
+          setAutocompleteValue("");
+          setError(null);
+        }} className="mt-4">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="email">Invite by Email</TabsTrigger>
             <TabsTrigger value="username">Add by Username</TabsTrigger>
@@ -158,7 +175,22 @@ export default function InviteCollaboratorModal({
                     <FormItem>
                       <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input placeholder="collaborator@example.com" {...field} disabled={isPending} />
+                        <UserAutocomplete
+                          placeholder="Type to search by email or username..."
+                          value={autocompleteValue}
+                          onChange={(value) => {
+                            setAutocompleteValue(value);
+                            // Update form value if user types directly
+                            if (value.includes('@')) {
+                              field.onChange(value);
+                            }
+                          }}
+                          onSelect={(user) => {
+                            handleUserSelect(user);
+                            field.onChange(user.email);
+                          }}
+                          disabled={isPending}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -192,7 +224,22 @@ export default function InviteCollaboratorModal({
                     <FormItem>
                       <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter username" {...field} disabled={isPending} />
+                        <UserAutocomplete
+                          placeholder="Type to search by username or email..."
+                          value={autocompleteValue}
+                          onChange={(value) => {
+                            setAutocompleteValue(value);
+                            // Update form value if user types directly
+                            if (!value.includes('@')) {
+                              field.onChange(value);
+                            }
+                          }}
+                          onSelect={(user) => {
+                            handleUserSelect(user);
+                            field.onChange(user.username);
+                          }}
+                          disabled={isPending}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

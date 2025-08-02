@@ -2744,6 +2744,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Search users for invitation autocomplete
+  app.get('/api/users/search', isAuthenticated, async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      
+      if (!query || query.length < 2) {
+        return res.json([]);
+      }
+
+      // Search for users by username or email (case-insensitive, partial match)
+      const users = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl
+        })
+        .from(users)
+        .where(
+          or(
+            sql`LOWER(${users.username}) LIKE LOWER(${'%' + query + '%'})`,
+            sql`LOWER(${users.email}) LIKE LOWER(${'%' + query + '%'})`
+          )
+        )
+        .limit(10);
+
+      // Filter out deleted users and current user
+      const currentUserId = req.session?.userId || req.user?.claims?.sub;
+      const filteredUsers = users
+        .filter(user => !user.id.startsWith('deleted_') && user.id !== currentUserId)
+        .map(user => ({
+          id: user.id,
+          username: user.username || 'Unknown',
+          email: user.email,
+          profileImageUrl: user.profileImageUrl,
+          displayText: `${user.username || 'Unknown'} (${user.email})`
+        }));
+
+      res.json(filteredUsers);
+    } catch (error) {
+      console.error("Error searching users:", error);
+      res.status(500).json({ message: "Failed to search users" });
+    }
+  });
+
   // Delete user account
   app.delete('/api/users/account', isAuthenticated, async (req: any, res) => {
     try {

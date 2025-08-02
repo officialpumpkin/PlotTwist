@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CloseIcon } from "./assets/icons";
+import UserAutocomplete from "./UserAutocomplete";
 
 // We're using the storyFormSchema imported from shared/schema.ts
 
@@ -49,6 +50,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
   const { toast } = useToast();
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
+  const [autocompleteValue, setAutocompleteValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [customGenre, setCustomGenre] = useState("");
   const [showCustomGenre, setShowCustomGenre] = useState(false);
 
@@ -67,25 +70,25 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
         }
       }, 100);
     }
-    
+
     // Monitor for accessibility issues
     const originalError = console.error;
     const originalWarn = console.warn;
-    
+
     console.error = (...args) => {
       if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
         // Log accessibility errors silently for debugging if needed
       }
       originalError.apply(console, args);
     };
-    
+
     console.warn = (...args) => {
       if (args[0]?.includes?.('DialogContent') || args[0]?.includes?.('accessibility')) {
         // Log accessibility warnings silently for debugging if needed
       }
       originalWarn.apply(console, args);
     };
-    
+
     return () => {
       console.error = originalError;
       console.warn = originalWarn;
@@ -142,6 +145,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
       form.reset();
       setInvites([]);
       setInviteEmail("");
+      setAutocompleteValue("");
       setCustomGenre("");
       setShowCustomGenre(false);
       queryClient.invalidateQueries({ queryKey: ["/api/my-stories"] });
@@ -165,6 +169,7 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
     if (!invites.includes(inviteEmail)) {
       setInvites([...invites, inviteEmail.trim()]);
       setInviteEmail("");
+      setAutocompleteValue("");
     } else {
       toast({
         title: "Duplicate invite",
@@ -182,6 +187,16 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
     console.log('Form submitted with values:', values);
     createStoryMutation.mutate(values);
   }
+
+  const handleUserSelect = (user: { username: string; email: string }) => {
+    // Prefer email for invitations, but fall back to username if needed
+    const inviteValue = user.email || user.username;
+    if (!invites.includes(inviteValue)) {
+      setInvites([...invites, inviteValue]);
+      setInviteEmail("");
+      setAutocompleteValue("");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -399,26 +414,11 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
 
             <div className="space-y-3">
               <FormLabel>Invite Contributors (Optional)</FormLabel>
-              <div className="flex space-x-2">
-                <Input 
-                  placeholder="Enter email or username" 
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addInvite();
-                    }
-                  }}
-                />
-                <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={addInvite}
-                >
-                  Add
-                </Button>
-              </div>
+              <UserAutocomplete
+                value={inviteEmail}
+                onValueChange={setInviteEmail}
+                onSelect={handleUserSelect}
+              />
 
               {invites.length > 0 && (
                 <div className="mt-2">

@@ -529,19 +529,10 @@ export default function StoryControlsModal({
           <Separator />
 
           {/* Story Actions Section */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium">Story Actions</h3>
-            <div className="flex flex-col gap-2">
-              <Button 
-                variant="destructive" 
-                onClick={handleCompleteStory}
-                disabled={completeMutation.isPending}
-                className="w-full"
-              >
-                {completeMutation.isPending ? "Completing..." : "Mark as Complete"}
-              </Button>
-
-              {story?.creatorId === user?.id && (
+          {story?.creatorId === user?.id && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium">Story Actions</h3>
+              <div className="flex flex-col gap-2">
                 <Button 
                   variant="destructive" 
                   onClick={handleDeleteStory}
@@ -550,15 +541,13 @@ export default function StoryControlsModal({
                 >
                   {deleteMutation.isPending ? "Burning..." : "🔥 Burn the Book (Delete)"}
                 </Button>
-              )}
-            </div>
-            
-            {story?.creatorId === user?.id && (
+              </div>
+              
               <p className="text-xs text-muted-foreground">
                 Burning the book will permanently delete the story and send the complete story to all participants via email.
               </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

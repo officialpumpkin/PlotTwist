@@ -2760,14 +2760,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search users for invitation autocomplete
   app.get('/api/users/search', isAuthenticated, async (req, res) => {
     try {
-      const query = (req.query.q || req.query.query) as string;
+      console.log('UserSearch: Raw query params received', { 
+        q: req.query.q, 
+        query: req.query.query,
+        allParams: req.query 
+      });
       
-      if (!query || query.length < 2) {
+      const query = (req.query.q || req.query.query) as string;
+      console.log('UserSearch: Resolved search query', { query, length: query?.length });
+      
+      if (!query) {
+        console.log('UserSearch: Early return - no query provided');
+        return res.json([]);
+      }
+      
+      if (query.length < 2) {
+        console.log('UserSearch: Early return - query too short', { query, length: query.length });
         return res.json([]);
       }
 
+      console.log('UserSearch: Proceeding with database search', { query });
+
       // Search for users by username or email (case-insensitive, partial match)
-      const users = await db
+      const dbUsers = await db
         .select({
           id: users.id,
           username: users.username,
@@ -2783,10 +2798,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         )
         .limit(10);
 
+      console.log('UserSearch: Database query completed', { 
+        rawResultCount: dbUsers.length,
+        rawResults: dbUsers.map(u => ({ id: u.id, username: u.username, email: u.email }))
+      });
+
       // Filter out deleted users and current user
       const currentUserId = req.session?.userId || req.user?.claims?.sub;
-      const filteredUsers = users
-        .filter(user => !user.id.startsWith('deleted_') && user.id !== currentUserId)
+      console.log('UserSearch: Current user ID for filtering', { currentUserId });
+      
+      const filteredUsers = dbUsers
+        .filter(user => {
+          const isDeleted = user.id.startsWith('deleted_');
+          const isCurrentUser = user.id === currentUserId;
+          const shouldInclude = !isDeleted && !isCurrentUser;
+          
+          if (isDeleted) console.log('UserSearch: Filtered out deleted user', { userId: user.id });
+          if (isCurrentUser) console.log('UserSearch: Filtered out current user', { userId: user.id });
+          
+          return shouldInclude;
+        })
         .map(user => ({
           id: user.id,
           username: user.username || 'Unknown',
@@ -2795,9 +2826,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           displayText: `${user.username || 'Unknown'} (${user.email})`
         }));
 
+      console.log('UserSearch: Final filtered results', { 
+        filteredCount: filteredUsers.length,
+        filteredResults: filteredUsers.map(u => ({ id: u.id, username: u.username, email: u.email }))
+      });
+
       res.json(filteredUsers);
     } catch (error) {
-      console.error("Error searching users:", error);
+      console.error("UserSearch: Error searching users:", error);
       res.status(500).json({ message: "Failed to search users" });
     }
   });

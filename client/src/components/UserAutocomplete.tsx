@@ -117,19 +117,32 @@ export default function UserAutocomplete({
   return (
     <div ref={containerRef} className={cn("relative", className)}>
       <Input
-        ref={inputRef}
-        value={value}
-        onChange={(e) => onValueChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (value.length >= 2 && users.length > 0) {
-            setIsOpen(true);
-          }
-        }}
-        placeholder={placeholder}
-        className="w-full"
-        autoComplete="off"
-      />
+          ref={inputRef}
+          value={value}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            console.log('UserAutocomplete: Input changed', { 
+              oldValue: value, 
+              newValue, 
+              length: newValue.length 
+            });
+            onValueChange(newValue);
+          }}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            console.log('UserAutocomplete: Input focused', { 
+              value, 
+              valueLength: value.length, 
+              usersLength: users.length 
+            });
+            if (value.length >= 2 && users.length > 0) {
+              setIsOpen(true);
+            }
+          }}
+          placeholder={placeholder}
+          className="w-full"
+          autoComplete="off"
+        />
 
       {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">

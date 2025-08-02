@@ -1,0 +1,38 @@
+// Add detailed logging to debug why the collaborator invite autocomplete isn’t showing suggestions.
+
+1. In client/src/components/UserAutocomplete.tsx:
+   - In the input change handler, log:
+       console.log("AUTOCOMPLETE INPUT CHANGE:", value);
+   - If there is debounce logic, instrument it to log:
+       console.log("AUTOCOMPLETE DEBOUNCED FIRE:", debouncedValue);
+   - Before making the fetch, log:
+       console.log("AUTOCOMPLETE FETCH START:", `/api/users/search?q=${encodeURIComponent(value)}`, value);
+   - If the code early-returns (e.g., input too short), add a log like:
+       console.log("AUTOCOMPLETE SKIPPED FETCH (too short or invalid):", value);
+   - After receiving the response, log:
+       console.log("AUTOCOMPLETE FETCH RESPONSE STATUS:", response.status);
+     Then parse and log the payload:
+       console.log("AUTOCOMPLETE FETCH RESPONSE DATA:", suggestionsArray);
+   - After setting state for suggestions, log:
+       console.log("AUTOCOMPLETE SUGGESTIONS SET:", suggestionsArray.length, suggestionsArray);
+   - In the render path where the dropdown visibility is decided, log:
+       console.log("AUTOCOMPLETE DROPDOWN RENDER:", { visible: shouldShowDropdown, suggestionsLength: suggestionsArray.length });
+
+2. In server/routes.ts, in the user search endpoint handler (the one backing `/api/users/search`):
+   - At the top, log the raw incoming query params and resolved search query:
+       console.log("AUTOCOMPLETE SEARCH REQUEST:", { rawQuery: req.query, resolvedQuery: (req.query.q || req.query.query) });
+   - After performing filtering but before returning, log:
+       console.log("AUTOCOMPLETE SEARCH RESPONSE COUNT:", filteredUsers.length);
+   - If no results or query is too short, log why:
+       console.log("AUTOCOMPLETE SEARCH EARLY RETURN:", reason, { resolvedQuery });
+
+3. Ensure fetch errors on the frontend are caught and logged:
+   - In the catch block of the fetch call, add:
+       console.log("AUTOCOMPLETE FETCH ERROR:", error);
+
+4. After adding these logs, test by:
+   - Typing into the collaborator invite autocomplete input.  
+   - Observing the sequence in the server console and browser console: input change, debounced fire, fetch start, fetch response, suggestions set, and dropdown render decisions.  
+   - Copy the relevant log sequence for further diagnosis.
+
+Relevant files: client/src/components/UserAutocomplete.tsx, server/routes.ts

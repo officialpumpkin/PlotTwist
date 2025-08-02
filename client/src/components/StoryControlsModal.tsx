@@ -33,6 +33,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Settings, SkipForward, UserPlus, Edit, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import UserAutocomplete from "./UserAutocomplete";
 
 const storyControlsSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -261,6 +262,21 @@ export default function StoryControlsModal({
     setInvites(invites.filter(i => i !== invite));
   };
 
+  const handleUserSelect = (user: { username: string; email: string }) => {
+    // Prefer email for invitations, but fall back to username if needed
+    const inviteValue = user.email || user.username;
+    if (!invites.includes(inviteValue)) {
+      setInvites([...invites, inviteValue]);
+      setInviteEmail("");
+    } else {
+      toast({
+        title: "Duplicate invite",
+        description: "This person has already been added to the invite list.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleUpdateTitle = () => {
     const title = form.getValues("title");
     if (title && title !== story?.title) {
@@ -453,16 +469,12 @@ export default function StoryControlsModal({
             </div>
 
             <div className="flex space-x-2">
-              <Input 
-                placeholder="Enter email or username" 
+              <UserAutocomplete
                 value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addInvite();
-                  }
-                }}
+                onValueChange={setInviteEmail}
+                onSelect={handleUserSelect}
+                placeholder="Enter email or username"
+                className="flex-1"
               />
               <Button 
                 type="button" 

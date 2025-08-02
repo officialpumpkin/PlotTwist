@@ -37,6 +37,15 @@ export default function UserAutocomplete({
   // Search users when value changes and is at least 2 characters
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/users/search', value],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/search?query=${encodeURIComponent(value)}`, {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to search users: ${response.statusText}`);
+      }
+      return response.json();
+    },
     enabled: value.length >= 2,
     staleTime: 30000, // Cache results for 30 seconds
   });
@@ -46,6 +55,13 @@ export default function UserAutocomplete({
     setIsOpen(value.length >= 2 && users.length > 0);
     setSelectedIndex(-1); // Reset selection when results change
   }, [users, value]);
+
+  // Debug logging
+  useEffect(() => {
+    if (value.length >= 2) {
+      console.log('UserAutocomplete debug:', { value, usersCount: users.length, isLoading, isOpen });
+    }
+  }, [value, users, isLoading, isOpen]);
 
   // Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {

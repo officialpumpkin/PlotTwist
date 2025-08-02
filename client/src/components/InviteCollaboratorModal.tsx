@@ -188,6 +188,7 @@ export default function InviteCollaboratorModal({
                           onSelect={(user) => {
                             handleUserSelect(user);
                             field.onChange(user.email);
+                            setAutocompleteValue(user.email);
                           }}
                           disabled={isPending}
                         />
@@ -237,6 +238,7 @@ export default function InviteCollaboratorModal({
                           onSelect={(user) => {
                             handleUserSelect(user);
                             field.onChange(user.username);
+                            setAutocompleteValue(user.username);
                           }}
                           disabled={isPending}
                         />

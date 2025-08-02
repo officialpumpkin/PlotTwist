@@ -172,7 +172,7 @@ export default function ReadStoryModal({
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="absolute top-2 right-2 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                        className="absolute top-2 -right-2 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
                         onClick={() => {
                           setEditingSegment({ id: 'prompt', content: story?.description || '' });
                           setShowEditRequestModal(true);

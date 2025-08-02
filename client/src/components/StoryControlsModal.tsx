@@ -32,14 +32,22 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Settings, SkipForward, UserPlus, Edit, CheckCircle } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
-import api from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 
 const storyControlsSchema = z.object({
   title: z.string().min(1, "Title is required"),
   wordLimit: z.number().min(1, "Word limit must be at least 1"),
   characterLimit: z.number().min(0, "Character limit must be at least 0"),
 });
+
+interface Story {
+  id: number;
+  title: string;
+  wordLimit: number;
+  characterLimit: number;
+  creatorId: string;
+  isComplete: boolean;
+}
 
 interface StoryControlsModalProps {
   open: boolean;
@@ -58,10 +66,10 @@ export default function StoryControlsModal({
   const [inviteEmail, setInviteEmail] = useState("");
   const [invites, setInvites] = useState<string[]>([]);
   const [inviteSuccess, setInviteSuccess] = useState(false);
-  const { user } = useUser();
+  const { user } = useAuth();
 
   // Get story details
-  const { data: story } = useQuery({
+  const { data: story } = useQuery<Story>({
     queryKey: [`/api/stories/${storyId}`],
     enabled: open
   });
@@ -199,7 +207,7 @@ export default function StoryControlsModal({
   });
 
   const completeMutation = useMutation({
-    mutationFn: () => api.post(`/api/stories/${storyId}/complete`),
+    mutationFn: () => apiRequest('POST', `/api/stories/${storyId}/complete`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
       queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
@@ -220,7 +228,7 @@ export default function StoryControlsModal({
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => api.delete(`/api/stories/${storyId}`),
+    mutationFn: () => apiRequest('DELETE', `/api/stories/${storyId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/my-stories'] });
       queryClient.invalidateQueries({ queryKey: ['/api/my-turn'] });
@@ -353,7 +361,7 @@ export default function StoryControlsModal({
                       <FormLabel>Word Limit</FormLabel>
                       <Select 
                         onValueChange={(value) => field.onChange(parseInt(value))} 
-                        value={field.value.toString()}
+                        value={field.value?.toString()}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -380,7 +388,7 @@ export default function StoryControlsModal({
                       <FormLabel>Character Limit</FormLabel>
                       <Select 
                         onValueChange={(value) => field.onChange(parseInt(value))} 
-                        value={field.value.toString()}
+                        value={field.value?.toString()}
                       >
                         <FormControl>
                           <SelectTrigger>

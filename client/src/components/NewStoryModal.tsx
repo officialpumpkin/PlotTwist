@@ -316,8 +316,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                   <FormItem>
                     <FormLabel>Word Limit per Turn</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value.toString()}
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      defaultValue={field.value?.toString()}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -346,8 +346,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                   <FormItem>
                     <FormLabel>Character Limit per Turn</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value.toString()}
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      defaultValue={field.value?.toString()}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -375,8 +375,8 @@ export default function NewStoryModal({ open, onOpenChange }: NewStoryModalProps
                   <FormItem>
                     <FormLabel>Max Story Segments</FormLabel>
                     <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value.toString()}
+                      onValueChange={(value) => field.onChange(parseInt(value))} 
+                      defaultValue={field.value?.toString()}
                     >
                       <FormControl>
                         <SelectTrigger>

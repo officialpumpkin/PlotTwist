@@ -364,7 +364,7 @@ export default function WritingModal({
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute top-0 right-0 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                      className="absolute top-0 -right-12 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
                       onClick={() => {
                         setEditingSegment(segment);
                         setShowEditRequestModal(true);

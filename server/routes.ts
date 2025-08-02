@@ -700,10 +700,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const turn = await storage.getStoryTurn(story.id);
           console.log(`[DEBUG] Story "${story.title}" turn info:`, turn);
 
+          // If no turn data exists, try to get participants to determine a default
+          let currentUserId = turn?.currentUserId || null;
+          if (!turn || !turn.currentUserId) {
+            console.log(`[DEBUG] No turn data for story ${story.id}, checking participants`);
+            const participants = await storage.getStoryParticipants(story.id);
+            if (participants.length > 0) {
+              // Default to story creator if available, otherwise first participant
+              const creator = participants.find(p => p.userId === story.creatorId);
+              currentUserId = creator ? creator.userId : participants[0].userId;
+              console.log(`[DEBUG] Using default currentUserId for story ${story.id}:`, currentUserId);
+            }
+          }
+
           participantStories.push({
             ...story,
-            currentTurn: turn?.currentTurn || 0,
-            currentUserId: turn?.currentUserId || null
+            currentTurn: turn?.currentTurn || 1,
+            currentUserId: currentUserId
           });
         }
       }

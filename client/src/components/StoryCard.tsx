@@ -153,14 +153,15 @@ export default function StoryCard({
   });
 
   // Debug logging to help identify issues
-  console.log('StoryCard render:', { 
-    storyId: story.id, 
-    status, 
-    hasOnContinue: !!onContinue, 
+  console.log('StoryCard render:', {
+    storyId: story.id,
+    status,
+    hasOnContinue: !!onContinue,
     userId: user?.id,
     currentUserId: story.currentUserId,
     isComplete: story.isComplete,
-    shouldShowContinue: status === "Your Turn" && !!onContinue
+    shouldShowContinue: !!onContinue && status === "Your Turn",
+    currentTurn: story.currentTurn
   });
 
   return (
@@ -266,7 +267,7 @@ export default function StoryCard({
               const currentTurnUser = participants.find(p => 
                 p.userId === waitingUserId || (status === "Your Turn" && p.userId === user?.id)
               );
-              
+
               // Filter out current turn user from others
               const otherParticipants = participants.filter(p => 
                 p.userId !== currentTurnUser?.userId

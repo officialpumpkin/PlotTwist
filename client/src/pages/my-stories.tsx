@@ -259,9 +259,12 @@ export default function MyStories() {
                 status = "Completed";
               } else if (isMyTurn) {
                 status = "Your Turn";
-              } else {
-                // Use "Waiting" status to match dashboard behavior for skip turn button
+              } else if (story.currentUserId && story.currentUserId !== user?.id) {
+                // It's someone else's turn - show whose turn it is
                 status = "Waiting";
+              } else {
+                // Fallback for stories without proper turn data
+                status = "Active";
               }
               
               // Debug logging

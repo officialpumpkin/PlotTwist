@@ -133,10 +133,20 @@ export default function StoryControlsModal({
     },
     onSuccess: () => {
       toast({
-        title: "Limits updated",
-        description: "Story limits have been successfully updated",
+        title: "Story limits updated",
+        description: "The new limits will apply to future contributions.",
       });
+      // Invalidate all story-related queries to ensure fresh data
       queryClient.invalidateQueries({ queryKey: [`/api/stories/${storyId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/stories`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/my-stories`] });
+
+      // Reset form to current values
+      form.reset({
+        title: story?.title || "",
+        wordLimit: data.wordLimit,
+        characterLimit: data.characterLimit,
+      });
     },
     onError: (error: any) => {
       toast({
@@ -542,7 +552,7 @@ export default function StoryControlsModal({
                   {deleteMutation.isPending ? "Burning..." : "🔥 Burn the Book (Delete)"}
                 </Button>
               </div>
-              
+
               <p className="text-xs text-muted-foreground">
                 Burning the book will permanently delete the story and send the complete story to all participants via email.
               </p>

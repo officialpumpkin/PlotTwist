@@ -185,6 +185,10 @@ export default function WritingModal({
 
   const isValidContribution = isValidWordCount && isValidCharacterCount;
 
+  // Show validation warnings
+  const isWordCountExceeded = story && wordCount > story.wordLimit;
+  const isCharacterCountExceeded = story && story.characterLimit > 0 && characterCount > story.characterLimit;
+
   // Sort segments by turn number
   const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
 
@@ -426,7 +430,7 @@ export default function WritingModal({
                     <div className="bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border text-right">
                       <div className="flex items-center space-x-1">
                         <span className="text-xs text-muted-foreground">Words:</span>
-                        <span className={`text-sm font-medium ${wordCount > (story?.wordLimit || 100) ? "text-destructive" : "text-primary"}`}>
+                        <span className={`text-sm font-medium ${isWordCountExceeded ? "text-destructive" : "text-primary"}`}>
                           {wordCount}
                         </span>
                         <span className="text-xs text-muted-foreground">/{story?.wordLimit}</span>
@@ -435,10 +439,18 @@ export default function WritingModal({
                       {story?.characterLimit > 0 && (
                         <div className="flex items-center space-x-1 mt-1">
                           <span className="text-xs text-muted-foreground">Chars:</span>
-                          <span className={`text-sm font-medium ${characterCount > (story?.characterLimit || 0) ? "text-destructive" : "text-primary"}`}>
+                          <span className={`text-sm font-medium ${isCharacterCountExceeded ? "text-destructive" : "text-primary"}`}>
                             {characterCount}
                           </span>
                           <span className="text-xs text-muted-foreground">/{story?.characterLimit}</span>
+                        </div>
+                      )}
+                      
+                      {(isWordCountExceeded || isCharacterCountExceeded) && (
+                        <div className="text-xs text-destructive mt-1">
+                          {isWordCountExceeded && "Exceeds word limit"}
+                          {isWordCountExceeded && isCharacterCountExceeded && " & "}
+                          {isCharacterCountExceeded && "Exceeds character limit"}
                         </div>
                       )}
                     </div>

@@ -1669,22 +1669,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.lastEditedAt = new Date();
         updateData.editedBy = userId;
       } else {
-        // For partial updates (title only or limits only)
+        // For partial updates (title only)
         if (title !== undefined) {
           updateData.title = title;
         }
-        if (wordLimit !== undefined) {
-          if (wordLimit < 1 || wordLimit > 10000) {
-            return res.status(400).json({ message: "Word limit must be between 1 and 10000" });
-          }
-          updateData.wordLimit = wordLimit;
+      }
+
+      // Handle wordLimit and characterLimit updates independently
+      if (wordLimit !== undefined) {
+        if (wordLimit < 1 || wordLimit > 10000) {
+          return res.status(400).json({ message: "Word limit must be between 1 and 10000" });
         }
-        if (characterLimit !== undefined) {
-          if (characterLimit < 0 || characterLimit > 50000) {
-            return res.status(400).json({ message: "Character limit must be between 0 and 50000" });
-          }
-          updateData.characterLimit = characterLimit;
+        updateData.wordLimit = wordLimit;
+      }
+      if (characterLimit !== undefined) {
+        if (characterLimit < 0 || characterLimit > 50000) {
+          return res.status(400).json({ message: "Character limit must be between 0 and 50000" });
         }
+        updateData.characterLimit = characterLimit;
       }
 
       // Update the story

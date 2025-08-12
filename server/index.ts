@@ -7,7 +7,7 @@ import fs from "fs";
 import path from "path";
 
 const app = express();
-const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8080;
 
 // Trust proxy for session cookies
 app.set('trust proxy', 1);

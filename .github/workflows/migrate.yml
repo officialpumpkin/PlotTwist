@@ -1,0 +1,22 @@
+name: Run Drizzle Migrations
+
+on:
+  workflow_dispatch: {}  # run it manually from the Actions tab
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps (server)
+        working-directory: server
+        run: npm ci
+      - name: Run migrations
+        working-directory: server
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DIRECT_URL }}   # add this secret in repo Settings → Secrets → Actions
+        run: npx drizzle-kit migrate

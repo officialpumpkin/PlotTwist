@@ -1,22 +1,32 @@
 name: Run Drizzle Migrations
 
 on:
-  workflow_dispatch: {}  # run it manually from the Actions tab
+  workflow_dispatch: {}
 
 jobs:
   migrate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Use Node 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Install deps (server)
-        working-directory: server
+
+      - name: Install dependencies (root)
         run: npm ci
+
+      # Optional: list files so we can see the config is where we expect
+      - name: Debug paths
+        run: |
+          pwd
+          ls -la
+          echo "---- find drizzle config ----"
+          git ls-files | grep -i 'drizzle.config'
+
       - name: Run migrations
-        working-directory: server
         env:
-          DATABASE_URL: ${{ secrets.NEON_DIRECT_URL }}   # add this secret in repo Settings → Secrets → Actions
-        run: npx drizzle-kit migrate
+          DATABASE_URL: ${{ secrets.NEON_DIRECT_URL }}   # add this in Settings > Secrets > Actions
+        run: npx drizzle-kit migrate --config drizzle.config.ts

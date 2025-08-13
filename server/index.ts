@@ -5,7 +5,7 @@
  import { setupHealthCheck } from "./health";
  import fs from "fs";
  import path from "path";
-+import cors from "cors";
+import cors from "cors";
 
  const app = express();
 

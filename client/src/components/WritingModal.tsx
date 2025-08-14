@@ -228,7 +228,7 @@ export default function WritingModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl p-0 h-[90vh] flex flex-col" aria-describedby="writing-modal-description">
+      <DialogContent className="sm:max-w-4xl p-0 h-[90vh] flex flex-col [&>button]:hidden" aria-describedby="writing-modal-description">
         <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
         <h2 className="sr-only">Story Writing Interface</h2>
 

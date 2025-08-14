@@ -82,13 +82,13 @@ export default function WritingModal({
   });
 
   // Check if current user is the author (either by role or by being the creator)
-  const isAuthor = participants?.some(p => 
+  const isAuthor = (participants as any[])?.some((p: any) => 
     p.userId === user?.id && p.role === 'author'
-  ) || story?.creatorId === user?.id;
+  ) || (story as any)?.creatorId === user?.id;
 
   // Calculate the progress
   const progress = story && segments 
-    ? Math.min(100, Math.round((segments.length / (story.maxSegments || 30)) * 100)) 
+    ? Math.min(100, Math.round(((segments as any[]).length / ((story as any).maxSegments || 30)) * 100)) 
     : 0;
 
   // Add segment mutation with rich text support
@@ -178,19 +178,19 @@ export default function WritingModal({
 
   // Check if the word and character counts are valid
   const isValidWordCount = wordCount > 0 && 
-    story && wordCount <= (story.wordLimit || 100);
+    story && wordCount <= ((story as any).wordLimit || 100);
 
   const isValidCharacterCount = characterCount > 0 && 
-    (!story?.characterLimit || characterCount <= story.characterLimit);
+    (!(story as any)?.characterLimit || characterCount <= (story as any).characterLimit);
 
   const isValidContribution = isValidWordCount && isValidCharacterCount;
 
   // Show validation warnings
-  const isWordCountExceeded = story && wordCount > story.wordLimit;
-  const isCharacterCountExceeded = story && story.characterLimit > 0 && characterCount > story.characterLimit;
+  const isWordCountExceeded = story && wordCount > (story as any).wordLimit;
+  const isCharacterCountExceeded = story && (story as any).characterLimit > 0 && characterCount > (story as any).characterLimit;
 
   // Sort segments by turn number
-  const sortedSegments = segments?.sort((a, b) => a.turn - b.turn);
+  const sortedSegments = (segments as any[])?.sort((a: any, b: any) => a.turn - b.turn);
 
   // Get recent segments (up to 5 most recent)
   const recentSegments = sortedSegments?.slice(-5);
@@ -232,16 +232,16 @@ export default function WritingModal({
         <div className="sr-only" id="writing-modal-description">Writing modal for story collaboration</div>
         <h2 className="sr-only">Story Writing Interface</h2>
 
-        {/* Split into 3 fixed-height sections: header, scrollable content, footer */}
+        {/* Split into 2 sections: header and scrollable content with editor at bottom */}
         <div className="flex flex-col h-full">
           {/* Compact Story Header */}
           <div className="p-4 border-b border-border shrink-0 bg-background z-10">
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h2 className="text-lg font-bold text-foreground">{story?.title || 'Untitled Story'}</h2>
+                  <h2 className="text-lg font-bold text-foreground">{(story as any)?.title || 'Untitled Story'}</h2>
                   <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
-                    {story?.genre}
+                    {(story as any)?.genre}
                   </span>
                   {/* Story Controls button - only for authors */}
                   {isAuthor && (
@@ -258,18 +258,18 @@ export default function WritingModal({
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <span>Turn {turn?.currentTurn} of {story?.maxSegments}</span>
+                  <span>Turn {(turn as any)?.currentTurn} of {(story as any)?.maxSegments}</span>
                   <span>
-                    {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
+                    {(turn as any)?.currentUserId === user?.id ? "Your turn" : "Waiting"}
                   </span>
                   <div className="flex items-center gap-2 text-xs">
-                    <span>{participants?.length || 0} participants</span>
+                    <span>{(participants as any[])?.length || 0} participants</span>
                     <span>•</span>
-                    <span>{story?.wordLimit} words max</span>
-                    {story?.characterLimit > 0 && (
+                    <span>{(story as any)?.wordLimit} words max</span>
+                    {(story as any)?.characterLimit > 0 && (
                       <>
                         <span>•</span>
-                        <span>{story?.characterLimit} chars max</span>
+                        <span>{(story as any)?.characterLimit} chars max</span>
                       </>
                     )}
                   </div>
@@ -292,7 +292,7 @@ export default function WritingModal({
               {/* Story prompt */}
               <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-6">
                 <p className="font-serif text-foreground leading-relaxed whitespace-pre-wrap">
-                  {story?.description}
+                  {(story as any)?.description}
                 </p>
                 {/* Edit prompt button - only for authors */}
                 {isAuthor && (
@@ -301,7 +301,7 @@ export default function WritingModal({
                     variant="ghost"
                     className="absolute top-2 -right-12 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
                     onClick={() => {
-                      setEditingSegment({ id: 'prompt', content: story?.description || '' });
+                      setEditingSegment({ id: 'prompt', content: (story as any)?.description || '' });
                       setShowEditRequestModal(true);
                     }}
                     title="Edit story prompt"
@@ -313,7 +313,7 @@ export default function WritingModal({
               </div>
 
               {/* Story segments */}
-              {recentSegments?.map((segment, index) => (
+              {recentSegments?.map((segment: any, index: number) => (
                 <div 
                   key={segment.id}
                   className={`story-segment font-serif leading-relaxed contributor-text-${index % 5} relative pr-10`}
@@ -338,108 +338,108 @@ export default function WritingModal({
                 </div>
               ))}
 
-              {/* Add some padding at the bottom to ensure the last content isn't hidden behind the writing area */}
-              <div className="h-32"></div>
+              {/* Writing area for user's turn - positioned at bottom of scroll */}
+              {(turn as any)?.currentUserId === user?.id && (
+                <div className="bg-background border border-border rounded-lg p-4 mt-6 mb-6">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <Avatar className="h-8 w-8">
+                      {user?.profileImageUrl ? (
+                        <AvatarImage 
+                          src={user.profileImageUrl} 
+                          alt={user.username || "User"} 
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                          {user?.firstName?.[0] || user?.username?.[0] || "U"}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="flex-1">
+                      <p className="font-medium text-foreground text-sm mb-2">Your Turn</p>
+                      
+                      {/* React Quill Editor */}
+                      <div className="mb-4">
+                        <ReactQuill
+                          ref={quillRef}
+                          theme="snow"
+                          value={content}
+                          onChange={setContent}
+                          modules={modules}
+                          formats={formats}
+                          placeholder={(segments as any[])?.length === 0 ? "It's time to begin the story! You're the first contributor." : "Continue the story... Let your imagination flow!"}
+                          className="font-serif text-foreground"
+                          style={{ height: '150px' }}
+                        />
+                      </div>
+
+                      {/* Word/Character Count and Submit */}
+                      <div className="flex justify-between items-center mt-12">
+                        <div className="bg-background/90 rounded-md px-3 py-2 shadow-sm border border-border">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="text-muted-foreground">Words:</span>
+                            <span className={`font-medium ${isWordCountExceeded ? "text-destructive" : "text-primary"}`}>
+                              {wordCount}
+                            </span>
+                            <span className="text-muted-foreground">/{(story as any)?.wordLimit}</span>
+                            
+                            {(story as any)?.characterLimit > 0 && (
+                              <>
+                                <span className="text-muted-foreground">•</span>
+                                <span className="text-muted-foreground">Chars:</span>
+                                <span className={`font-medium ${isCharacterCountExceeded ? "text-destructive" : "text-primary"}`}>
+                                  {characterCount}
+                                </span>
+                                <span className="text-muted-foreground">/{(story as any)?.characterLimit}</span>
+                              </>
+                            )}
+                          </div>
+                          
+                          {(isWordCountExceeded || isCharacterCountExceeded) && (
+                            <div className="text-sm text-destructive mt-1">
+                              {isWordCountExceeded && <span>Exceeds word limit</span>}
+                              {isWordCountExceeded && isCharacterCountExceeded && <span> & </span>}
+                              {isCharacterCountExceeded && <span>Exceeds character limit</span>}
+                            </div>
+                          )}
+                        </div>
+
+                        <Button 
+                          size="default" 
+                          className="gap-2"
+                          disabled={!isValidContribution || addSegmentMutation.isPending}
+                          onClick={() => addSegmentMutation.mutate()}
+                        >
+                          {addSegmentMutation.isPending ? (
+                            <>
+                              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Submitting...
+                            </>
+                          ) : (
+                            <>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <polyline points="19 12 12 19 5 12"></polyline>
+                              </svg>
+                              Submit Turn
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Extra padding at bottom */}
+              <div className="h-8"></div>
             </div>
           </div>
 
-          {/* Compact writing input area at the bottom - only when it's user's turn */}
-          {turn?.currentUserId === user?.id && (
-            <div className="border-t border-border bg-background shrink-0 p-4">
-              <div className="flex items-start space-x-3 mb-3">
-                <Avatar className="h-6 w-6">
-                  {user?.profileImageUrl ? (
-                    <AvatarImage 
-                      src={user.profileImageUrl} 
-                      alt={user.username || "User"} 
-                    />
-                  ) : (
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      {user?.firstName?.[0] || user?.username?.[0] || "U"}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground text-sm">Your Turn</p>
-                  
-                  {/* React Quill Editor - more compact */}
-                  <div className="mt-2 mb-3">
-                    <ReactQuill
-                      ref={quillRef}
-                      theme="snow"
-                      value={content}
-                      onChange={setContent}
-                      modules={modules}
-                      formats={formats}
-                      placeholder={segments?.length === 0 ? "It's time to begin the story! You're the first contributor." : "Continue the story... Let your imagination flow!"}
-                      className="font-serif text-foreground"
-                      style={{ height: '100px' }}
-                    />
-                  </div>
-
-                  {/* Word/Character Count and Submit - on same row */}
-                  <div className="flex justify-between items-center mt-8">
-                    <div className="bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border">
-                      <div className="flex items-center space-x-2 text-xs">
-                        <span className="text-muted-foreground">Words:</span>
-                        <span className={`font-medium ${isWordCountExceeded ? "text-destructive" : "text-primary"}`}>
-                          {wordCount}
-                        </span>
-                        <span className="text-muted-foreground">/{story?.wordLimit}</span>
-                        
-                        {story?.characterLimit > 0 && (
-                          <>
-                            <span className="text-muted-foreground">•</span>
-                            <span className="text-muted-foreground">Chars:</span>
-                            <span className={`font-medium ${isCharacterCountExceeded ? "text-destructive" : "text-primary"}`}>
-                              {characterCount}
-                            </span>
-                            <span className="text-muted-foreground">/{story?.characterLimit}</span>
-                          </>
-                        )}
-                      </div>
-                      
-                      {(isWordCountExceeded || isCharacterCountExceeded) && (
-                        <div className="text-xs text-destructive mt-1">
-                          {isWordCountExceeded && "Exceeds word limit"}
-                          {isWordCountExceeded && isCharacterCountExceeded && " & "}
-                          {isCharacterCountExceeded && "Exceeds character limit"}
-                        </div>
-                      )}
-                    </div>
-
-                    <Button 
-                      size="sm" 
-                      className="gap-1 h-8"
-                      disabled={!isValidContribution || addSegmentMutation.isPending}
-                      onClick={() => addSegmentMutation.mutate()}
-                    >
-                      {addSegmentMutation.isPending ? (
-                        <>
-                          <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Submitting...
-                        </>
-                      ) : (
-                        <>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="12" y1="5" x2="12" y2="19"></line>
-                            <polyline points="19 12 12 19 5 12"></polyline>
-                          </svg>
-                          Submit
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Story Progress - Fixed height footer */}
-          <div className="p-3 border-t border-border bg-background shrink-0 h-[70px]">
+          <div className="p-3 border-t border-border bg-background shrink-0">
             <div className="flex flex-wrap items-center justify-between">
               <div className="flex items-center">
                 <span className="text-xs text-muted-foreground mr-2">Progress:</span>
@@ -450,12 +450,12 @@ export default function WritingModal({
                   ></div>
                 </div>
                 <span className="ml-2 text-xs font-medium text-foreground">
-                  {segments?.length || 0}/{story?.maxSegments || 30}
+                  {(segments as any[])?.length || 0}/{(story as any)?.maxSegments || 30}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                {story?.creatorId === user?.id && progress >= 80 && onComplete && (
+                {(story as any)?.creatorId === user?.id && progress >= 80 && onComplete && (
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -476,6 +476,7 @@ export default function WritingModal({
       <StoryControlsModal 
         open={showStoryControls} 
         onOpenChange={setShowStoryControls}
+        onClose={() => setShowStoryControls(false)}
         storyId={storyId}
       />
 

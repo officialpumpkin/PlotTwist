@@ -234,129 +234,85 @@ export default function WritingModal({
 
         {/* Split into 3 fixed-height sections: header, scrollable content, footer */}
         <div className="flex flex-col h-full">
-          {/* Fixed Story Header - absolute height */}
-          <div className="p-3 border-b border-border shrink-0 bg-background z-10 h-[100px]">
+          {/* Compact Story Header */}
+          <div className="p-4 border-b border-border shrink-0 bg-background z-10">
             <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-lg font-bold text-foreground">{story?.title || 'Untitled Story'}</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Turn {turn?.currentTurn} of {story?.maxSegments} • {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
-                  {story?.genre}
-                </span>
-                {/* Story Controls button - only for authors */}
-                {isAuthor && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowStoryControls(true)}
-                    className="ml-2 h-6 text-xs"
-                    title="Story controls and settings"
-                  >
-                    <Settings className="h-3 w-3 mr-1" />
-                    Story Controls
-                  </Button>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => onOpenChange(false)}
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                >
-                  <CloseIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 mt-1">
-              <div className="flex items-center text-xs text-neutral-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-3 w-3 mr-1"
-                >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-                <span>{participants?.length || 0}</span>
-              </div>
-              <div className="flex items-center text-xs text-neutral-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-3 w-3 mr-1"
-                >
-                  <path d="M4 7V4h16v3" />
-                  <path d="M9 20h6" />
-                  <path d="M12 4v16" />
-                </svg>
-                <span>{story?.wordLimit} words</span>
-              </div>
-              {story?.characterLimit > 0 && (
-                <div className="flex items-center text-xs text-neutral-600">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-3 w-3 mr-1"
-                  >
-                    <path d="M18 6H6L2 12l4 6h12l4-6-4-6z" />
-                    <path d="M12 10v4" />
-                    <path d="M12 16h.01" />
-                  </svg>
-                  <span>{story?.characterLimit} chars</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Scrollable Story Content - takes remaining space minus header and input form */}
-          <div className="flex-1 overflow-y-auto bg-muted/30">
-            <div className="max-w-3xl mx-auto p-6 space-y-6">
-              {/* Story content - continuous flow */}
-              
-                <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-4">
-                  <p className="font-serif text-foreground leading-relaxed whitespace-pre-wrap">
-                    {story?.description}
-                  </p>
-                  {/* Edit prompt button - only for authors */}
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h2 className="text-lg font-bold text-foreground">{story?.title || 'Untitled Story'}</h2>
+                  <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
+                    {story?.genre}
+                  </span>
+                  {/* Story Controls button - only for authors */}
                   {isAuthor && (
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute top-2 -right-12 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
-                      onClick={() => {
-                        setEditingSegment({ id: 'prompt', content: story?.description || '' });
-                        setShowEditRequestModal(true);
-                      }}
-                      title="Edit story prompt"
+                      onClick={() => setShowStoryControls(true)}
+                      className="h-6 text-xs"
+                      title="Story controls and settings"
                     >
-                      <Edit className="h-3 w-3" />
-                      <span className="sr-only">Edit story prompt</span>
+                      <Settings className="h-3 w-3 mr-1" />
+                      Controls
                     </Button>
                   )}
                 </div>
-              
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>Turn {turn?.currentTurn} of {story?.maxSegments}</span>
+                  <span>
+                    {turn?.currentUserId === user?.id ? "Your turn" : "Waiting"}
+                  </span>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span>{participants?.length || 0} participants</span>
+                    <span>•</span>
+                    <span>{story?.wordLimit} words max</span>
+                    {story?.characterLimit > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>{story?.characterLimit} chars max</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => onOpenChange(false)}
+                className="h-8 w-8 text-muted-foreground hover:text-foreground ml-2"
+              >
+                <CloseIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
 
+          {/* Main scrollable story content area - takes most of the screen */}
+          <div className="flex-1 overflow-y-auto bg-muted/30">
+            <div className="max-w-3xl mx-auto p-6 space-y-6">
+              {/* Story prompt */}
+              <div className="relative bg-muted/30 border border-border/30 rounded-lg p-4 mb-6">
+                <p className="font-serif text-foreground leading-relaxed whitespace-pre-wrap">
+                  {story?.description}
+                </p>
+                {/* Edit prompt button - only for authors */}
+                {isAuthor && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-2 -right-12 h-6 w-6 p-0 bg-background/80 backdrop-blur-sm border border-border/50 hover:bg-accent"
+                    onClick={() => {
+                      setEditingSegment({ id: 'prompt', content: story?.description || '' });
+                      setShowEditRequestModal(true);
+                    }}
+                    title="Edit story prompt"
+                  >
+                    <Edit className="h-3 w-3" />
+                    <span className="sr-only">Edit story prompt</span>
+                  </Button>
+                )}
+              </div>
+
+              {/* Story segments */}
               {recentSegments?.map((segment, index) => (
                 <div 
                   key={segment.id}
@@ -382,36 +338,32 @@ export default function WritingModal({
                 </div>
               ))}
 
-              
+              {/* Add some padding at the bottom to ensure the last content isn't hidden behind the writing area */}
+              <div className="h-32"></div>
             </div>
           </div>
 
-          {/* Fixed input area at the bottom */}
+          {/* Compact writing input area at the bottom - only when it's user's turn */}
           {turn?.currentUserId === user?.id && (
-            <div className="border-t border-border bg-background shrink-0 p-4 h-[280px]">
-              <div className="h-full flex flex-col">
-                <div className="flex items-start space-x-3 mb-3">
-                  <Avatar className="h-7 w-7">
-                    {user?.profileImageUrl ? (
-                      <AvatarImage 
-                        src={user.profileImageUrl} 
-                        alt={user.username || "User"} 
-                      />
-                    ) : (
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {user?.firstName?.[0] || user?.username?.[0] || "U"}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div>
-                    <p className="font-medium text-foreground text-sm">Your Turn</p>
-                    <p className="text-xs text-muted-foreground">Turn {turn.currentTurn} • Now</p>
-                  </div>
-                </div>
-
-                <div className="flex-grow flex flex-col">
-                  {/* React Quill Editor */}
-                  <div className="flex-grow mb-3">
+            <div className="border-t border-border bg-background shrink-0 p-4">
+              <div className="flex items-start space-x-3 mb-3">
+                <Avatar className="h-6 w-6">
+                  {user?.profileImageUrl ? (
+                    <AvatarImage 
+                      src={user.profileImageUrl} 
+                      alt={user.username || "User"} 
+                    />
+                  ) : (
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                      {user?.firstName?.[0] || user?.username?.[0] || "U"}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div className="flex-1">
+                  <p className="font-medium text-foreground text-sm">Your Turn</p>
+                  
+                  {/* React Quill Editor - more compact */}
+                  <div className="mt-2 mb-3">
                     <ReactQuill
                       ref={quillRef}
                       theme="snow"
@@ -420,31 +372,32 @@ export default function WritingModal({
                       modules={modules}
                       formats={formats}
                       placeholder={segments?.length === 0 ? "It's time to begin the story! You're the first contributor." : "Continue the story... Let your imagination flow!"}
-                      className="font-serif text-foreground h-24"
-                      style={{ height: '120px' }}
+                      className="font-serif text-foreground"
+                      style={{ height: '100px' }}
                     />
                   </div>
 
-                  {/* Word/Character Count */}
-                  <div className="flex justify-end mb-3">
-                    <div className="bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border text-right">
-                      <div className="flex items-center space-x-1">
-                        <span className="text-xs text-muted-foreground">Words:</span>
-                        <span className={`text-sm font-medium ${isWordCountExceeded ? "text-destructive" : "text-primary"}`}>
+                  {/* Word/Character Count and Submit - on same row */}
+                  <div className="flex justify-between items-center mt-8">
+                    <div className="bg-background/90 rounded-md px-2 py-1 shadow-sm border border-border">
+                      <div className="flex items-center space-x-2 text-xs">
+                        <span className="text-muted-foreground">Words:</span>
+                        <span className={`font-medium ${isWordCountExceeded ? "text-destructive" : "text-primary"}`}>
                           {wordCount}
                         </span>
-                        <span className="text-xs text-muted-foreground">/{story?.wordLimit}</span>
+                        <span className="text-muted-foreground">/{story?.wordLimit}</span>
+                        
+                        {story?.characterLimit > 0 && (
+                          <>
+                            <span className="text-muted-foreground">•</span>
+                            <span className="text-muted-foreground">Chars:</span>
+                            <span className={`font-medium ${isCharacterCountExceeded ? "text-destructive" : "text-primary"}`}>
+                              {characterCount}
+                            </span>
+                            <span className="text-muted-foreground">/{story?.characterLimit}</span>
+                          </>
+                        )}
                       </div>
-
-                      {story?.characterLimit > 0 && (
-                        <div className="flex items-center space-x-1 mt-1">
-                          <span className="text-xs text-muted-foreground">Chars:</span>
-                          <span className={`text-sm font-medium ${isCharacterCountExceeded ? "text-destructive" : "text-primary"}`}>
-                            {characterCount}
-                          </span>
-                          <span className="text-xs text-muted-foreground">/{story?.characterLimit}</span>
-                        </div>
-                      )}
                       
                       {(isWordCountExceeded || isCharacterCountExceeded) && (
                         <div className="text-xs text-destructive mt-1">
@@ -454,36 +407,31 @@ export default function WritingModal({
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex justify-end items-center pt-3 border-t border-border">
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        className="gap-1 h-8"
-                        disabled={!isValidContribution || addSegmentMutation.isPending}
-                        onClick={() => addSegmentMutation.mutate()}
-                      >
-                        {addSegmentMutation.isPending ? (
-                          <>
-                            <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Submitting...
-                          </>
-                        ) : (
-                          <>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="12" y1="5" x2="12" y2="19"></line>
-                              <polyline points="19 12 12 19 5 12"></polyline>
-                            </svg>
-                            Submit
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                    <Button 
+                      size="sm" 
+                      className="gap-1 h-8"
+                      disabled={!isValidContribution || addSegmentMutation.isPending}
+                      onClick={() => addSegmentMutation.mutate()}
+                    >
+                      {addSegmentMutation.isPending ? (
+                        <>
+                          <svg className="animate-spin h-3.5 w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <polyline points="19 12 12 19 5 12"></polyline>
+                          </svg>
+                          Submit
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               </div>
